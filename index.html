@@ -845,11 +845,16 @@ footer a { color: var(--accent2); text-decoration: none; }
     </div>
     <div class="charts-grid" style="margin-bottom:16px">
       <div class="chart-card"><div class="chart-title">Perfil DISC</div><div class="chart-wrap"><canvas id="chart-disc"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title">Egograma</div><div class="ego-bars" id="ego-bars"></div></div>
+      <div class="chart-card" style="position:relative">
+        <div class="chart-title">Egograma</div>
+        <div class="chart-wrap" style="height:260px"><canvas id="chart-ego-line"></canvas></div>
+        <div style="text-align:right;margin-top:8px">
+          <button onclick="mostrarSaibaMais()" style="background:rgba(108,79,238,0.12);border:1px solid rgba(108,79,238,0.3);color:#a78bfa;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">📖 Saiba mais</button>
+        </div>
+      </div>
     </div>
-    <div class="charts-grid" style="margin-bottom:24px">
+    <div style="margin-bottom:16px">
       <div class="chart-card"><div class="chart-title">Quadrantes Cerebrais</div><div class="chart-wrap"><canvas id="chart-quad"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title">Roda das Virtudes</div><div class="chart-wrap"><canvas id="chart-virt"></canvas></div></div>
     </div>
     <div class="card" id="disc-desc-card" style="margin-bottom:28px"></div>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -2031,19 +2036,9 @@ function renderizarFichaReal(c, compat, posicao) {
       });
     }
 
-    // Egograma
+    // Egograma — gráfico de linha
     const ego = c.ego || {PC:10,PA:10,A:15,CL:10,CA:8};
-    const egoNomes = {PC:'Pai Crítico',PA:'Pai Amoroso',A:'Adulto',CL:'Criança Livre',CA:'Criança Adaptada'};
-    const egoCores = {PC:'#ff6b6b',PA:'#f59e0b',A:'#1de9b6',CL:'#7c5cfc',CA:'#a78bfa'};
-    const maxEgo = Math.max.apply(null, Object.values(ego)) || 1;
-    const egoBars = document.getElementById('ego-bars');
-    if(egoBars) egoBars.innerHTML = Object.entries(ego).map(function(kv){
-      return '<div class="ego-bar-row">'
-        +'<span class="ego-bar-label">'+egoNomes[kv[0]]+'</span>'
-        +'<div class="ego-bar-bg"><div class="ego-bar-fill" style="width:'+Math.round((kv[1]/maxEgo)*100)+'%;background:'+egoCores[kv[0]]+'"></div></div>'
-        +'<span class="ego-bar-val" style="color:'+egoCores[kv[0]]+'">'+kv[1]+'</span>'
-        +'</div>';
-    }).join('');
+    renderEgoLineChart(ego);
 
     // Quadrantes
     const quad = c.quad || {A:12,B:12,C:12,D:12};
@@ -2061,28 +2056,7 @@ function renderizarFichaReal(c, compat, posicao) {
       });
     }
 
-    // Virtudes
-    const virt = c.virt || {};
-    const virtEntries = Object.entries(virt).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
-    const ctx3 = document.getElementById('chart-virt');
-    if(ctx3 && virtEntries.length > 0){
-      state.charts.virt = new Chart(ctx3.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: virtEntries.map(function(e){return e[0];}),
-          datasets: [{ data: virtEntries.map(function(e){return e[1];}),
-            backgroundColor:'#7c5cfc33', borderColor:'#7c5cfc', borderWidth:2, borderRadius:6 }]
-        },
-        options: {
-          indexAxis:'y',
-          scales: {
-            x:{min:0,max:10,ticks:{color:'#7a798a',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},
-            y:{ticks:{color:'#f0eff5',font:{size:10}},grid:{display:false}}
-          },
-          plugins:{ legend:{display:false} }
-        }
-      });
-    }
+    // Roda das Virtudes removida
 
     // Descrição DISC
     const mapDesc = {
@@ -2108,6 +2082,88 @@ function renderizarFichaReal(c, compat, posicao) {
         +'<div style="font-size:13px;color:var(--muted2);line-height:1.6">'+d.ideal+'</div></div></div>';
     }
   }, 150);
+}
+
+window.mostrarSaibaMais = function() {
+  state._paginaAnterior = 'candidato';
+  showPage('saibamais');
+  window.scrollTo(0,0);
+};
+
+window.voltarFicha = function() {
+  showPage(state._paginaAnterior || 'candidato');
+  window.scrollTo(0,0);
+};
+
+function renderEgoLineChart(ego) {
+  const ctx = document.getElementById('chart-ego-line');
+  if (!ctx) return;
+  if (state.charts.egoLine) { try{state.charts.egoLine.destroy();}catch(e){} }
+  
+  const labels = ['Pai Crítico','Pai Amoroso','Adulto','Criança Livre','Criança Adaptada'];
+  const valores = [
+    ego.PC || 0,
+    ego.PA || 0,
+    ego.A  || 0,
+    ego.CL || 0,
+    ego.CA || 0
+  ];
+  
+  state.charts.egoLine = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: valores,
+        borderColor: '#4a90d9',
+        backgroundColor: 'rgba(74,144,217,0.08)',
+        pointBackgroundColor: '#4a90d9',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 7,
+        pointHoverRadius: 9,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35
+      }]
+    },
+    options: {
+      layout: { padding: { top: 20, bottom: 10 } },
+      scales: {
+        x: {
+          ticks: { color: '#e8e6f0', font: { size: 11, weight: '600' } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        },
+        y: {
+          min: 0,
+          ticks: { color: '#7a798a', font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return '  ' + ctx.parsed.y + ' pts'; }
+          },
+          backgroundColor: 'rgba(13,13,20,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1
+        },
+        datalabels: {
+          display: true,
+          color: '#ffffff',
+          font: { size: 12, weight: '700' },
+          anchor: 'end',
+          align: 'top',
+          formatter: function(v) { return v; }
+        }
+      },
+      animation: { duration: 900, easing: 'easeOutQuart' }
+    }
+  });
 }
 </script>
 
@@ -2279,5 +2335,64 @@ function renderizarFichaReal(c, compat, posicao) {
   animation: slideOutRight 0.4s ease forwards;
 }
 </style>
+
+<!-- PÁGINA SAIBA MAIS — Egograma -->
+<div id="page-saibamais" class="page hidden">
+  <div style="max-width:860px;margin:0 auto;padding:90px 28px 60px">
+    <button onclick="voltarFicha()" class="btn btn-outline btn-sm" style="margin-bottom:28px">← Voltar ao resultado</button>
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:11px;font-weight:600;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Metodologia</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:10px">Referencial — Egograma</h1>
+      <p style="font-size:15px;color:var(--muted2);max-width:560px;margin:0 auto">Entenda como interpretar os resultados do Egograma e o que cada dimensão revela sobre o comportamento do candidato.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:14px;height:14px;border-radius:50%;background:#ef4444;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#f87171">PC — Pai Crítico</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">Representa o lado crítico das pessoas. Quanto maior o resultado <strong style="color:var(--text)">(acima de 17)</strong>, maior será a manifestação crítica no ambiente, demonstrando desqualificação do outro, centralização, postura rude e agressividade verbal — causa sofrimento aos subordinados. Quanto mais inferior a 15, menor será a capacidade de expressão crítica. <strong style="color:var(--text)">Uma marca adequada seria entre 14 e 16.</strong></p>
+      </div>
+
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:14px;height:14px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#fbbf24">PA — Pai Amoroso</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">É o senso de proteção e cuidado com o outro. <strong style="color:var(--text)">Acima de 20</strong>, a pessoa está cuidando demais e esquecendo-se de si mesma — depois cobra. <strong style="color:var(--text)">Abaixo de 8/9</strong>, trata-se de uma pessoa egoísta, sem percepção do outro. <strong style="color:var(--text)">O ideal é entre 15 e 20</strong>, tendendo ao equilíbrio.</p>
+      </div>
+
+      <div style="background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.25);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:14px;height:14px;border-radius:50%;background:#1de9b6;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#1de9b6">A — Adulto</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">Representa a razão e o raciocínio concreto, sem interferência das emoções. <strong style="color:var(--text)">Muito alto (20–30)</strong>: pessoa calculista, perfeccionista, analítica e burocrática — pode travar processos e ser inflexível. Em cargos de liderança, é imprescindível ter A na marca de <strong style="color:var(--text)">16/17</strong>. <strong style="color:var(--text)">Abaixo de 12/13</strong>: decide com base emocional — prejudicial para a equipe.</p>
+      </div>
+
+      <div style="background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.25);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:14px;height:14px;border-radius:50%;background:#7c5cfc;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#a78bfa">CL — Criança Livre</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75"><strong style="color:var(--text)">Alto (25–30)</strong>: pessoa irresponsável, puramente emocional, não respeita horários nem compromissos — nunca permanece em empregos. <strong style="color:var(--text)">19–25</strong>: responsabilidade razoável, agradável e empática. <strong style="color:var(--text)">13–16</strong>: boa administração razão-emoção — ideal nas organizações. <strong style="color:var(--text)">Abaixo de 13</strong>: repressão das emoções, dificuldade de motivar e estimular.</p>
+      </div>
+
+      <div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:14px;height:14px;border-radius:50%;background:#a78bfa;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#c4b5fd">CA — Criança Adaptada</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">É o lado da submissão. <strong style="color:var(--text)">15/16</strong>: fantástico — demonstra capacidade de ouvir, falar e interagir adequadamente. <strong style="color:var(--text)">Acima de 20</strong>: ouve muito mas interage pouco, sem potência — inadequado para gestão de pessoas. <strong style="color:var(--text)">Abaixo de 12</strong>: indica PA alto — sujeito altamente crítico e inadequado ao contexto organizacional.</p>
+      </div>
+
+    </div>
+    <div style="margin-top:32px;text-align:center">
+      <button onclick="voltarFicha()" class="btn btn-grad btn-lg">← Voltar ao resultado do candidato</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
