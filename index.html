@@ -1822,7 +1822,7 @@ function renderizarRankingReal() {
     const nivel = c.nivel || '';
     const local = c.endereco || '';
 
-    list.innerHTML += '<div class="rank-card ' + cls + '" data-id="' + c.candidato_id + '" onclick="verCandidatoReal(this.dataset.id)">'
+    list.innerHTML += '<div class="rank-card ' + cls + '" data-id="' + (c.candidato_id || c.id) + '" onclick="verCandidatoReal(this.dataset.id)">'
       + '<div class="rank-pos ' + cls + '">' + pos + '</div>'
       + '<div class="rank-avatar" style="background:' + bg + '">' + iniciais + '</div>'
       + '<div class="rank-info">'
@@ -1848,6 +1848,16 @@ async function verCandidatoReal(candidatoId) {
     
     // Montar objeto no formato esperado pela ficha
     const a = (c.analises && c.analises[0]) || {};
+    // Calcular ego totais das 50 questões
+    var egoPC=0, egoPA=0, egoA=0, egoCL=0, egoCA=0;
+    for(var qi=1;qi<=50;qi++){
+      var v=a['ego_r'+String(qi).padStart(2,'0')]||0;
+      if([1,2,3,6,10,20,23,29,34,37,47].indexOf(qi)>=0) egoPC+=v;
+      else if([5,12,14,17,25,28,30,31,35,38,42,46,49].indexOf(qi)>=0) egoPA+=v;
+      else if([8,13,15,19,21,27,32,33,36,39,40,44,50].indexOf(qi)>=0) egoA+=v;
+      else if([2,7,9,16,18,22,24,26,43,45,48].indexOf(qi)>=0) egoCL+=v;
+      else egoCA+=v;
+    }
     state.candidatoAtual = {
       id: c.id,
       nome: c.nome,
@@ -1868,8 +1878,9 @@ async function verCandidatoReal(candidatoId) {
         S: a.disc_planejador || 51, C: a.disc_analitico || 51
       },
       ego: {
-        PC: a.ego_pai_critico || 10, PA: a.ego_pai_amoroso || 10,
-        A: a.ego_adulto || 15, CL: a.ego_crianca_livre || 10, CA: a.ego_crianca_adapt || 8
+        PC: egoPC||a.ego_pai_critico||10, PA: egoPA||a.ego_pai_amoroso||10,
+        A: egoA||a.ego_adulto||15, CL: egoCL||a.ego_crianca_livre||10,
+        CA: egoCA||a.ego_crianca_adapt||8
       },
       quad: {
         A: a.quad_analitico || 12, B: a.quad_ordenado || 12,
@@ -1881,7 +1892,7 @@ async function verCandidatoReal(candidatoId) {
     };
 
     // Encontrar compatibilidade no ranking real
-    const rankItem = (state.rankingReal || []).find(function(x){ return x.candidato_id === candidatoId; });
+    const rankItem = (state.rankingReal || []).find(function(x){ return (x.candidato_id||x.id) === candidatoId; });
     const compat = rankItem ? (rankItem.compatibilidade || rankItem.compat || 0) : 0;
     const rankIdx = (state.rankingReal || []).indexOf(rankItem);
     
