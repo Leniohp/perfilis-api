@@ -1603,14 +1603,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const path = window.location.pathname;
   
   // /f/TOKEN — formulário do candidato
-  const matchF = path.match(/^\/f\/([A-Z0-9]{6,12})$/i);
+  const matchF = path.match(/^\/f\/([A-Z0-9-]{3,16})$/i);
   if (matchF) {
     carregarFormulario(matchF[1].toUpperCase());
     return;
   }
   
   // /r/TOKEN — ranking privado do contratante
-  const matchR = path.match(/^\/r\/([A-Z0-9]{6,13})$/i);
+  const matchR = path.match(/^\/r\/([A-Z0-9-]{3,17})$/i);
   if (matchR) {
     carregarRankingPrivado(matchR[1].toUpperCase());
     return;
