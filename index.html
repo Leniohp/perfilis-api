@@ -1006,12 +1006,7 @@ async function nextStep(n) {
           // Enviar WhatsApp automaticamente
           const wpp = state.cadastro.whatsapp.replace(/\D/g,'');
           const link = d2.link;
-          const msg = encodeURIComponent('🎯 Seu link Perfilis está pronto!
-
-Compartilhe com os candidatos:
-' + link + '
-
-Acesse o ranking quando quiser pelo mesmo link.');
+          const msg = encodeURIComponent('\uD83C\uDFAF Seu link Perfilis está pronto!\n\nCompartilhe com os candidatos:\n' + link + '\n\nAcesse o ranking quando quiser pelo mesmo link.');
           setTimeout(()=>{ window.open('https://wa.me/55'+wpp+'?text='+msg,'_blank'); }, 1500);
         }
       }
