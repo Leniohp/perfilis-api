@@ -1038,53 +1038,6 @@ let state = {
 
 state.candidatos = gerarCandidatos();
 
-// Adicionar candidato real da planilha
-const rosanaRow = [
-  'Candidato 90','Rosana de Paula Ferreira','rosandepaulaferreira@gmail.com',
-  '64992054759','Rio Verde','2000-04-27',
-  'Ter um ambiente de trabalho.','Todos focados para um resultado comum.',
-  'Honestidade, flexibilidade, determinação, participativa e receptiva',
-  'Tenho ampla experiência em depto pessoal que irá agregar muito à equipe.',
-  null,'Sim','Médio','Ela tem muita determinação.',
-  // Q01-Q26 (4 opções cada) — valores da planilha
-  1,4,3,2, 4,2,3,1, 1,4,2,3, 4,3,1,2, 4,1,2,3, 1,2,3,4, 1,2,3,4, 4,1,2,3,
-  1,3,2,4, 4,3,2,1, 4,2,3,1, 4,3,2,1, 1,4,2,3, 4,1,3,2, 2,3,4,1, 4,1,2,3,
-  4,1,2,3, 1,4,2,3, 1,4,2,3, 1,4,3,2, 4,3,2,1, 3,4,2,1, 1,2,3,4, 3,4,1,2,
-  4,3,2,1, 4,3,2,1,
-  // Quadrantes (118-144)
-  3,3,2,1,3,3,1,3,3,3,3,0,2,2,3,3,0,2,1,3,2,3,2,3,1,3,3,
-  // Egograma (145-194)
-  2,3,3,0,3,2,3,0,2,3,1,0,2,2,3,3,0,3,1,2,0,2,1,0,2,3,1,2,1,3,2,1,2,3,0,3,3,0,0,1,2,3,3,2,3,3,2,2,3,2,0,
-  // Virtudes (196-219)
-  8,7,9,8,9,10,10,10,10,10,10,9,10,8,10,10,10,9,8,10,9,10,10,5,
-  'Devemos sempre procurar melhorias.'
-];
-
-const discRosana = calcularDISC(rosanaRow);
-const egoRosana = calcularEgo(rosanaRow);
-const quadRosana = calcularQuad(rosanaRow);
-const virtRosana = calcularVirtudes(rosanaRow);
-const sortedR = Object.entries(discRosana.norm).sort((a,b)=>b[1]-a[1]);
-const mapN = {D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
-
-state.candidatos.push({
-  id: 13, nome:'Rosana de Paula Ferreira',
-  email:'rosandepaulaferreira@gmail.com',
-  whatsapp:'64992054759', endereco:'Rio Verde, GO', dataNasc:'27/04/1990',
-  linkedin:null, experiencia:'Sim', nivel:'Médio',
-  respostas:{
-    q1:'Ter um ambiente de trabalho.',
-    q2:'Todos focados para um resultado comum.',
-    q3:'Honestidade, flexibilidade, determinação, participativa e receptiva',
-    q4:'Tenho ampla experiência em depto pessoal que irá agregar muito à equipe.',
-    q5:'Sim', q6:'Médio', q7:'Ela tem muita determinação.'
-  },
-  disc:discRosana.norm, discRaw:discRosana.raw,
-  ego:egoRosana, quad:quadRosana, virt:virtRosana,
-  perfilPrimario:mapN[sortedR[0][0]], perfilSecundario:mapN[sortedR[1][0]],
-  row: rosanaRow
-});
-
 // ══════════════════════════════════════
 // NAVEGAÇÃO
 // ══════════════════════════════════════
@@ -1636,23 +1589,37 @@ async function carregarFormulario(token) {
 }
 
 async function carregarRankingPrivado(tokenRanking) {
+  // Mostrar loading
+  showPage('ranking');
+  document.getElementById('ranking-titulo').textContent = 'Carregando ranking...';
+  document.getElementById('ranking-list').innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--muted2)">Buscando candidatos...</div>';
+  
   try {
     const r = await fetch('https://project-dcveo.vercel.app/api/ranking-privado/' + tokenRanking);
     const d = await r.json();
-    if (d.erro) { showPage('link-invalido'); return; }
+    if (d.erro) {
+      document.getElementById('ranking-titulo').textContent = 'Link inválido';
+      document.getElementById('ranking-list').innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--muted2)">Este link de ranking não foi encontrado.</div>';
+      return;
+    }
     if (d.pacote) {
       state.cadastro.p1 = d.pacote.perfil_1;
       state.cadastro.p2 = d.pacote.perfil_2;
       state.cadastro.token = d.pacote.token;
+      state.cadastro.qty = d.pacote.quantidade;
+      state.cadastro.usados = d.pacote.usados;
     }
-    if (d.ranking) state.ranking = d.ranking;
+    // Usar APENAS os candidatos reais da API — sem demo
+    if (d.ranking && d.ranking.length > 0) {
+      state.rankingReal = d.ranking;
+    } else {
+      state.rankingReal = [];
+    }
+    renderizarRankingReal();
   } catch(e) {
-    // Demo mode
-    state.cadastro.p1 = 'Analítico';
-    state.cadastro.p2 = 'Planejador';
+    document.getElementById('ranking-titulo').textContent = 'Erro ao carregar';
+    document.getElementById('ranking-list').innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--muted2)">Erro de conexão. Tente recarregar a página.</div>';
   }
-  renderizarRanking();
-  showPage('ranking');
 }
 
 
@@ -1784,6 +1751,127 @@ function discAtualizar(qi) {
   var completa = vals.length === 4 && [1,2,3,4].every(function(v){ return vals.indexOf(v) >= 0; });
   var check = document.getElementById('dcheck'+qi);
   if (check) check.style.display = completa ? 'block' : 'none';
+}
+
+function renderizarRankingReal() {
+  const p1 = state.cadastro.p1 || '';
+  const p2 = state.cadastro.p2 || null;
+  const titulo = 'Ranking — ' + p1 + (p2 ? '/' + p2 : '');
+  document.getElementById('ranking-titulo').textContent = titulo;
+  
+  const usados = state.cadastro.usados || 0;
+  const qty = state.cadastro.qty || 0;
+  document.getElementById('ranking-meta').textContent = 
+    usados + ' candidato' + (usados !== 1 ? 's' : '') + ' analisado' + (usados !== 1 ? 's' : '') + 
+    (qty ? ' · ' + (qty - usados) + ' análises restantes' : '');
+
+  const b1 = document.getElementById('ranking-perfil-badge');
+  const b2 = document.getElementById('ranking-perfil2-badge');
+  if(b1) b1.textContent = p1;
+  if(b2) { if(p2){ b2.textContent=p2; b2.classList.remove('hidden'); } else { b2.classList.add('hidden'); } }
+
+  const list = document.getElementById('ranking-list');
+  
+  if (!state.rankingReal || state.rankingReal.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:60px 0;">'
+      + '<div style="font-size:48px;margin-bottom:16px">📭</div>'
+      + '<div style="font-family:Playfair Display,serif;font-size:22px;font-weight:700;margin-bottom:8px">Nenhum candidato ainda</div>'
+      + '<div style="font-size:14px;color:var(--muted2);max-width:360px;margin:0 auto">Compartilhe o link de candidatos e o ranking aparecerá aqui automaticamente.</div>'
+      + '</div>';
+    return;
+  }
+
+  const mapDisc = {Executor:'disc_executor',Comunicador:'disc_comunicador',Planejador:'disc_planejador','Analítico':'disc_analitico'};
+  const CORES_GRAD = [
+    ['#7c5cfc','#1de9b6'],['#ff6b6b','#f59e0b'],['#1de9b6','#7c5cfc'],
+    ['#f59e0b','#ff6b6b'],['#a78bfa','#34d399'],['#fb7185','#fbbf24'],
+    ['#60a5fa','#34d399'],['#f472b6','#a78bfa'],['#4ade80','#60a5fa'],
+    ['#fcd34d','#f87171'],['#c084fc','#22d3ee'],['#fb923c','#a3e635'],
+    ['#38bdf8','#f472b6']
+  ];
+
+  list.innerHTML = '';
+  state.rankingReal.forEach(function(c, i) {
+    const pos = i + 1;
+    const cls = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+    const compat = c.compatibilidade || c.compat || 0;
+    const bar = Math.round((compat / 75) * 100);
+    const cor = CORES_GRAD[i % CORES_GRAD.length];
+    const bg = 'linear-gradient(135deg,' + cor[0] + ',' + cor[1] + ')';
+    const nome = c.nome || 'Candidato';
+    const iniciais = nome.split(' ').map(function(p){return p[0]||'';}).slice(0,2).join('').toUpperCase();
+    const perfPrim = c.perfil_primario || '';
+    const perfSec = c.perfil_secundario || '';
+    const exp = c.experiencia === 'Sim' ? 'Com experiência' : 'Sem experiência';
+    const nivel = c.nivel || '';
+    const local = c.endereco || '';
+
+    list.innerHTML += '<div class="rank-card ' + cls + '" data-id="' + c.candidato_id + '" onclick="verCandidatoReal(this.dataset.id)">'
+      + '<div class="rank-pos ' + cls + '">' + pos + '</div>'
+      + '<div class="rank-avatar" style="background:' + bg + '">' + iniciais + '</div>'
+      + '<div class="rank-info">'
+      + '<div class="rank-name">' + nome + '</div>'
+      + '<div class="rank-sub">' + [local, exp, nivel ? 'Nível ' + nivel : ''].filter(Boolean).join(' · ') + '</div>'
+      + '<div class="rank-badges">'
+      + (perfPrim ? '<span class="badge badge-purple">' + perfPrim + '</span>' : '')
+      + (perfSec ? '<span class="badge badge-teal">' + perfSec + '</span>' : '')
+      + '</div></div>'
+      + '<div class="rank-score">'
+      + '<div class="score-num">' + compat + '</div>'
+      + '<div class="score-label">Compat.</div>'
+      + '<div class="rank-bar-bg"><div class="rank-bar" style="width:' + bar + '%"></div></div>'
+      + '</div></div>';
+  });
+}
+
+async function verCandidatoReal(candidatoId) {
+  try {
+    const r = await fetch('https://project-dcveo.vercel.app/api/candidato/' + candidatoId);
+    const c = await r.json();
+    if (!c || c.erro) return;
+    
+    // Montar objeto no formato esperado pela ficha
+    const a = (c.analises && c.analises[0]) || {};
+    state.candidatoAtual = {
+      id: c.id,
+      nome: c.nome,
+      email: c.email,
+      whatsapp: c.whatsapp,
+      endereco: c.endereco || '',
+      dataNasc: c.data_nasc ? new Date(c.data_nasc).toLocaleDateString('pt-BR') : null,
+      linkedin: c.linkedin,
+      experiencia: c.experiencia,
+      nivel: c.nivel,
+      respostas: {
+        q1: c.resp_empresa || '', q2: c.resp_equipe || '',
+        q3: c.resp_valores || '', q4: c.resp_vaga || '',
+        q5: c.experiencia || '', q6: c.nivel || '', q7: c.resp_feedback || ''
+      },
+      disc: {
+        D: a.disc_executor || 51, I: a.disc_comunicador || 51,
+        S: a.disc_planejador || 51, C: a.disc_analitico || 51
+      },
+      ego: {
+        PC: a.ego_pai_critico || 10, PA: a.ego_pai_amoroso || 10,
+        A: a.ego_adulto || 15, CL: a.ego_crianca_livre || 10, CA: a.ego_crianca_adapt || 8
+      },
+      quad: {
+        A: a.quad_analitico || 12, B: a.quad_ordenado || 12,
+        C: a.quad_relacional || 12, D: a.quad_experimental || 12
+      },
+      virt: {},
+      perfilPrimario: a.perfil_primario || '',
+      perfilSecundario: a.perfil_secundario || ''
+    };
+
+    // Encontrar compatibilidade no ranking
+    const rankItem = (state.rankingReal || []).find(function(x){ return x.candidato_id === candidatoId; });
+    const idx = (state.rankingReal || []).indexOf(rankItem);
+    
+    verCandidato(state.candidatoAtual.id);
+  } catch(e) {
+    showToast('Erro ao carregar candidato','❌');
+  }
 }
 </script>
 
