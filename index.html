@@ -540,8 +540,16 @@ footer a { color: var(--accent2); text-decoration: none; }
             Tudo entregue diretamente no seu WhatsApp.
           </p>
           <div class="hero-actions">
-            <button class="btn btn-grad btn-lg" onclick="showPage('cadastro')">Começar gratuitamente →</button>
+            <button class="btn btn-grad btn-lg" onclick="showPage('cadastro')">Começar agora →</button>
             <button class="btn btn-outline btn-lg" onclick="showDemo()">Ver demonstração</button>
+          </div>
+          <!-- JÁ SOU CLIENTE -->
+          <div style="margin-top:8px;background:rgba(108,79,238,0.07);border:1px solid rgba(108,79,238,0.2);border-radius:var(--r);padding:14px 16px">
+            <div style="font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em">🔑 Já sou cliente — acessar meu ranking</div>
+            <div style="display:flex;gap:8px">
+              <input class="input" type="text" id="input-link-ranking" placeholder="Cole aqui seu link de ranking (perfilis.com/r/...)" style="flex:1;font-size:13px">
+              <button class="btn btn-primary btn-sm" onclick="acessarRankingCliente()" style="white-space:nowrap">Acessar →</button>
+            </div>
           </div>
           <div class="hero-stats">
             <div class="stat-item">
@@ -655,42 +663,57 @@ footer a { color: var(--accent2); text-decoration: none; }
       <p class="section-sub">Experimente sem custo. Pague apenas quando o produto crescer.</p>
       <div class="pkg-grid">
         <div class="pkg-card">
-          <div class="pkg-name">Starter</div>
-          <div class="pkg-qty">10–50 <span class="pkg-unit">análises</span></div>
-          <div class="pkg-desc">Ideal para primeiras contratações e testes da ferramenta.</div>
+          <div class="pkg-name">Free</div>
+          <div class="pkg-qty" style="-webkit-text-fill-color:var(--accent2)">1–10 <span class="pkg-unit">análises</span></div>
+          <div style="display:inline-block;background:rgba(0,212,170,0.12);color:var(--accent2);border:1px solid rgba(0,212,170,0.3);border-radius:999px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:10px;letter-spacing:0.05em">GRATUITO</div>
+          <div class="pkg-desc">Teste a plataforma sem custo. Ideal para conhecer o sistema.</div>
           <ul class="pkg-features">
-            <li>Ranking DISC personalizado</li>
-            <li>Fichas individuais completas</li>
-            <li>Gráficos comportamentais</li>
-            <li>Link WhatsApp automático</li>
+            <li>Análise DISC completa</li>
+            <li>Egograma + Quadrantes cerebrais</li>
+            <li>Ranking automático</li>
+            <li>Fichas individuais com gráficos</li>
+            <li>Link privado do ranking</li>
           </ul>
           <button class="btn btn-outline" style="width:100%" onclick="showPage('cadastro')">Começar grátis</button>
         </div>
         <div class="pkg-card popular">
           <div class="pkg-badge">Mais popular</div>
-          <div class="pkg-name">Growth</div>
-          <div class="pkg-qty">100–300 <span class="pkg-unit">análises</span></div>
-          <div class="pkg-desc">Para empresas em expansão com múltiplos processos seletivos.</div>
+          <div class="pkg-name">Pro</div>
+          <div class="pkg-qty">11–100 <span class="pkg-unit">análises</span></div>
+          <div style="display:inline-block;background:rgba(108,79,238,0.12);color:#a78bfa;border:1px solid rgba(108,79,238,0.25);border-radius:999px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:10px">R$ 5,00 / análise</div>
+          <div class="pkg-desc">Para processos seletivos pontuais e equipes em crescimento.</div>
           <ul class="pkg-features">
-            <li>Tudo do Starter</li>
-            <li>Egograma + Quadrantes cerebrais</li>
-            <li>Roda das Virtudes</li>
-            <li>Banco compartilhado de talentos</li>
+            <li>Tudo do Free</li>
+            <li>Até 100 candidatos ranqueados</li>
+            <li>Total: R$ 55 – R$ 500</li>
+            <li>Links ativos por 90 dias</li>
+            <li>Pagamento PIX ou cartão</li>
           </ul>
-          <button class="btn btn-grad" style="width:100%" onclick="showPage('cadastro')">Começar grátis</button>
+          <button class="btn btn-grad" style="width:100%" onclick="showPage('cadastro')">Contratar</button>
         </div>
         <div class="pkg-card">
-          <div class="pkg-name">Enterprise</div>
-          <div class="pkg-qty">500–1000 <span class="pkg-unit">análises</span></div>
-          <div class="pkg-desc">Para RH corporativo com grande volume de candidatos.</div>
+          <div class="pkg-name">Business</div>
+          <div class="pkg-qty">101–500 <span class="pkg-unit">análises</span></div>
+          <div style="display:inline-block;background:rgba(108,79,238,0.08);color:#a78bfa;border:1px solid rgba(108,79,238,0.2);border-radius:999px;font-size:11px;font-weight:700;padding:3px 12px;margin-bottom:10px">R$ 3,00 / análise</div>
+          <div class="pkg-desc">Para RH com múltiplos processos seletivos simultâneos.</div>
           <ul class="pkg-features">
-            <li>Tudo do Growth</li>
-            <li>Sugestão automática de talentos</li>
-            <li>Exportação PDF por candidato</li>
+            <li>Tudo do Pro</li>
+            <li>Até 500 candidatos</li>
+            <li>Total: R$ 303 – R$ 1.500</li>
+            <li>Banco compartilhado de talentos</li>
             <li>Suporte prioritário</li>
           </ul>
-          <button class="btn btn-outline" style="width:100%" onclick="showPage('cadastro')">Começar grátis</button>
+          <button class="btn btn-outline" style="width:100%" onclick="showPage('cadastro')">Contratar</button>
         </div>
+      </div>
+      <!-- Enterprise row -->
+      <div style="margin-top:12px;background:linear-gradient(135deg,rgba(108,79,238,0.08),rgba(0,212,170,0.05));border:1px solid rgba(108,79,238,0.2);border-radius:var(--r-lg);padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Enterprise — 501 a 1.000 análises</div>
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px">R$ 2,00 <span style="font-size:13px;font-weight:400;color:var(--muted2)">por análise</span></div>
+          <div style="font-size:13px;color:var(--muted2)">Para RH corporativo de alto volume · Total: R$ 1.002 – R$ 2.000 · Exportação PDF · Suporte VIP</div>
+        </div>
+        <button class="btn btn-grad btn-lg" onclick="showPage('cadastro')" style="flex-shrink:0">Contratar agora →</button>
       </div>
     </div>
   </section>
@@ -712,6 +735,8 @@ footer a { color: var(--accent2); text-decoration: none; }
         <div class="si-line" id="sl-1"></div>
         <div class="si-dot" id="si-2">2</div>
         <div class="si-line" id="sl-2"></div>
+        <div class="si-dot" id="si-pag">💳</div>
+        <div class="si-line" id="sl-pag" style="display:none"></div>
         <div class="si-dot" id="si-3">3</div>
       </div>
       <div id="step-1">
@@ -748,15 +773,113 @@ footer a { color: var(--accent2); text-decoration: none; }
         </div>
         <div class="form-group">
           <label>Quantidade de análises</label>
-          <div class="qty-display"><span id="qty-val">100</span> <span>análises</span></div>
-          <input type="range" min="10" max="1000" value="100" step="10" id="qty-slider" oninput="updateQty(this.value)">
-          <div class="qty-range"><span>10</span><span>1.000</span></div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:6px">
+            <div class="qty-display" style="margin-bottom:0"><span id="qty-val">10</span> <span>análises</span></div>
+            <div id="qty-badge" style="background:var(--accent2);color:#05050a;font-size:13px;font-weight:700;padding:4px 14px;border-radius:999px;transition:all 0.3s">GRÁTIS</div>
+          </div>
+          <input type="range" min="1" max="1000" value="10" step="1" id="qty-slider" oninput="updateQty(this.value)">
+          <div class="qty-range"><span>1</span><span>1.000</span></div>
+          <!-- Painel de preço dinâmico -->
+          <div style="margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-size:12px;color:var(--muted2)">Valor por análise</span>
+              <span id="qty-faixa" style="font-size:13px;font-weight:600;color:var(--accent2)">Gratuito</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;color:var(--muted2)">Total do pacote</span>
+              <span id="qty-preco" style="font-size:18px;font-weight:700;color:var(--text)">Gratuito</span>
+            </div>
+            <div id="qty-economia" style="display:none;font-size:11px;color:var(--accent2);margin-top:6px;text-align:right"></div>
+          </div>
+          <!-- Faixas visuais -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;font-size:10px;text-align:center">
+            <div style="padding:5px;background:rgba(0,212,170,0.1);border:1px solid rgba(0,212,170,0.2);border-radius:6px;color:var(--accent2)">1–10<br><strong>Grátis</strong></div>
+            <div style="padding:5px;background:rgba(108,79,238,0.08);border:1px solid rgba(108,79,238,0.2);border-radius:6px;color:#a78bfa">11–100<br><strong>R$5/un</strong></div>
+            <div style="padding:5px;background:rgba(108,79,238,0.08);border:1px solid rgba(108,79,238,0.2);border-radius:6px;color:#a78bfa">101–500<br><strong>R$3/un</strong></div>
+            <div style="padding:5px;background:rgba(108,79,238,0.08);border:1px solid rgba(108,79,238,0.2);border-radius:6px;color:#a78bfa">501–1000<br><strong>R$2/un</strong></div>
+          </div>
         </div>
         <div class="form-group"><label>Vaga / motivo</label><input class="input" type="text" id="c-vaga" placeholder="Ex: Vendedor, Gerente, Analista..."></div>
         <div style="display:flex;gap:10px;margin-top:6px">
           <button class="btn btn-outline" onclick="nextStep(1)">← Voltar</button>
-          <button class="btn btn-primary" style="flex:1" onclick="nextStep(3)">Continuar →</button>
+          <button class="btn btn-primary" style="flex:1" id="btn-step2-next" onclick="nextStep(3)">Continuar →</button>
         </div>
+      </div>
+      
+      <!-- STEP PAG: Pagamento -->
+      <div id="step-pag" class="hidden">
+        <h2 class="form-title">Pagamento</h2>
+        <p class="form-sub">Seu pedido está quase pronto. Escolha como deseja pagar.</p>
+        <!-- Resumo do pedido -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Resumo do pedido</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:13px;color:var(--muted2)">Pacote Perfilis</span>
+            <span id="pag-qty" style="font-size:13px;font-weight:600"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:13px;color:var(--muted2)">Valor por análise</span>
+            <span id="pag-unit" style="font-size:13px;color:var(--muted2)"></span>
+          </div>
+          <div style="height:1px;background:var(--border);margin:10px 0"></div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-size:15px;font-weight:700">Total</span>
+            <span id="pag-total" style="font-size:20px;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent"></span>
+          </div>
+          <div class="form-group" style="margin-top:14px;margin-bottom:0">
+            <label>Cupom de desconto (opcional)</label>
+            <div style="display:flex;gap:8px">
+              <input class="input" type="text" id="pag-cupom" placeholder="Digite seu cupom" style="flex:1">
+              <button class="btn btn-outline btn-sm" onclick="aplicarCupom()">Aplicar</button>
+            </div>
+            <div id="pag-cupom-msg" style="font-size:12px;margin-top:4px;display:none"></div>
+          </div>
+        </div>
+        <!-- Métodos de pagamento -->
+        <div style="font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Forma de pagamento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+          <div id="pag-btn-pix" onclick="selecionarPagamento('pix')" style="border:2px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all 0.2s">
+            <div style="font-size:24px;margin-bottom:4px">💠</div>
+            <div style="font-size:14px;font-weight:600">PIX</div>
+            <div style="font-size:11px;color:var(--muted2)">Aprovação imediata</div>
+          </div>
+          <div id="pag-btn-card" onclick="selecionarPagamento('card')" style="border:2px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:all 0.2s">
+            <div style="font-size:24px;margin-bottom:4px">💳</div>
+            <div style="font-size:14px;font-weight:600">Cartão</div>
+            <div style="font-size:11px;color:var(--muted2)">Crédito ou débito</div>
+          </div>
+        </div>
+        <!-- Área PIX -->
+        <div id="pag-area-pix" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px;text-align:center">
+          <p style="font-size:13px;color:var(--muted2);margin-bottom:12px">Clique em "Gerar PIX" para receber o QR Code e a chave de pagamento.</p>
+          <button class="btn btn-grad" style="width:100%;margin-bottom:10px" onclick="gerarPagamento('pix')">Gerar PIX →</button>
+          <div id="pix-qr" style="display:none;margin-top:12px">
+            <div style="font-size:12px;color:var(--muted2);margin-bottom:8px">Escaneie o QR Code ou copie a chave:</div>
+            <div id="pix-code" style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;word-break:break-all;cursor:pointer;color:var(--accent2)" onclick="copiarPix()"></div>
+            <button class="btn btn-outline btn-sm" style="margin-top:8px;width:100%" onclick="copiarPix()">📋 Copiar chave PIX</button>
+            <p style="font-size:11px;color:var(--muted);margin-top:8px">Após o pagamento, seus links serão liberados automaticamente.</p>
+          </div>
+        </div>
+        <!-- Área Cartão -->
+        <div id="pag-area-card" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px">
+          <div class="form-group"><label>Número do cartão</label>
+            <input class="input" type="text" id="card-numero" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCartao(this)">
+          </div>
+          <div class="grid2">
+            <div class="form-group"><label>Validade</label><input class="input" type="text" id="card-validade" placeholder="MM/AA" maxlength="5" oninput="formatValidade(this)"></div>
+            <div class="form-group"><label>CVV</label><input class="input" type="text" id="card-cvv" placeholder="123" maxlength="4"></div>
+          </div>
+          <div class="form-group"><label>Nome no cartão</label><input class="input" type="text" id="card-nome" placeholder="Como está no cartão"></div>
+          <div class="form-group">
+            <label>Parcelamento</label>
+            <select class="input" id="card-parcelas"></select>
+          </div>
+          <button class="btn btn-grad" style="width:100%" onclick="gerarPagamento('card')">Pagar agora →</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:6px">
+          <button class="btn btn-outline" onclick="nextStep(2)">← Voltar</button>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted)">🔒 Pagamento seguro via Stripe · seus dados são criptografados</div>
       </div>
       <div id="step-3" class="hidden">
         <h2 class="form-title">Tudo pronto! 🎉</h2>
@@ -1163,11 +1286,34 @@ function selectDisc(type, perfil, el) {
   }
 }
 
+function calcPreco(qty) {
+  qty = parseInt(qty);
+  if (qty <= 10) return { total: 0, unit: 0, faixa: 'Gratuito', economia: null };
+  if (qty <= 100) return { total: qty*5, unit: 5, faixa: 'R$ 5,00/análise', economia: null };
+  if (qty <= 500) return { total: qty*3, unit: 3, faixa: 'R$ 3,00/análise', economia: formatBRL((qty*5)-(qty*3)) };
+  return { total: qty*2, unit: 2, faixa: 'R$ 2,00/análise', economia: formatBRL((qty*5)-(qty*2)) };
+}
+
+function formatBRL(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
 function updateQty(val) {
+  val = parseInt(val);
+  state.cadastro.qty = val;
+  const pct = ((val-1)/(1000-1))*100;
+  const slider = document.getElementById('qty-slider');
+  if (slider) slider.style.setProperty('--pct', pct+'%');
   document.getElementById('qty-val').textContent = val;
-  state.cadastro.qty = parseInt(val);
-  const pct = ((val-10)/(1000-10))*100;
-  document.getElementById('qty-slider').style.setProperty('--pct', pct+'%');
+  const p = calcPreco(val);
+  const precoEl = document.getElementById('qty-preco');
+  const faixaEl = document.getElementById('qty-faixa');
+  const econEl  = document.getElementById('qty-economia');
+  const badgeEl = document.getElementById('qty-badge');
+  if (precoEl) precoEl.textContent = p.total === 0 ? 'Gratuito' : formatBRL(p.total);
+  if (faixaEl) faixaEl.textContent = p.faixa;
+  if (econEl)  { econEl.textContent = p.economia ? 'Você economiza ' + p.economia + ' vs pacote menor' : ''; econEl.style.display = p.economia ? 'block' : 'none'; }
+  if (badgeEl) { badgeEl.textContent = p.total === 0 ? 'GRÁTIS' : formatBRL(p.total); badgeEl.style.background = p.total === 0 ? 'var(--accent2)' : 'var(--accent)'; }
 }
 
 function verRanking() {
@@ -2239,6 +2385,271 @@ function renderQuadChart(quad) {
     }
   });
 }
+
+// ══════════════════════════════════════
+// PRECIFICAÇÃO E PAGAMENTO
+// ══════════════════════════════════════
+
+// Acessar ranking pela landing page
+window.acessarRankingCliente = function() {
+  var input = document.getElementById('input-link-ranking');
+  if (!input) return;
+  var val = input.value.trim();
+  // Extrair token do link ou usar direto
+  var match = val.match(/\/r\/([A-Z0-9-]{3,17})/i);
+  var token = match ? match[1].toUpperCase() : val.toUpperCase();
+  if (!token || token.length < 3) { showToast('Cole um link válido de ranking','⚠️'); return; }
+  carregarRankingPrivado(token);
+};
+
+// Formatar campo cartão
+window.formatCartao = function(el) {
+  var v = el.value.replace(/\D/g,'').substr(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+};
+window.formatValidade = function(el) {
+  var v = el.value.replace(/\D/g,'').substr(0,4);
+  if (v.length >= 2) v = v.substr(0,2) + '/' + v.substr(2);
+  el.value = v;
+};
+
+// Selecionar método de pagamento
+window.selecionarPagamento = function(tipo) {
+  state.pagamento = state.pagamento || {};
+  state.pagamento.metodo = tipo;
+  var pixBtn  = document.getElementById('pag-btn-pix');
+  var cardBtn = document.getElementById('pag-btn-card');
+  var pixArea = document.getElementById('pag-area-pix');
+  var cardArea = document.getElementById('pag-area-card');
+  var accent = 'var(--accent)';
+  if (pixBtn)  pixBtn.style.borderColor  = tipo==='pix'  ? accent : 'var(--border)';
+  if (cardBtn) cardBtn.style.borderColor = tipo==='card' ? accent : 'var(--border)';
+  if (pixArea)  pixArea.style.display  = tipo==='pix'  ? 'block' : 'none';
+  if (cardArea) cardArea.style.display = tipo==='card' ? 'block' : 'none';
+
+  // Popular parcelas
+  if (tipo === 'card') {
+    var sel = document.getElementById('card-parcelas');
+    if (sel) {
+      var total = calcPreco(state.cadastro.qty).total;
+      sel.innerHTML = '';
+      for (var i=1; i<=12; i++) {
+        if (total/i < 5) break;
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i + 'x de R$ ' + (total/i).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + (i===1?' (sem juros)':'');
+        sel.appendChild(opt);
+      }
+    }
+  }
+};
+
+// Aplicar cupom
+window.aplicarCupom = function() {
+  var code = (document.getElementById('pag-cupom').value||'').trim().toUpperCase();
+  var msg = document.getElementById('pag-cupom-msg');
+  // Cupons de lançamento
+  var cupons = { 'PERFILIS10': 10, 'LAUNCH20': 20, 'BETA50': 50 };
+  if (cupons[code]) {
+    state.pagamento = state.pagamento || {};
+    state.pagamento.desconto = cupons[code];
+    var total = calcPreco(state.cadastro.qty).total;
+    var desc = Math.round(total * cupons[code] / 100);
+    var novoTotal = total - desc;
+    if (msg) { msg.style.display='block'; msg.style.color='var(--accent2)'; msg.textContent='✓ Cupom aplicado! Desconto de ' + cupons[code] + '% (−R$ ' + desc.toLocaleString('pt-BR',{minimumFractionDigits:2}) + ')'; }
+    var ptEl = document.getElementById('pag-total');
+    if (ptEl) ptEl.textContent = formatBRL(novoTotal);
+  } else {
+    if (msg) { msg.style.display='block'; msg.style.color='#ef4444'; msg.textContent='Cupom inválido ou expirado.'; }
+  }
+};
+
+// Gerar pagamento via API
+window.gerarPagamento = async function(tipo) {
+  var p = calcPreco(state.cadastro.qty);
+  if (p.total === 0) {
+    // Gratuito — pular pagamento
+    await criarPacoteAposPagamento(null);
+    return;
+  }
+  var desconto = (state.pagamento && state.pagamento.desconto) || 0;
+  var total = Math.round(p.total * (1 - desconto/100));
+
+  showToast('Processando...','⏳');
+
+  try {
+    var body = {
+      valor: total,
+      metodo: tipo,
+      qty: state.cadastro.qty,
+      nome: state.cadastro.nome,
+      email: state.cadastro.email,
+      descricao: 'Perfilis — ' + state.cadastro.qty + ' análises DISC'
+    };
+    if (tipo === 'card') {
+      body.card_numero = (document.getElementById('card-numero').value||'').replace(/\s/g,'');
+      body.card_validade = document.getElementById('card-validade').value||'';
+      body.card_cvv = document.getElementById('card-cvv').value||'';
+      body.card_nome = document.getElementById('card-nome').value||'';
+      body.parcelas = parseInt(document.getElementById('card-parcelas').value)||1;
+    }
+    var r = await fetch('https://project-dcveo.vercel.app/api/pagamento', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+    });
+    var d = await r.json();
+    if (d.erro) { showToast(d.erro,'❌'); return; }
+
+    if (tipo === 'pix') {
+      // Mostrar QR / chave PIX
+      var qrEl = document.getElementById('pix-qr');
+      var codeEl = document.getElementById('pix-code');
+      if (qrEl) qrEl.style.display = 'block';
+      if (codeEl) codeEl.textContent = d.pix_copia_cola || d.pix_key || '';
+      state.pagamento.payment_id = d.payment_id;
+      showToast('PIX gerado! Copie a chave para pagar','✅');
+      // Polling status
+      iniciarPollingPIX(d.payment_id);
+    } else {
+      // Cartão — aprovado imediato
+      if (d.status === 'approved' || d.status === 'succeeded') {
+        await criarPacoteAposPagamento(d.payment_id);
+      } else {
+        showToast(d.mensagem || 'Pagamento recusado. Verifique os dados.','❌');
+      }
+    }
+  } catch(e) {
+    showToast('Erro de conexão com o gateway de pagamento','❌');
+  }
+};
+
+// Polling PIX
+function iniciarPollingPIX(paymentId) {
+  var tentativas = 0;
+  var intervalo = setInterval(async function() {
+    tentativas++;
+    if (tentativas > 60) { clearInterval(intervalo); return; } // máx 5min
+    try {
+      var r = await fetch('https://project-dcveo.vercel.app/api/pagamento/status/' + paymentId);
+      var d = await r.json();
+      if (d.status === 'approved' || d.status === 'succeeded') {
+        clearInterval(intervalo);
+        showToast('Pagamento confirmado! 🎉','✅');
+        await criarPacoteAposPagamento(paymentId);
+      }
+    } catch(e) {}
+  }, 5000); // verifica a cada 5s
+}
+
+// Copiar chave PIX
+window.copiarPix = function() {
+  var code = document.getElementById('pix-code');
+  if (code) navigator.clipboard.writeText(code.textContent).then(function(){ showToast('Chave PIX copiada!','📋'); });
+};
+
+// Criar pacote após pagamento confirmado
+async function criarPacoteAposPagamento(paymentId) {
+  showToast('Criando seu pacote...','⏳');
+  try {
+    var r1 = await fetch('https://project-dcveo.vercel.app/api/contratantes', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ nome:state.cadastro.nome, email:state.cadastro.email, whatsapp:state.cadastro.whatsapp, empresa:state.cadastro.empresa })
+    });
+    var d1 = await r1.json();
+    if (!d1.contratante_id) throw new Error('Erro ao criar contratante');
+
+    var r2 = await fetch('https://project-dcveo.vercel.app/api/pacotes', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contratante_id:d1.contratante_id, perfil_1:state.cadastro.p1, perfil_2:state.cadastro.p2||null, quantidade:state.cadastro.qty, vaga:state.cadastro.vaga, payment_id:paymentId })
+    });
+    var d2 = await r2.json();
+
+    var token = d2.token || Math.random().toString(36).substr(2,9).toUpperCase();
+    var tokenR = d2.token_ranking || ('R'+Math.random().toString(36).substr(2,11).toUpperCase());
+    var link = d2.link || ('https://perfilis.com/f/'+token);
+    var linkR = d2.link_ranking || ('https://perfilis.com/r/'+tokenR);
+
+    state.cadastro.token = token;
+    state.cadastro.link = link;
+    state.cadastro.link_ranking = linkR;
+
+    // Preencher step-3
+    var perfil = state.cadastro.p1 + (state.cadastro.p2 ? '/'+state.cadastro.p2 : '');
+    var el = function(id){ return document.getElementById(id); };
+    if(el('s3-nome')) el('s3-nome').textContent = state.cadastro.nome;
+    if(el('s3-perfil')) el('s3-perfil').textContent = perfil;
+    if(el('s3-qty')) el('s3-qty').textContent = state.cadastro.qty + ' análises';
+    if(el('s3-link')) el('s3-link').textContent = link;
+    if(el('s3-link-ranking')) el('s3-link-ranking').textContent = linkR;
+    if(el('s3-progress')) el('s3-progress').style.width = '0%';
+    if(el('s3-progress-label')) el('s3-progress-label').textContent = '0 de '+state.cadastro.qty+' responderam';
+
+    // Enviar links por WhatsApp
+    var wpp = state.cadastro.whatsapp.replace(/\D/g,'');
+    var msg = encodeURIComponent('Seu pacote Perfilis foi criado!\n\nLink candidatos: '+link+'\n\nSeu ranking privado: '+linkR);
+    setTimeout(function(){ window.open('https://wa.me/55'+wpp+'?text='+msg,'_blank'); }, 1500);
+
+    // Mostrar step final
+    document.querySelectorAll('[id^=step-]').forEach(function(el){ el.classList.add('hidden'); });
+    document.getElementById('step-pag').classList.add('hidden');
+    document.getElementById('step-3').classList.remove('hidden');
+    updateStepIndicator(3);
+    showToast('Pacote criado! Links gerados 🎉','✅');
+
+  } catch(e) {
+    showToast('Erro ao criar pacote: '+e.message,'❌');
+  }
+}
+
+// Override do nextStep para roteamento com pagamento
+const _nextStepBase = window.nextStep ? window.nextStep : function(){};
+window.nextStep = async function(n) {
+  if (n === 2) {
+    var nome=document.getElementById('c-nome').value.trim();
+    var email=document.getElementById('c-email').value.trim();
+    var wpp=document.getElementById('c-whatsapp').value.trim();
+    if(!nome||!email||!wpp){ showToast('Preencha todos os campos obrigatórios','⚠️'); return; }
+    state.cadastro.nome=nome; state.cadastro.email=email; state.cadastro.whatsapp=wpp;
+    state.cadastro.empresa=document.getElementById('c-empresa').value.trim();
+  }
+  if (n === 3) {
+    if(!state.cadastro.p1){ showToast('Selecione pelo menos o perfil primário','⚠️'); return; }
+    state.cadastro.vaga = document.getElementById('c-vaga').value.trim();
+    var p = calcPreco(state.cadastro.qty);
+
+    if (p.total === 0) {
+      // Gratuito — criar pacote direto
+      await criarPacoteAposPagamento(null);
+      return;
+    }
+
+    // Pagar — mostrar step de pagamento
+    document.querySelectorAll('[id^=step-]').forEach(function(el){ el.classList.add('hidden'); });
+    document.getElementById('step-pag').classList.remove('hidden');
+
+    // Preencher resumo
+    var el = function(id){ return document.getElementById(id); };
+    if(el('pag-qty')) el('pag-qty').textContent = state.cadastro.qty + ' análises';
+    if(el('pag-unit')) el('pag-unit').textContent = p.faixa;
+    if(el('pag-total')) el('pag-total').textContent = formatBRL(p.total);
+
+    // Reset cupom
+    if(el('pag-cupom')) el('pag-cupom').value='';
+    if(el('pag-cupom-msg')) el('pag-cupom-msg').style.display='none';
+    state.pagamento = {};
+    return;
+  }
+
+  // Steps 1 e 2 normais
+  document.querySelectorAll('[id^=step-]').forEach(function(el){ el.classList.add('hidden'); });
+  document.getElementById('step-pag').classList.add('hidden');
+  document.getElementById('step-'+n).classList.remove('hidden');
+  updateStepIndicator(n);
+};
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+  updateQty(10);
+});
 </script>
 
 <!-- FORMULÁRIO DO CANDIDATO -->
