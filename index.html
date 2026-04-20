@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfilis — Análise de Perfil que Gera Conexões</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #07070a;
+  --surface: #0f0f14;
+  --surface2: #16161e;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+  --text: #f0eff5;
+  --muted: #7a798a;
+  --accent: #7c5cfc;
+  --accent2: #1de9b6;
+  --accent3: #ff6b6b;
+  --grad: linear-gradient(135deg, #7c5cfc 0%, #1de9b6 100%);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --r: 12px;
+  --r-lg: 20px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── UTILITIES ── */
+.hidden { display: none !important; }
+.page { min-height: 100vh; padding: 0; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px 32px;
+}
+.card-sm { padding: 20px 24px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+}
+.badge-purple { background: rgba(124,92,252,0.15); color: #a78bfa; border: 1px solid rgba(124,92,252,0.3); }
+.badge-teal   { background: rgba(29,233,182,0.1);  color: #1de9b6; border: 1px solid rgba(29,233,182,0.25); }
+.badge-red    { background: rgba(255,107,107,0.1);  color: #ff6b6b; border: 1px solid rgba(255,107,107,0.25); }
+.badge-amber  { background: rgba(245,158,11,0.1);   color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 24px; border-radius: var(--r); font-family: var(--font-body);
+  font-size: 14px; font-weight: 500; cursor: pointer; border: none;
+  transition: all 0.2s ease; text-decoration: none;
+}
+.btn-primary {
+  background: var(--accent); color: white;
+}
+.btn-primary:hover { background: #6b4ee8; transform: translateY(-1px); }
+.btn-outline {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border-strong);
+}
+.btn-outline:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+.btn-grad {
+  background: var(--grad); color: #07070a; font-weight: 600;
+}
+.btn-grad:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(124,92,252,0.4); }
+.btn-lg { padding: 16px 36px; font-size: 16px; border-radius: 14px; }
+.btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 8px; }
+.input {
+  width: 100%; padding: 12px 16px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--r);
+  color: var(--text); font-family: var(--font-body); font-size: 14px;
+  outline: none; transition: border-color 0.2s;
+}
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--muted); }
+select.input { cursor: pointer; }
+label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+.form-group { margin-bottom: 18px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* ── ANIMAÇÕES ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+}
+@keyframes gradShift {
+  0%  { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100%{ background-position: 0% 50%; }
+}
+.anim-up { animation: fadeUp 0.5s ease both; }
+
+/* ── NAVBAR ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 16px 0;
+  background: rgba(7,7,10,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-size: 22px; font-weight: 800;
+  letter-spacing: 4px; color: var(--text); text-decoration: none;
+}
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--grad); display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: #07070a;
+}
+.logo span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.nav-links { display: flex; align-items: center; gap: 8px; }
+
+/* ══════════════════════════════════════════════
+   PÁGINA 1 — LANDING
+══════════════════════════════════════════════ */
+#page-landing {
+  padding-top: 80px;
+}
+.hero {
+  min-height: calc(100vh - 80px);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 80px 0 60px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,92,252,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent2); margin-bottom: 24px;
+}
+.hero-title {
+  font-family: var(--font-display); font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800; line-height: 1.05; margin-bottom: 24px;
+}
+.hero-title .grad { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-sub {
+  font-size: 18px; color: var(--muted); max-width: 520px; line-height: 1.7; margin-bottom: 40px;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-stats {
+  display: flex; gap: 40px; padding-top: 60px; border-top: 1px solid var(--border);
+  margin-top: 60px;
+}
+.stat-num {
+  font-family: var(--font-display); font-size: 36px; font-weight: 800;
+  background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+/* Seção de como funciona */
+.section-title {
+  font-family: var(--font-display); font-size: 36px; font-weight: 700;
+  line-height: 1.2; margin-bottom: 12px;
+}
+.section-sub { font-size: 16px; color: var(--muted); margin-bottom: 48px; }
+
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.step-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 28px;
+  position: relative; transition: border-color 0.2s;
+}
+.step-card:hover { border-color: rgba(124,92,252,0.4); }
+.step-num {
+  font-family: var(--font-display); font-size: 48px; font-weight: 800;
+  background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  opacity: 0.3; line-height: 1; margin-bottom: 16px;
+}
+.step-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* Pacotes */
+.packages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.pkg-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 32px 28px; position: relative;
+  transition: all 0.2s;
+}
+.pkg-card.popular {
+  border-color: rgba(124,92,252,0.5);
+  background: linear-gradient(135deg, rgba(124,92,252,0.08), rgba(29,233,182,0.05));
+}
+.pkg-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--grad); color: #07070a; font-size: 11px; font-weight: 700;
+  padding: 4px 16px; border-radius: 999px; letter-spacing: 1px;
+}
+.pkg-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.pkg-qtd { font-size: 44px; font-weight: 800; font-family: var(--font-display); line-height: 1; margin: 16px 0 4px; }
+.pkg-qtd span { font-size: 16px; font-weight: 400; color: var(--muted); }
+.pkg-desc { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+.pkg-features { list-style: none; margin-bottom: 28px; }
+.pkg-features li {
+  font-size: 13px; color: var(--muted); padding: 6px 0;
+  border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+}
+.pkg-features li::before { content: '✓'; color: var(--accent2); font-weight: 700; }
+
+/* ══════════════════════════════════════════════
+   PÁGINA 2 — CADASTRO CONTRATANTE
+══════════════════════════════════════════════ */
+#page-cadastro { padding: 100px 0 60px; min-height: 100vh; }
+.form-card { max-width: 600px; margin: 0 auto; }
+.form-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.form-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+.disc-selector {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 12px;
+}
+.disc-btn {
+  padding: 16px; border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--surface2); cursor: pointer; transition: all 0.2s;
+  text-align: center;
+}
+.disc-btn:hover { border-color: var(--accent); }
+.disc-btn.selected { border-color: var(--accent); background: rgba(124,92,252,0.12); }
+.disc-btn.selected-2 { border-color: var(--accent2); background: rgba(29,233,182,0.08); }
+.disc-btn .disc-icon { font-size: 24px; margin-bottom: 6px; }
+.disc-btn .disc-name { font-size: 14px; font-weight: 600; }
+.disc-btn .disc-code {
+  font-size: 11px; color: var(--muted);
+  background: var(--surface); padding: 2px 8px; border-radius: 4px; margin-top: 4px;
+  display: inline-block;
+}
+.qty-slider-wrap { position: relative; }
+.qty-display {
+  text-align: center; font-family: var(--font-display);
+  font-size: 40px; font-weight: 800; margin: 12px 0;
+  background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.qty-display span { font-size: 16px; font-weight: 400; color: var(--muted); }
+input[type=range] {
+  width: 100%; -webkit-appearance: none; height: 4px;
+  background: linear-gradient(to right, var(--accent) var(--pct,50%), var(--surface2) var(--pct,50%));
+  border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--accent); cursor: pointer; border: 2px solid var(--bg);
+}
+.qty-range { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.step-indicator {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 32px;
+}
+.si-dot {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted);
+}
+.si-dot.active { background: var(--accent); border-color: var(--accent); color: white; }
+.si-dot.done { background: var(--accent2); border-color: var(--accent2); color: var(--bg); }
+.si-line { flex: 1; height: 1px; background: var(--border); }
+.si-line.done { background: var(--accent2); }
+
+/* ══════════════════════════════════════════════
+   PÁGINA 3 — RANKING
+══════════════════════════════════════════════ */
+#page-ranking { padding: 100px 0 60px; min-height: 100vh; }
+.ranking-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 32px; gap: 16px; flex-wrap: wrap;
+}
+.ranking-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+.ranking-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.ranking-list { display: flex; flex-direction: column; gap: 12px; }
+.rank-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 20px 24px;
+  display: flex; align-items: center; gap: 20px;
+  cursor: pointer; transition: all 0.2s;
+}
+.rank-card:hover { border-color: rgba(124,92,252,0.4); transform: translateX(4px); }
+.rank-card.gold   { border-left: 3px solid #f59e0b; }
+.rank-card.silver { border-left: 3px solid #94a3b8; }
+.rank-card.bronze { border-left: 3px solid #b45309; }
+.rank-pos {
+  font-family: var(--font-display); font-size: 28px; font-weight: 800; min-width: 48px;
+  text-align: center; color: var(--muted);
+}
+.rank-pos.gold { color: #f59e0b; }
+.rank-pos.silver { color: #94a3b8; }
+.rank-pos.bronze { color: #b45309; }
+.rank-avatar {
+  width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 18px; font-weight: 700; color: #07070a;
+}
+.rank-info { flex: 1; min-width: 0; }
+.rank-name { font-size: 16px; font-weight: 600; }
+.rank-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.rank-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.rank-score {
+  text-align: right; flex-shrink: 0;
+}
+.score-num {
+  font-family: var(--font-display); font-size: 32px; font-weight: 800;
+  background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.score-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.rank-bar-wrap { margin-top: 4px; }
+.rank-bar-bg { height: 4px; background: var(--surface2); border-radius: 2px; width: 100px; }
+.rank-bar { height: 4px; border-radius: 2px; background: var(--grad); transition: width 0.8s ease; }
+
+/* ══════════════════════════════════════════════
+   PÁGINA 4 — FICHA DO CANDIDATO
+══════════════════════════════════════════════ */
+#page-candidato { padding: 100px 0 60px; min-height: 100vh; }
+.ficha-header {
+  display: flex; align-items: center; gap: 24px; margin-bottom: 40px;
+}
+.ficha-avatar {
+  width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 28px; font-weight: 800; color: #07070a;
+}
+.ficha-name { font-family: var(--font-display); font-size: 32px; font-weight: 800; margin-bottom: 4px; }
+.ficha-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.ficha-contacts { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.ficha-contact {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--muted); text-decoration: none;
+}
+.ficha-contact:hover { color: var(--accent2); }
+
+.ficha-section-title {
+  font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.qa-item { margin-bottom: 20px; }
+.qa-question { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+.qa-answer { font-size: 15px; color: var(--text); line-height: 1.6; }
+
+/* Charts container */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.chart-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 24px;
+}
+.chart-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; text-align: center; }
+.chart-wrap { position: relative; height: 260px; }
+
+/* Egograma barras */
+.ego-bars { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; }
+.ego-bar-row { display: flex; align-items: center; gap: 12px; }
+.ego-bar-label { font-size: 12px; color: var(--muted); min-width: 110px; text-align: right; }
+.ego-bar-bg { flex: 1; height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
+.ego-bar-fill { height: 100%; border-radius: 5px; transition: width 1s ease; }
+.ego-bar-val { font-size: 12px; font-weight: 600; min-width: 24px; }
+
+/* Virtudes */
+.virtudes-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.virt-item {
+  background: var(--surface2); border-radius: var(--r); padding: 12px;
+  text-align: center;
+}
+.virt-score {
+  font-family: var(--font-display); font-size: 24px; font-weight: 800;
+  line-height: 1; margin-bottom: 4px;
+}
+.virt-name { font-size: 11px; color: var(--muted); line-height: 1.3; }
+
+/* DISC descritivo */
+.disc-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+.disc-detail-item {}
+.disc-detail-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.disc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.disc-tag {
+  font-size: 12px; padding: 4px 10px; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+}
+
+/* ══════════════════════════════════════════════
+   MODAL DE LINK
+══════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.modal {
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg); padding: 36px; max-width: 480px; width: 100%;
+  animation: fadeUp 0.3s ease;
+}
+.modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.modal-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+.link-box {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 14px 16px; font-size: 13px; color: var(--accent2);
+  word-break: break-all; font-family: monospace; margin-bottom: 16px;
+}
+.progress-bar-wrap { background: var(--surface2); border-radius: 6px; height: 8px; margin: 16px 0; }
+.progress-bar { height: 100%; border-radius: 6px; background: var(--grad); transition: width 0.5s; }
+.progress-label { font-size: 12px; color: var(--muted); text-align: right; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 300;
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--r); padding: 12px 20px; font-size: 14px;
+  animation: fadeUp 0.3s ease;
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border); padding: 32px 0;
+  text-align: center; font-size: 13px; color: var(--muted);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .steps-grid, .packages-grid, .charts-grid { grid-template-columns: 1fr; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .disc-selector { grid-template-columns: 1fr 1fr; }
+  .hero-title { font-size: 36px; }
+  .hero-stats { gap: 24px; flex-wrap: wrap; }
+  .rank-card { padding: 14px 16px; gap: 12px; }
+  .ficha-header { flex-direction: column; }
+  .virtudes-grid { grid-template-columns: repeat(3,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a class="logo" href="#" onclick="showPage('landing')">
+      <div class="logo-icon">P</div>
+      PERFIL<span>IS</span>
+    </a>
+    <div class="nav-links">
+      <button class="btn btn-outline btn-sm" onclick="showPage('landing')">Início</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('cadastro')">Contratar</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     PÁGINA 1 — LANDING
+══════════════════════════════════════════ -->
+<div id="page-landing" class="page">
+  <section class="hero">
+    <div class="container">
+      <p class="hero-label">Análise de perfil que gera conexões</p>
+      <h1 class="hero-title">
+        Encontre as pessoas<br>
+        <span class="grad">certas para o seu time</span>
+      </h1>
+      <p class="hero-sub">
+        Análise comportamental DISC completa. Ranking automático. Fichas individuais com gráficos. 
+        Tudo isso entregue direto no seu WhatsApp.
+      </p>
+      <div class="hero-actions">
+        <button class="btn btn-grad btn-lg" onclick="showPage('cadastro')">
+          Começar gratuitamente →
+        </button>
+        <button class="btn btn-outline btn-lg" onclick="showDemo()">
+          Ver demonstração
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">4</div>
+          <div class="stat-label">Perfis DISC analisados</div>
+        </div>
+        <div>
+          <div class="stat-num">26</div>
+          <div class="stat-label">Questões comportamentais</div>
+        </div>
+        <div>
+          <div class="stat-num">1000</div>
+          <div class="stat-label">Análises por pacote</div>
+        </div>
+        <div>
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Gratuito no lançamento</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Como funciona -->
+  <section style="padding: 80px 0;">
+    <div class="container">
+      <p class="hero-label">Como funciona</p>
+      <h2 class="section-title">Simples e rápido</h2>
+      <p class="section-sub">Do cadastro ao ranking em minutos.</p>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-title">Cadastre-se e escolha seu pacote</div>
+          <div class="step-desc">Escolha de 10 a 1000 análises e defina o perfil DISC que você busca na sua equipe.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-title">Compartilhe o link com candidatos</div>
+          <div class="step-desc">Você recebe um link único. Cada candidato que o acessar preenche o questionário completo.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-title">Receba o ranking no WhatsApp</div>
+          <div class="step-desc">Quando os candidatos responderem, o ranking chega automaticamente no seu WhatsApp com fichas completas.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Perfis DISC -->
+  <section style="padding: 40px 0 80px;">
+    <div class="container">
+      <p class="hero-label">Metodologia DISC</p>
+      <h2 class="section-title">4 perfis comportamentais</h2>
+      <p class="section-sub">Identifique quem é Executor, Comunicador, Planejador ou Analítico.</p>
+      <div class="grid2" style="gap: 20px;">
+        <div class="card card-sm" style="border-left: 3px solid #ff6b6b;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <span style="font-size:28px;">⚡</span>
+            <div>
+              <div style="font-weight:700;font-size:16px;">Executor</div>
+              <div style="font-size:12px;color:var(--muted);">D — Dominante</div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;">Direto, decidido e orientado a resultados. Assume riscos e toma decisões rápidas.</p>
+        </div>
+        <div class="card card-sm" style="border-left: 3px solid #f59e0b;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <span style="font-size:28px;">💬</span>
+            <div>
+              <div style="font-weight:700;font-size:16px;">Comunicador</div>
+              <div style="font-size:12px;color:var(--muted);">I — Influente</div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;">Entusiasta, social e persuasivo. Motiva pessoas e cria ambientes positivos.</p>
+        </div>
+        <div class="card card-sm" style="border-left: 3px solid #1de9b6;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <span style="font-size:28px;">🤝</span>
+            <div>
+              <div style="font-weight:700;font-size:16px;">Planejador</div>
+              <div style="font-size:12px;color:var(--muted);">S — Estável</div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;">Paciente, leal e colaborativo. Mantém harmonia e trabalha bem em equipe.</p>
+        </div>
+        <div class="card card-sm" style="border-left: 3px solid #7c5cfc;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <span style="font-size:28px;">🔍</span>
+            <div>
+              <div style="font-weight:700;font-size:16px;">Analítico</div>
+              <div style="font-size:12px;color:var(--muted);">C — Criterioso</div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;">Preciso, meticuloso e orientado a qualidade. Analisa antes de agir.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pacotes -->
+  <section style="padding: 40px 0 80px;">
+    <div class="container">
+      <p class="hero-label">Pacotes</p>
+      <h2 class="section-title">Gratuito no lançamento</h2>
+      <p class="section-sub">Experimente sem custo. Pague apenas quando o produto crescer.</p>
+      <div class="packages-grid">
+        <div class="pkg-card">
+          <div class="pkg-name">Starter</div>
+          <div class="pkg-qtd">10–50<span> análises</span></div>
+          <div class="pkg-desc">Ideal para primeiras contratações e testes da ferramenta.</div>
+          <ul class="pkg-features">
+            <li>Ranking DISC personalizado</li>
+            <li>Fichas individuais completas</li>
+            <li>Gráficos comportamentais</li>
+            <li>Link WhatsApp automático</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%" onclick="showPage('cadastro')">Começar grátis</button>
+        </div>
+        <div class="pkg-card popular">
+          <div class="pkg-badge">MAIS POPULAR</div>
+          <div class="pkg-name">Growth</div>
+          <div class="pkg-qtd">100–300<span> análises</span></div>
+          <div class="pkg-desc">Para empresas em expansão com múltiplos processos seletivos.</div>
+          <ul class="pkg-features">
+            <li>Tudo do Starter</li>
+            <li>Egograma + Quadrantes</li>
+            <li>Roda das Virtudes</li>
+            <li>Banco compartilhado de talentos</li>
+          </ul>
+          <button class="btn btn-grad" style="width:100%" onclick="showPage('cadastro')">Começar grátis</button>
+        </div>
+        <div class="pkg-card">
+          <div class="pkg-name">Enterprise</div>
+          <div class="pkg-qtd">500–1000<span> análises</span></div>
+          <div class="pkg-desc">Para RH corporativo com grande volume de candidatos.</div>
+          <ul class="pkg-features">
+            <li>Tudo do Growth</li>
+            <li>Sugestão automática de talentos</li>
+            <li>Exportação PDF por candidato</li>
+            <li>Suporte prioritário</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%" onclick="showPage('cadastro')">Começar grátis</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 Perfilis · <a href="#" style="color:var(--accent2)">www.perfilis.com</a> · Análise de perfil que gera conexões</p>
+      <p style="margin-top:8px;font-size:12px;">Dados protegidos conforme LGPD · Ao usar o formulário você concorda com nossa <a href="#" style="color:var(--muted)">Política de Privacidade</a></p>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PÁGINA 2 — CADASTRO CONTRATANTE
+══════════════════════════════════════════ -->
+<div id="page-cadastro" class="page hidden">
+  <div class="container" style="padding-top: 100px; padding-bottom: 60px;">
+    <div class="form-card">
+      <!-- Step indicator -->
+      <div class="step-indicator" id="step-indicator">
+        <div class="si-dot active" id="si-1">1</div>
+        <div class="si-line" id="sl-1"></div>
+        <div class="si-dot" id="si-2">2</div>
+        <div class="si-line" id="sl-2"></div>
+        <div class="si-dot" id="si-3">3</div>
+      </div>
+
+      <!-- Step 1: Dados -->
+      <div id="step-1">
+        <h2 class="form-title">Seus dados</h2>
+        <p class="form-sub">Crie sua conta gratuita para acessar a plataforma.</p>
+        <div class="form-group">
+          <label>Nome completo *</label>
+          <input class="input" type="text" id="c-nome" placeholder="Seu nome">
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label>Email *</label>
+            <input class="input" type="email" id="c-email" placeholder="seu@email.com">
+          </div>
+          <div class="form-group">
+            <label>WhatsApp *</label>
+            <input class="input" type="tel" id="c-whatsapp" placeholder="(99) 99999-9999">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <input class="input" type="text" id="c-empresa" placeholder="Nome da empresa (opcional)">
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="nextStep(2)">
+          Continuar →
+        </button>
+      </div>
+
+      <!-- Step 2: Pacote e perfil -->
+      <div id="step-2" class="hidden">
+        <h2 class="form-title">Perfil desejado</h2>
+        <p class="form-sub">Qual tipo de candidato você está buscando?</p>
+        
+        <div class="form-group">
+          <label>Perfil primário (obrigatório)</label>
+          <div class="disc-selector" id="disc-primary">
+            <div class="disc-btn" onclick="selectDisc('primary','Executor',this)">
+              <div class="disc-icon">⚡</div>
+              <div class="disc-name">Executor</div>
+              <div class="disc-code">D — Dominante</div>
+            </div>
+            <div class="disc-btn" onclick="selectDisc('primary','Comunicador',this)">
+              <div class="disc-icon">💬</div>
+              <div class="disc-name">Comunicador</div>
+              <div class="disc-code">I — Influente</div>
+            </div>
+            <div class="disc-btn" onclick="selectDisc('primary','Planejador',this)">
+              <div class="disc-icon">🤝</div>
+              <div class="disc-name">Planejador</div>
+              <div class="disc-code">S — Estável</div>
+            </div>
+            <div class="disc-btn" onclick="selectDisc('primary','Analítico',this)">
+              <div class="disc-icon">🔍</div>
+              <div class="disc-name">Analítico</div>
+              <div class="disc-code">C — Criterioso</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Perfil secundário (opcional)</label>
+          <div class="disc-selector" id="disc-secondary">
+            <div class="disc-btn" onclick="selectDisc('secondary','Executor',this)">
+              <div class="disc-icon">⚡</div>
+              <div class="disc-name">Executor</div>
+              <div class="disc-code">D — Dominante</div>
+            </div>
+            <div class="disc-btn" onclick="selectDisc('secondary','Comunicador',this)">
+              <div class="disc-icon">💬</div>
+              <div class="disc-name">Comunicador</div>
+              <div class="disc-code">I — Influente</div>
+            </div>
+            <div class="disc-btn" onclick="selectDisc('secondary','Planejador',this)">
+              <div class="disc-icon">🤝</div>
+              <div class="disc-name">Planejador</div>
+              <div class="disc-code">S — Estável</div>
+            </div>
+            <div class="disc-btn" onclick="selectDisc('secondary','Analítico',this)">
+              <div class="disc-icon">🔍</div>
+              <div class="disc-name">Analítico</div>
+              <div class="disc-code">C — Criterioso</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Quantidade de análises</label>
+          <div class="qty-display"><span id="qty-val">100</span> <span>análises</span></div>
+          <input type="range" min="10" max="1000" value="100" step="10" id="qty-slider"
+            oninput="updateQty(this.value)">
+          <div class="qty-range"><span>10</span><span>1000</span></div>
+        </div>
+
+        <div class="form-group">
+          <label>Vaga / motivo</label>
+          <input class="input" type="text" id="c-vaga" placeholder="Ex: Vendedor, Gerente, etc.">
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px">
+          <button class="btn btn-outline" onclick="nextStep(1)">← Voltar</button>
+          <button class="btn btn-primary" style="flex:1" onclick="nextStep(3)">Continuar →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Confirmação e link -->
+      <div id="step-3" class="hidden">
+        <h2 class="form-title">Tudo pronto! 🎉</h2>
+        <p class="form-sub">Seu pacote foi criado. Compartilhe o link abaixo com os candidatos.</p>
+
+        <div class="card card-sm" style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:13px;color:var(--muted)">Contratante</span>
+            <span id="s3-nome" style="font-size:13px;font-weight:600"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:13px;color:var(--muted)">Perfil desejado</span>
+            <span id="s3-perfil" style="font-size:13px;font-weight:600"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:13px;color:var(--muted)">Análises disponíveis</span>
+            <span id="s3-qty" style="font-size:13px;font-weight:600"></span>
+          </div>
+        </div>
+
+        <label>Link para candidatos</label>
+        <div class="link-box" id="s3-link">https://perfilis.com/f/ABC123XYZ</div>
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <button class="btn btn-outline btn-sm" onclick="copiarLink()">📋 Copiar link</button>
+          <button class="btn btn-outline btn-sm" onclick="enviarWhatsApp()">📱 Enviar por WhatsApp</button>
+        </div>
+
+        <label>Progresso das respostas</label>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="s3-progress" style="width:8%"></div>
+        </div>
+        <div class="progress-label"><span id="s3-progress-label">8 de 100 responderam</span></div>
+
+        <div style="margin-top:24px">
+          <button class="btn btn-grad" style="width:100%" onclick="verRanking()">
+            Ver ranking atual →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PÁGINA 3 — RANKING
+══════════════════════════════════════════ -->
+<div id="page-ranking" class="page hidden">
+  <div class="container">
+    <div class="ranking-header">
+      <div>
+        <button class="btn btn-outline btn-sm" onclick="showPage('cadastro')" style="margin-bottom:12px">← Voltar</button>
+        <h2 class="ranking-title" id="ranking-titulo">Ranking — Executor/Comunicador</h2>
+        <p class="ranking-meta" id="ranking-meta">12 candidatos analisados · Link: perfilis.com/f/ABC123XYZ</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="badge badge-teal" id="ranking-perfil-badge">Executor</span>
+        <span class="badge badge-purple" id="ranking-perfil2-badge"></span>
+        <button class="btn btn-outline btn-sm" onclick="exportarRanking()">⬇ Exportar</button>
+      </div>
+    </div>
+    <div class="ranking-list" id="ranking-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PÁGINA 4 — FICHA DO CANDIDATO
+══════════════════════════════════════════ -->
+<div id="page-candidato" class="page hidden">
+  <div class="container">
+    <button class="btn btn-outline btn-sm" onclick="showPage('ranking')" style="margin-bottom:24px">← Voltar ao ranking</button>
+    
+    <!-- Header da ficha -->
+    <div class="ficha-header">
+      <div class="ficha-avatar" id="ficha-avatar"></div>
+      <div style="flex:1">
+        <h2 class="ficha-name" id="ficha-nome"></h2>
+        <div class="ficha-badges" id="ficha-badges"></div>
+        <div class="ficha-contacts" id="ficha-contacts"></div>
+      </div>
+      <div style="text-align:right">
+        <div class="score-num" id="ficha-score"></div>
+        <div class="score-label">Compatibilidade</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+      <!-- Respostas abertas -->
+      <div class="card">
+        <div class="ficha-section-title">Respostas da Ficha</div>
+        <div id="ficha-respostas"></div>
+      </div>
+
+      <!-- Info pessoal -->
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="ficha-section-title">Informações</div>
+          <div id="ficha-info"></div>
+        </div>
+        <!-- Perfil dominante -->
+        <div class="card card-sm" id="ficha-perfil-card"></div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-grid" style="margin-bottom:24px">
+      <div class="chart-card">
+        <div class="chart-title">Perfil DISC</div>
+        <div class="chart-wrap">
+          <canvas id="chart-disc"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Egograma</div>
+        <div class="ego-bars" id="ego-bars"></div>
+      </div>
+    </div>
+
+    <div class="charts-grid" style="margin-bottom:24px">
+      <div class="chart-card">
+        <div class="chart-title">Quadrantes Cerebrais</div>
+        <div class="chart-wrap">
+          <canvas id="chart-quad"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Roda das Virtudes</div>
+        <div class="chart-wrap">
+          <canvas id="chart-virt"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descrição do perfil DISC -->
+    <div class="card" id="disc-desc-card" style="margin-bottom:32px"></div>
+
+    <!-- Ação -->
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-grad btn-lg" id="btn-contatar" onclick="contatar()">
+        📱 Contatar pelo WhatsApp
+      </button>
+      <button class="btn btn-outline btn-lg" onclick="showPage('ranking')">
+        Ver outros candidatos
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL LGPD
+══════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-lgpd">
+  <div class="modal">
+    <h3 class="modal-title">🔒 Privacidade e LGPD</h3>
+    <p class="modal-sub">Antes de continuar, entenda como seus dados são protegidos.</p>
+    <ul style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:24px;padding-left:20px">
+      <li>Seus dados são usados apenas para análise de perfil</li>
+      <li>O contratante verá apenas nome, WhatsApp, email e respostas</li>
+      <li>Você pode solicitar exclusão dos seus dados a qualquer momento</li>
+      <li>Não compartilhamos dados com terceiros sem seu consentimento</li>
+      <li>Os dados ficam armazenados por no máximo 1 ano</li>
+    </ul>
+    <label style="display:flex;align-items:center;gap:10px;margin-bottom:20px;cursor:pointer">
+      <input type="checkbox" id="lgpd-check" style="width:16px;height:16px;accent-color:var(--accent)">
+      <span style="font-size:13px">Li e concordo com a política de privacidade</span>
+    </label>
+    <button class="btn btn-grad" style="width:100%" onclick="aceitarLGPD()">Continuar</button>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// DADOS DE DEMONSTRAÇÃO
+// ══════════════════════════════════════
+
+const DISC_MAP = [
+  ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
+  ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
+  ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
+  ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
+  ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],
+  ['S','I','D','C']
+];
+
+const EGO_MAP = [
+  ['A'],['CL'],['PC'],['CA'],['PC'],['PA'],['PA'],['A'],['CL'],['PC'],
+  ['CA'],['PA'],['CA'],['PC'],['A'],['CA'],['PA'],['CA'],['A'],['PC'],
+  ['A'],['CL'],['PC'],['PA'],['CL'],['CA'],['PC'],['CL'],['PC'],['A'],
+  ['CA'],['CL'],['A'],['PC'],['CA'],['A'],['CL'],['PC'],['PA'],['A'],
+  ['A'],['PA'],['PC'],['CL'],['CL'],['A'],['CL'],['PA'],['A'],['CA']
+];
+
+const QUAD_MAP = [
+  'A','B','C','D','A','B','A','B','D','D','C','B','B','A','C','D','C','B','D','B','D','A','D','C','B','C','B'
+];
+
+function gerarRespostasAleatorias(seed) {
+  const rng = (n) => { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return Math.abs(seed) % n; };
+  const perm4 = () => {
+    const a = [1,2,3,4]; 
+    for(let i=3;i>0;i--){const j=rng(i+1);[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  };
+  const row = new Array(221).fill(0);
+  // DISC: 26 questões × 4 opções
+  for(let q=0;q<26;q++){
+    const p = perm4();
+    for(let j=0;j<4;j++) row[14+q*4+j] = p[j];
+  }
+  // Egograma: 50 questões, valores 0-3
+  for(let i=0;i<50;i++) row[145+i] = rng(4);
+  // Quadrantes: 27 questões, valores 0-3
+  for(let i=0;i<27;i++) row[118+i] = rng(4);
+  // Virtudes: 24 itens, valores 5-10
+  for(let i=0;i<24;i++) row[196+i] = 5 + rng(6);
+  return row;
+}
+
+function calcularDISC(row) {
+  const sc = {D:0,I:0,S:0,C:0};
+  for(let q=0;q<26;q++){
+    const base=14+q*4;
+    for(let j=0;j<4;j++){
+      const p = DISC_MAP[q][j];
+      sc[p] += parseInt(row[base+j])||0;
+    }
+  }
+  // Normalizar para ~51-75 range
+  const vals = Object.values(sc);
+  const min = Math.min(...vals), max = Math.max(...vals), range = max-min||1;
+  const norm = {};
+  for(const k of ['D','I','S','C']) norm[k] = Math.round(((sc[k]-min)/range)*24+51);
+  return {raw:sc, norm};
+}
+
+function calcularEgo(row) {
+  const sc = {PC:0,PA:0,A:0,CL:0,CA:0};
+  for(let i=0;i<50;i++){
+    const estado = EGO_MAP[i][0];
+    sc[estado] += parseInt(row[145+i])||0;
+  }
+  return sc;
+}
+
+function calcularQuad(row) {
+  const sc = {A:0,B:0,C:0,D:0};
+  for(let i=0;i<27;i++){
+    const q = QUAD_MAP[i];
+    if(q) sc[q] += parseInt(row[118+i])||0;
+  }
+  return sc;
+}
+
+function calcularVirtudes(row) {
+  const nomes = ['Criatividade','Descobridor','Mente aberta','Amor ao aprendizado','Perspectiva',
+    'Perseverança','Integridade','Entusiasmo','Amor','Compaixão','Inteligência social',
+    'Cidadania','Igualdade','Liderança','Perdoar','Humildade','Prudência','Controle',
+    'Espiritualidade','Humor','Esperança','Otimismo','Gratidão','Apreciação de beleza'];
+  const v = {};
+  for(let i=0;i<24;i++) v[nomes[i]] = parseInt(row[196+i])||7;
+  return v;
+}
+
+function compatibilidade(discNorm, p1, p2) {
+  const map = {Executor:'D',Comunicador:'I',Planejador:'S','Analítico':'C','Analitico':'C'};
+  const v1 = discNorm[map[p1]||p1]||0;
+  if(!p2) return v1;
+  const v2 = discNorm[map[p2]||p2]||0;
+  return Math.round(v1*0.7 + v2*0.3);
+}
+
+const NOMES = ['Ana Silva','Carlos Mendes','Fernanda Costa','Ricardo Oliveira','Beatriz Santos',
+  'Diego Ferreira','Juliana Lima','Marcos Souza','Patrícia Alves','Roberto Nunes',
+  'Camila Ramos','Leonardo Martins'];
+
+function gerarCandidatos() {
+  return NOMES.map((nome, i) => {
+    const row = gerarRespostasAleatorias((i+1)*123456 + 789);
+    const disc = calcularDISC(row);
+    const ego = calcularEgo(row);
+    const quad = calcularQuad(row);
+    const virt = calcularVirtudes(row);
+    const perfis = ['Executor','Comunicador','Planejador','Analítico'];
+    const sorted = Object.entries(disc.norm).sort((a,b)=>b[1]-a[1]);
+    const mapNome = {D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
+    return {
+      id: i+1, nome,
+      email: nome.toLowerCase().replace(' ','.') + '@email.com',
+      whatsapp: '6499' + String(1000000 + i*1234567).slice(-7),
+      endereco: ['São Paulo, SP','Goiânia, GO','Rio de Janeiro, RJ','Belo Horizonte, MG'][i%4],
+      dataNasc: `${String(10+(i%20)).padStart(2,'0')}/${String(1+(i%12)).padStart(2,'0')}/${1980+i}`,
+      linkedin: i%3===0 ? 'linkedin.com/in/'+nome.toLowerCase().replace(' ','-') : null,
+      experiencia: i%2===0 ? 'Sim' : 'Não',
+      nivel: ['Básico','Médio','Avançado'][i%3],
+      respostas: {
+        q1: ['Ambiente colaborativo e inovador','Bons líderes e desafios constantes','Estabilidade e bom relacionamento','Crescimento e reconhecimento'][i%4],
+        q2: ['União e foco em resultados comuns','Comunicação aberta e respeito','Colaboração e ajuda mútua','Metas claras e execução eficiente'][i%4],
+        q3: ['Honestidade, lealdade, responsabilidade, foco e resiliência','Criatividade, comprometimento, empatia, ética e proatividade','Integridade, disciplina, comunicação, liderança e inovação','Humildade, dedicação, flexibilidade, coragem e sabedoria'][i%4],
+        q4: ['Trago experiência sólida e capacidade de resolver problemas complexos','Minha comunicação e energia positiva transformam equipes','Sou confiável, organizado e entrego resultados consistentes','Analiso dados com precisão e entrego qualidade acima do esperado'][i%4],
+        q5: i%2===0 ? 'Sim' : 'Não',
+        q6: ['Básico','Médio','Avançado'][i%3],
+        q7: ['Muito determinado e focado','Excelente comunicador e motivador','Confiável e sempre entrega no prazo','Muito preciso e cuidadoso com detalhes'][i%4],
+      },
+      disc: disc.norm,
+      discRaw: disc.raw,
+      ego, quad, virt,
+      perfilPrimario: mapNome[sorted[0][0]],
+      perfilSecundario: mapNome[sorted[1][0]],
+      row
+    };
+  });
+}
+
+// ══════════════════════════════════════
+// ESTADO DA APLICAÇÃO
+// ══════════════════════════════════════
+let state = {
+  currentPage: 'landing',
+  cadastro: { nome:'', email:'', whatsapp:'', empresa:'', p1:'', p2:'', qty:100, vaga:'' },
+  candidatos: [],
+  ranking: [],
+  candidatoAtual: null,
+  charts: {}
+};
+
+state.candidatos = gerarCandidatos();
+
+// Adicionar candidato real da planilha
+const rosanaRow = [
+  'Candidato 90','Rosana de Paula Ferreira','rosandepaulaferreira@gmail.com',
+  '64992054759','Rio Verde','2000-04-27',
+  'Ter um ambiente de trabalho.','Todos focados para um resultado comum.',
+  'Honestidade, flexibilidade, determinação, participativa e receptiva',
+  'Tenho ampla experiência em depto pessoal que irá agregar muito à equipe.',
+  null,'Sim','Médio','Ela tem muita determinação.',
+  // Q01-Q26 (4 opções cada) — valores da planilha
+  1,4,3,2, 4,2,3,1, 1,4,2,3, 4,3,1,2, 4,1,2,3, 1,2,3,4, 1,2,3,4, 4,1,2,3,
+  1,3,2,4, 4,3,2,1, 4,2,3,1, 4,3,2,1, 1,4,2,3, 4,1,3,2, 2,3,4,1, 4,1,2,3,
+  4,1,2,3, 1,4,2,3, 1,4,2,3, 1,4,3,2, 4,3,2,1, 3,4,2,1, 1,2,3,4, 3,4,1,2,
+  4,3,2,1, 4,3,2,1,
+  // Quadrantes (118-144)
+  3,3,2,1,3,3,1,3,3,3,3,0,2,2,3,3,0,2,1,3,2,3,2,3,1,3,3,
+  // Egograma (145-194)
+  2,3,3,0,3,2,3,0,2,3,1,0,2,2,3,3,0,3,1,2,0,2,1,0,2,3,1,2,1,3,2,1,2,3,0,3,3,0,0,1,2,3,3,2,3,3,2,2,3,2,0,
+  // Virtudes (196-219)
+  8,7,9,8,9,10,10,10,10,10,10,9,10,8,10,10,10,9,8,10,9,10,10,5,
+  'Devemos sempre procurar melhorias.'
+];
+
+const discRosana = calcularDISC(rosanaRow);
+const egoRosana = calcularEgo(rosanaRow);
+const quadRosana = calcularQuad(rosanaRow);
+const virtRosana = calcularVirtudes(rosanaRow);
+const sortedR = Object.entries(discRosana.norm).sort((a,b)=>b[1]-a[1]);
+const mapN = {D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
+
+state.candidatos.push({
+  id: 13, nome:'Rosana de Paula Ferreira',
+  email:'rosandepaulaferreira@gmail.com',
+  whatsapp:'64992054759', endereco:'Rio Verde, GO', dataNasc:'27/04/1990',
+  linkedin:null, experiencia:'Sim', nivel:'Médio',
+  respostas:{
+    q1:'Ter um ambiente de trabalho.',
+    q2:'Todos focados para um resultado comum.',
+    q3:'Honestidade, flexibilidade, determinação, participativa e receptiva',
+    q4:'Tenho ampla experiência em depto pessoal que irá agregar muito à equipe.',
+    q5:'Sim', q6:'Médio', q7:'Ela tem muita determinação.'
+  },
+  disc:discRosana.norm, discRaw:discRosana.raw,
+  ego:egoRosana, quad:quadRosana, virt:virtRosana,
+  perfilPrimario:mapN[sortedR[0][0]], perfilSecundario:mapN[sortedR[1][0]],
+  row: rosanaRow
+});
+
+// ══════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  document.getElementById('page-'+page).classList.remove('hidden');
+  window.scrollTo(0,0);
+  state.currentPage = page;
+}
+
+function showDemo() {
+  state.cadastro.p1 = 'Analítico'; state.cadastro.p2 = 'Planejador';
+  state.cadastro.nome = 'Demo'; state.cadastro.qty = 100;
+  renderizarRanking();
+  showPage('ranking');
+}
+
+// ══════════════════════════════════════
+// CADASTRO
+// ══════════════════════════════════════
+function nextStep(n) {
+  if(n===2) {
+    const nome = document.getElementById('c-nome').value.trim();
+    const email = document.getElementById('c-email').value.trim();
+    const wpp = document.getElementById('c-whatsapp').value.trim();
+    if(!nome||!email||!wpp){ showToast('Preencha todos os campos obrigatórios','⚠️'); return; }
+    state.cadastro.nome = nome;
+    state.cadastro.email = email;
+    state.cadastro.whatsapp = wpp;
+    state.cadastro.empresa = document.getElementById('c-empresa').value.trim();
+  }
+  if(n===3) {
+    if(!state.cadastro.p1){ showToast('Selecione pelo menos o perfil primário','⚠️'); return; }
+    state.cadastro.vaga = document.getElementById('c-vaga').value.trim();
+    // Preencher step 3
+    const perfil = state.cadastro.p1 + (state.cadastro.p2 ? '/' + state.cadastro.p2 : '');
+    document.getElementById('s3-nome').textContent = state.cadastro.nome;
+    document.getElementById('s3-perfil').textContent = perfil;
+    document.getElementById('s3-qty').textContent = state.cadastro.qty + ' análises';
+    const token = Math.random().toString(36).substr(2,9).toUpperCase();
+    document.getElementById('s3-link').textContent = 'https://perfilis.com/f/' + token;
+    state.link = token;
+    const respondidos = Math.floor(state.cadastro.qty * 0.08);
+    document.getElementById('s3-progress').style.width = '8%';
+    document.getElementById('s3-progress-label').textContent = respondidos + ' de ' + state.cadastro.qty + ' responderam';
+  }
+  document.querySelectorAll('[id^=step-]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('step-'+n).classList.remove('hidden');
+  updateStepIndicator(n);
+}
+
+function updateStepIndicator(n) {
+  for(let i=1;i<=3;i++){
+    const dot = document.getElementById('si-'+i);
+    dot.classList.remove('active','done');
+    if(i<n) dot.classList.add('done');
+    else if(i===n) dot.classList.add('active');
+    if(i<3){
+      const line = document.getElementById('sl-'+i);
+      line.classList.toggle('done', i<n);
+    }
+  }
+}
+
+function selectDisc(type, perfil, el) {
+  const selector = type === 'primary' ? 'disc-primary' : 'disc-secondary';
+  document.querySelectorAll('#'+selector+' .disc-btn').forEach(b=>{
+    b.classList.remove('selected','selected-2');
+  });
+  if(type==='primary'){
+    el.classList.add('selected');
+    state.cadastro.p1 = perfil;
+    if(state.cadastro.p2 === perfil) state.cadastro.p2 = '';
+  } else {
+    if(state.cadastro.p1 === perfil){
+      showToast('O perfil secundário deve ser diferente do primário','⚠️'); return;
+    }
+    el.classList.add('selected-2');
+    state.cadastro.p2 = perfil;
+  }
+}
+
+function updateQty(val) {
+  document.getElementById('qty-val').textContent = val;
+  state.cadastro.qty = parseInt(val);
+  const pct = ((val-10)/(1000-10))*100;
+  document.getElementById('qty-slider').style.setProperty('--pct', pct+'%');
+}
+
+function verRanking() {
+  renderizarRanking();
+  showPage('ranking');
+}
+
+// ══════════════════════════════════════
+// RANKING
+// ══════════════════════════════════════
+const CORES_GRAD = [
+  ['#7c5cfc','#1de9b6'],['#ff6b6b','#f59e0b'],['#1de9b6','#7c5cfc'],
+  ['#f59e0b','#ff6b6b'],['#a78bfa','#34d399'],['#fb7185','#fbbf24'],
+  ['#60a5fa','#34d399'],['#f472b6','#a78bfa'],['#4ade80','#60a5fa'],
+  ['#fcd34d','#f87171'],['#c084fc','#22d3ee'],['#fb923c','#a3e635'],
+  ['#38bdf8','#f472b6']
+];
+
+function avatarBg(idx) {
+  const c = CORES_GRAD[idx%CORES_GRAD.length];
+  return `linear-gradient(135deg,${c[0]},${c[1]})`;
+}
+
+function iniciais(nome) {
+  const p = nome.split(' ');
+  return (p[0][0]+(p[p.length-1][0]||'')).toUpperCase();
+}
+
+function renderizarRanking() {
+  const p1 = state.cadastro.p1 || 'Analítico';
+  const p2 = state.cadastro.p2 || null;
+  const titulo = 'Ranking — ' + p1 + (p2 ? '/' + p2 : '');
+  document.getElementById('ranking-titulo').textContent = titulo;
+  document.getElementById('ranking-meta').textContent =
+    state.candidatos.length + ' candidatos analisados';
+  document.getElementById('ranking-perfil-badge').textContent = p1;
+  const b2 = document.getElementById('ranking-perfil2-badge');
+  if(p2){ b2.textContent = p2; b2.classList.remove('hidden'); } else { b2.classList.add('hidden'); }
+
+  const ranked = state.candidatos.map((c,i) => ({
+    ...c, compat: compatibilidade(c.disc, p1, p2)
+  })).sort((a,b)=>{
+    if(b.compat!==a.compat) return b.compat-a.compat;
+    return b.disc[{Executor:'D',Comunicador:'I',Planejador:'S','Analítico':'C',Analitico:'C'}[p2||p1]||'D']
+         - a.disc[{Executor:'D',Comunicador:'I',Planejador:'S','Analítico':'C',Analitico:'C'}[p2||p1]||'D'];
+  });
+  state.ranking = ranked;
+
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = '';
+  ranked.forEach((c,i)=>{
+    const pos = i+1;
+    const cls = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+    const bar = Math.round((c.compat/75)*100);
+    list.innerHTML += `
+    <div class="rank-card ${cls}" onclick="verCandidato(${c.id})">
+      <div class="rank-pos ${cls}">${pos}</div>
+      <div class="rank-avatar" style="background:${avatarBg(i)}">${iniciais(c.nome)}</div>
+      <div class="rank-info">
+        <div class="rank-name">${c.nome}</div>
+        <div class="rank-sub">${c.endereco} · ${c.experiencia==='Sim'?'Com experiência':'Sem experiência'} · Nível ${c.nivel}</div>
+        <div class="rank-badges">
+          <span class="badge badge-purple">${c.perfilPrimario}</span>
+          <span class="badge badge-teal">${c.perfilSecundario}</span>
+        </div>
+      </div>
+      <div class="rank-score">
+        <div class="score-num">${c.compat}</div>
+        <div class="score-label">Compat.</div>
+        <div class="rank-bar-wrap">
+          <div class="rank-bar-bg"><div class="rank-bar" style="width:${bar}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+// ══════════════════════════════════════
+// FICHA DO CANDIDATO
+// ══════════════════════════════════════
+function verCandidato(id) {
+  const c = state.candidatos.find(x=>x.id===id);
+  if(!c) return;
+  state.candidatoAtual = c;
+
+  const idx = state.ranking.findIndex(x=>x.id===id);
+  const compat = idx>=0 ? state.ranking[idx].compat : compatibilidade(c.disc, state.cadastro.p1||'Analítico', state.cadastro.p2||null);
+
+  // Destruir charts anteriores
+  Object.values(state.charts).forEach(ch=>{ try{ch.destroy();}catch(e){} });
+  state.charts = {};
+
+  // Header
+  const av = document.getElementById('ficha-avatar');
+  av.style.background = avatarBg(idx>=0?idx:0);
+  av.textContent = iniciais(c.nome);
+  document.getElementById('ficha-nome').textContent = c.nome;
+  document.getElementById('ficha-score').textContent = compat;
+  document.getElementById('btn-contatar').onclick = () => {
+    window.open('https://wa.me/55'+c.whatsapp.replace(/\D/g,'')+'?text=Olá '+encodeURIComponent(c.nome.split(' ')[0])+', vi seu perfil na Perfilis!','_blank');
+  };
+
+  // Badges
+  const badges = document.getElementById('ficha-badges');
+  badges.innerHTML = `
+    <span class="badge badge-purple">${c.perfilPrimario}</span>
+    <span class="badge badge-teal">${c.perfilSecundario}</span>
+    <span class="badge badge-amber">Nível ${c.nivel}</span>
+    ${c.experiencia==='Sim'?'<span class="badge badge-teal">Com experiência</span>':''}
+    ${(idx+1)<=3?`<span class="badge badge-amber">#${idx+1} no ranking</span>`:''}
+  `;
+
+  // Contatos
+  document.getElementById('ficha-contacts').innerHTML = `
+    <a href="tel:+55${c.whatsapp}" class="ficha-contact">📱 ${c.whatsapp}</a>
+    <a href="mailto:${c.email}" class="ficha-contact">✉️ ${c.email}</a>
+    ${c.dataNasc?`<span class="ficha-contact">🗓 ${c.dataNasc}</span>`:''}
+    ${c.linkedin?`<a href="https://${c.linkedin}" class="ficha-contact">🔗 LinkedIn</a>`:''}
+  `;
+
+  // Respostas
+  const perguntas = [
+    'O que uma empresa precisa ter para você trabalhar feliz?',
+    'O que trabalho em equipe significa para você?',
+    'Quais são seus 5 principais valores pessoais?',
+    'Por que você merece essa vaga?',
+    'Você tem experiência na área?',
+    'Qual seu nível de conhecimento?',
+    'Que feedback você costuma ouvir sobre seu trabalho?'
+  ];
+  const resps = document.getElementById('ficha-respostas');
+  resps.innerHTML = perguntas.map((q,i)=>`
+    <div class="qa-item">
+      <div class="qa-question">${q}</div>
+      <div class="qa-answer">${Object.values(c.respostas)[i]||'—'}</div>
+    </div>
+  `).join('');
+
+  // Info pessoal
+  document.getElementById('ficha-info').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div><span style="font-size:12px;color:var(--muted)">Localização</span><br><span style="font-size:14px">${c.endereco}</span></div>
+      <div><span style="font-size:12px;color:var(--muted)">Data de nascimento</span><br><span style="font-size:14px">${c.dataNasc||'Não informada'}</span></div>
+      <div><span style="font-size:12px;color:var(--muted)">Experiência</span><br><span style="font-size:14px">${c.experiencia}</span></div>
+      <div><span style="font-size:12px;color:var(--muted)">Nível</span><br><span style="font-size:14px">${c.nivel}</span></div>
+    </div>
+  `;
+
+  // Perfil card
+  const mapD={D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
+  const sortedD = Object.entries(c.disc).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('ficha-perfil-card').innerHTML = `
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Perfil Comportamental</div>
+    ${sortedD.map(([k,v],i)=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <span style="font-size:12px;color:var(--muted);min-width:90px">${mapD[k]}</span>
+      <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${v}%;background:${i===0?'var(--grad)':'var(--border-strong)'};border-radius:4px;transition:width 1s"></div>
+      </div>
+      <span style="font-size:13px;font-weight:600;min-width:24px">${v}</span>
+    </div>`).join('')}
+  `;
+
+  // Gráfico DISC (radar)
+  setTimeout(()=>{
+    const ctx = document.getElementById('chart-disc').getContext('2d');
+    state.charts.disc = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Executor','Comunicador','Planejador','Analítico'],
+        datasets: [{
+          label: c.nome.split(' ')[0],
+          data: [c.disc.D, c.disc.I, c.disc.S, c.disc.C],
+          backgroundColor: 'rgba(124,92,252,0.15)',
+          borderColor: '#7c5cfc',
+          pointBackgroundColor: '#1de9b6',
+          pointRadius: 5, borderWidth: 2
+        }]
+      },
+      options: {
+        scales: { r: {
+          suggestedMin:40, suggestedMax:80,
+          ticks: { color:'#7a798a', font:{size:10}, backdropColor:'transparent' },
+          grid: { color:'rgba(255,255,255,0.06)' },
+          pointLabels: { color:'#f0eff5', font:{size:12,family:'DM Sans'} },
+          angleLines: { color:'rgba(255,255,255,0.06)' }
+        }},
+        plugins: { legend: { labels: { color:'#f0eff5', font:{size:12} } } }
+      }
+    });
+
+    // Egograma barras
+    const egoNomes = {PC:'Pai Crítico',PA:'Pai Amoroso',A:'Adulto',CL:'Criança Livre',CA:'Criança Adaptada'};
+    const egoCores = {PC:'#ff6b6b',PA:'#f59e0b',A:'#1de9b6',CL:'#7c5cfc',CA:'#a78bfa'};
+    const maxEgo = Math.max(...Object.values(c.ego));
+    const egoBars = document.getElementById('ego-bars');
+    egoBars.innerHTML = Object.entries(c.ego).map(([k,v])=>`
+      <div class="ego-bar-row">
+        <span class="ego-bar-label">${egoNomes[k]}</span>
+        <div class="ego-bar-bg">
+          <div class="ego-bar-fill" style="width:${Math.round((v/maxEgo)*100)}%;background:${egoCores[k]}"></div>
+        </div>
+        <span class="ego-bar-val" style="color:${egoCores[k]}">${v}</span>
+      </div>
+    `).join('');
+
+    // Gráfico Quadrantes (doughnut)
+    const qNames=['Analítico','Ordenado','Relacional','Experimental'];
+    const qCores=['#7c5cfc','#1de9b6','#f59e0b','#ff6b6b'];
+    const ctx2 = document.getElementById('chart-quad').getContext('2d');
+    state.charts.quad = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: qNames,
+        datasets: [{ data: [c.quad.A,c.quad.B,c.quad.C,c.quad.D],
+          backgroundColor: qCores.map(x=>x+'33'), borderColor: qCores, borderWidth: 2 }]
+      },
+      options: {
+        cutout: '60%',
+        plugins: { legend: { labels:{ color:'#f0eff5',font:{size:11} } } }
+      }
+    });
+
+    // Gráfico Virtudes (bar horizontal top 8)
+    const virtEntries = Object.entries(c.virt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const ctx3 = document.getElementById('chart-virt').getContext('2d');
+    state.charts.virt = new Chart(ctx3, {
+      type: 'bar',
+      data: {
+        labels: virtEntries.map(([k])=>k),
+        datasets: [{ data: virtEntries.map(([,v])=>v),
+          backgroundColor: '#7c5cfc33', borderColor: '#7c5cfc', borderWidth: 2,
+          borderRadius: 6 }]
+      },
+      options: {
+        indexAxis: 'y',
+        scales: {
+          x: { min:0, max:10, ticks:{color:'#7a798a',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'} },
+          y: { ticks:{color:'#f0eff5',font:{size:10}}, grid:{display:false} }
+        },
+        plugins: { legend:{ display:false } }
+      }
+    });
+
+  }, 100);
+
+  // Descrição DISC
+  const mapDesc = {
+    Executor:{cor:'#ff6b6b',icone:'⚡',desc:'Dominante, direto e orientado a resultados. Toma decisões rápidas, aceita desafios e age com iniciativa.',fortes:['Foco em resultados','Decisão rápida','Iniciativa','Liderança direta'],atencao:['Pode ser impulsivo','Pouca paciência','Dificuldade em delegar'],ideal:'Inovador, com desafios constantes e autonomia para agir'},
+    Comunicador:{cor:'#f59e0b',icone:'💬',desc:'Influente, entusiasta e social. Motiva pessoas e resolve conflitos com facilidade.',fortes:['Comunicação','Entusiasmo','Relações interpessoais','Persuasão'],atencao:['Pode ser disperso','Dificuldade com detalhes','Busca de aprovação'],ideal:'Com contato constante com pessoas e liberdade de expressão'},
+    Planejador:{cor:'#1de9b6',icone:'🤝',desc:'Estável, paciente e leal. Trabalha bem em equipe e mantém ambientes harmoniosos.',fortes:['Trabalho em equipe','Paciência','Estabilidade','Lealdade'],atencao:['Resistência a mudanças','Dificuldade em conflitos','Pode ser passivo'],ideal:'Estável, previsível e com relações duradouras'},
+    'Analítico':{cor:'#7c5cfc',icone:'🔍',desc:'Criterioso, preciso e orientado a qualidade. Analisa antes de agir.',fortes:['Precisão','Qualidade','Análise crítica','Sistematização'],atencao:['Pode ser perfeccionista','Lento para decidir','Dificuldade social'],ideal:'Com pensamento crítico, dados e padrões altos de qualidade'},
+  };
+  const d = mapDesc[c.perfilPrimario] || mapDesc['Analítico'];
+  document.getElementById('disc-desc-card').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <span style="font-size:40px">${d.icone}</span>
+      <div>
+        <div style="font-size:18px;font-weight:700">${c.perfilPrimario}</div>
+        <div style="font-size:13px;color:var(--muted)">${d.desc}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Pontos fortes</div>
+        ${d.fortes.map(f=>`<div class="disc-tag" style="margin-bottom:6px;display:inline-block;margin-right:4px">${f}</div>`).join('')}
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Pontos de atenção</div>
+        ${d.atencao.map(a=>`<div class="disc-tag" style="margin-bottom:6px;display:inline-block;margin-right:4px;border-color:rgba(255,107,107,0.3)">${a}</div>`).join('')}
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Ambiente ideal</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6">${d.ideal}</div>
+      </div>
+    </div>
+  `;
+
+  showPage('candidato');
+}
+
+// ══════════════════════════════════════
+// UTILITÁRIOS
+// ══════════════════════════════════════
+function copiarLink() {
+  const link = document.getElementById('s3-link').textContent;
+  navigator.clipboard.writeText(link).then(()=>showToast('Link copiado!','📋'));
+}
+
+function enviarWhatsApp() {
+  const wpp = state.cadastro.whatsapp.replace(/\D/g,'');
+  const link = document.getElementById('s3-link')?.textContent || 'https://perfilis.com/f/DEMO';
+  const msg = encodeURIComponent(`🔍 Seu link de análise de perfil Perfilis está pronto!\n\n${link}\n\nCompartilhe com os candidatos.`);
+  window.open('https://wa.me/55'+wpp+'?text='+msg,'_blank');
+}
+
+function exportarRanking() {
+  showToast('Exportando ranking... (funcionalidade em desenvolvimento)','📊');
+}
+
+function contatar() {
+  if(!state.candidatoAtual) return;
+  const c = state.candidatoAtual;
+  window.open('https://wa.me/55'+c.whatsapp.replace(/\D/g,'')+'?text=Olá '+encodeURIComponent(c.nome.split(' ')[0])+', vi seu perfil na Perfilis e gostaria de conversar!','_blank');
+}
+
+function showToast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  t.classList.remove('hidden');
+  setTimeout(()=>t.classList.add('hidden'), 3000);
+}
+
+function aceitarLGPD() {
+  if(!document.getElementById('lgpd-check').checked){
+    showToast('Por favor aceite a política de privacidade','⚠️'); return;
+  }
+  document.getElementById('modal-lgpd').classList.add('hidden');
+  showPage('cadastro');
+}
+
+// ══════════════════════════════════════
+// INTEGRAÇÃO COM API REAL
+// ══════════════════════════════════════
+const API_URL = 'https://project-dcveo.vercel.app';
+
+async function apiCadastrar() {
+  const nome = document.getElementById('c-nome').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const wpp = document.getElementById('c-whatsapp').value.trim();
+  const empresa = document.getElementById('c-empresa').value.trim();
+  if (!nome || !email || !wpp) { showToast('Preencha todos os campos','⚠️'); return false; }
+
+  showToast('Criando cadastro...','⏳');
+  try {
+    // 1. Cadastrar contratante
+    const r1 = await fetch(`${API_URL}/api/contratantes`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ nome, email, whatsapp: wpp, empresa })
+    });
+    const d1 = await r1.json();
+    if (d1.erro) { showToast(d1.erro, '❌'); return false; }
+    state.cadastro.contratante_id = d1.contratante_id;
+
+    // 2. Criar pacote
+    const r2 = await fetch(`${API_URL}/api/pacotes`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contratante_id: d1.contratante_id,
+        perfil_1: state.cadastro.p1,
+        perfil_2: state.cadastro.p2 || null,
+        quantidade: state.cadastro.qty,
+        vaga: state.cadastro.vaga
+      })
+    });
+    const d2 = await r2.json();
+    if (d2.erro) { showToast(d2.erro, '❌'); return false; }
+
+    state.cadastro.token = d2.token;
+    state.cadastro.link = d2.link;
+    return true;
+  } catch(e) {
+    showToast('Erro de conexão com o servidor','❌');
+    return false;
+  }
+}
+
+async function apiVerRanking(token) {
+  try {
+    const r = await fetch(`${API_URL}/api/ranking/${token}`);
+    const d = await r.json();
+    if (d.ranking) {
+      // Mesclar com candidatos demo para demonstração
+      state.ranking = d.ranking;
+    }
+  } catch(e) {
+    console.log('Usando dados demo');
+  }
+}
+
+// Override do nextStep para integrar com API real no step 3
+const _nextStepOriginal = nextStep;
+async function nextStep(n) {
+  if (n === 3) {
+    if (!state.cadastro.p1) { showToast('Selecione pelo menos o perfil primário','⚠️'); return; }
+    state.cadastro.vaga = document.getElementById('c-vaga').value.trim();
+
+    // Tentar criar na API real
+    const ok = await apiCadastrar();
+
+    const perfil = state.cadastro.p1 + (state.cadastro.p2 ? '/' + state.cadastro.p2 : '');
+    const link = state.cadastro.link || `https://perfilis.com/f/${Math.random().toString(36).substr(2,9).toUpperCase()}`;
+    const token = state.cadastro.token || link.split('/').pop();
+
+    document.getElementById('s3-nome').textContent = state.cadastro.nome;
+    document.getElementById('s3-perfil').textContent = perfil;
+    document.getElementById('s3-qty').textContent = state.cadastro.qty + ' análises';
+    document.getElementById('s3-link').textContent = link;
+    document.getElementById('s3-progress').style.width = '0%';
+    document.getElementById('s3-progress-label').textContent = '0 de ' + state.cadastro.qty + ' responderam';
+
+    document.querySelectorAll('[id^=step-]').forEach(el => el.classList.add('hidden'));
+    document.getElementById('step-3').classList.remove('hidden');
+    updateStepIndicator(3);
+
+    if (ok) showToast('Conta criada com sucesso! Link gerado.', '🎉');
+    return;
+  }
+  _nextStepOriginal(n);
+}
+
+// Init slider
+document.addEventListener('DOMContentLoaded', ()=>{
+  updateQty(100);
+});
+</script>
+</body>
+</html>
