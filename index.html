@@ -844,7 +844,13 @@ footer a { color: var(--accent2); text-decoration: none; }
       </div>
     </div>
     <div class="charts-grid" style="margin-bottom:16px">
-      <div class="chart-card"><div class="chart-title">Perfil DISC</div><div class="chart-wrap"><canvas id="chart-disc"></canvas></div></div>
+      <div class="chart-card" style="position:relative">
+        <div class="chart-title">Perfil DISC</div>
+        <div class="chart-wrap"><canvas id="chart-disc"></canvas></div>
+        <div style="text-align:right;margin-top:8px">
+          <button onclick="mostrarSaibaMaisDisc()" style="background:rgba(229,57,53,0.1);border:1px solid rgba(229,57,53,0.3);color:#f87171;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">📖 Saiba mais</button>
+        </div>
+      </div>
       <div class="chart-card" style="position:relative">
         <div class="chart-title">Egograma</div>
         <div class="chart-wrap" style="height:260px"><canvas id="chart-ego-line"></canvas></div>
@@ -854,7 +860,13 @@ footer a { color: var(--accent2); text-decoration: none; }
       </div>
     </div>
     <div style="margin-bottom:16px">
-      <div class="chart-card"><div class="chart-title">Quadrantes Cerebrais</div><div class="chart-wrap"><canvas id="chart-quad"></canvas></div></div>
+      <div class="chart-card" style="position:relative">
+        <div class="chart-title">Quadrantes Cerebrais</div>
+        <div class="chart-wrap" style="height:240px"><canvas id="chart-quad"></canvas></div>
+        <div style="text-align:right;margin-top:8px">
+          <button onclick="mostrarSaibaMaisQuad()" style="background:rgba(74,144,217,0.12);border:1px solid rgba(74,144,217,0.3);color:#60a5fa;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">📖 Saiba mais</button>
+        </div>
+      </div>
     </div>
     <div class="card" id="disc-desc-card" style="margin-bottom:28px"></div>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -2040,21 +2052,9 @@ function renderizarFichaReal(c, compat, posicao) {
     const ego = c.ego || {PC:10,PA:10,A:15,CL:10,CA:8};
     renderEgoLineChart(ego);
 
-    // Quadrantes
+    // Quadrantes — barras horizontais
     const quad = c.quad || {A:12,B:12,C:12,D:12};
-    const ctx2 = document.getElementById('chart-quad');
-    if(ctx2){
-      state.charts.quad = new Chart(ctx2.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Analítico','Ordenado','Relacional','Experimental'],
-          datasets: [{ data:[quad.A,quad.B,quad.C,quad.D],
-            backgroundColor:['#7c5cfc33','#1de9b633','#f59e0b33','#ff6b6b33'],
-            borderColor:['#7c5cfc','#1de9b6','#f59e0b','#ff6b6b'], borderWidth:2 }]
-        },
-        options: { cutout:'60%', plugins:{ legend:{ labels:{ color:'#f0eff5',font:{size:11} } } } }
-      });
-    }
+    renderQuadChart(quad);
 
     // Roda das Virtudes removida
 
@@ -2162,6 +2162,80 @@ function renderEgoLineChart(ego) {
         }
       },
       animation: { duration: 900, easing: 'easeOutQuart' }
+    }
+  });
+}
+
+// Saiba Mais — DISC
+window.mostrarSaibaMaisDisc = function() {
+  state._paginaAnterior = 'candidato';
+  showPage('saibamaisdisc');
+  window.scrollTo(0,0);
+};
+
+// Saiba Mais — Quadrantes
+window.mostrarSaibaMaisQuad = function() {
+  state._paginaAnterior = 'candidato';
+  showPage('saibamaisquad');
+  window.scrollTo(0,0);
+};
+
+// Gráfico Quadrantes — barras horizontais estilo da imagem
+function renderQuadChart(quad) {
+  const ctx = document.getElementById('chart-quad');
+  if (!ctx) return;
+  if (state.charts.quad) { try{state.charts.quad.destroy();}catch(e){} }
+
+  const labels = ['Pré-Ativo','Pró-Ativo','Reativo','Relacional'];
+  const valores = [quad.A||0, quad.B||0, quad.C||0, quad.D||0];
+  const cores = ['#4a90d9','#dc5050','#50b478','#f0b43c'];
+
+  state.charts.quad = new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: valores,
+        backgroundColor: cores.map(function(c){ return c + '99'; }),
+        borderColor: cores,
+        borderWidth: 2,
+        borderRadius: 0,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      layout: { padding: { right: 40 } },
+      scales: {
+        x: {
+          min: 0,
+          ticks: { color: '#7a798a', font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        },
+        y: {
+          ticks: { color: '#e8e6f0', font: { size: 12, weight: '600' } },
+          grid: { display: false }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: function(c){ return '  ' + c.parsed.x + ' pts'; } },
+          backgroundColor: 'rgba(13,13,20,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1
+        },
+        datalabels: {
+          display: true,
+          color: '#ffffff',
+          font: { size: 12, weight: '700' },
+          anchor: 'end',
+          align: 'right',
+          formatter: function(v) { return v; }
+        }
+      },
+      animation: { duration: 800, easing: 'easeOutQuart' }
     }
   });
 }
@@ -2388,6 +2462,231 @@ function renderEgoLineChart(ego) {
         <p style="font-size:14px;color:var(--muted2);line-height:1.75">É o lado da submissão. <strong style="color:var(--text)">15/16</strong>: fantástico — demonstra capacidade de ouvir, falar e interagir adequadamente. <strong style="color:var(--text)">Acima de 20</strong>: ouve muito mas interage pouco, sem potência — inadequado para gestão de pessoas. <strong style="color:var(--text)">Abaixo de 12</strong>: indica PA alto — sujeito altamente crítico e inadequado ao contexto organizacional.</p>
       </div>
 
+    </div>
+    <div style="margin-top:32px;text-align:center">
+      <button onclick="voltarFicha()" class="btn btn-grad btn-lg">← Voltar ao resultado do candidato</button>
+    </div>
+  </div>
+</div>
+
+<!-- PÁGINA SAIBA MAIS — DISC -->
+<div id="page-saibamaisdisc" class="page hidden">
+  <div style="max-width:900px;margin:0 auto;padding:90px 28px 60px">
+    <button onclick="voltarFicha()" class="btn btn-outline btn-sm" style="margin-bottom:28px">← Voltar ao resultado</button>
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:11px;font-weight:600;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Metodologia DISC</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:10px">Fichas Técnicas dos Perfis DISC</h1>
+      <p style="font-size:15px;color:var(--muted2);max-width:560px;margin:0 auto">Entenda as características, forças, debilidades e como se comunicar com cada perfil comportamental.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <!-- EXECUTOR -->
+      <div style="background:rgba(229,57,53,0.08);border:1px solid rgba(229,57,53,0.3);border-radius:var(--r-lg);padding:28px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <span style="font-size:32px">⚡</span>
+          <div>
+            <div style="font-size:20px;font-weight:700;color:#f87171">D — Executor</div>
+            <div style="font-size:13px;color:var(--muted2);font-style:italic">"Fazer e impulsionar o mundo"</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;background:rgba(229,57,53,0.15);color:#f87171;padding:4px 12px;border-radius:999px;font-weight:600">Fogo · Extrovertido</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">✅ Forças</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Perseverança — adora desafios</li><li>Energia — quer abraçar o mundo</li><li>Visão — não existem obstáculos insuperáveis</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">⚠️ Debilidades</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Egocêntrico e insensível</li><li>Explosivo — reage antes de pensar</li><li>Mandão e manipulador</li><li>Impaciente e agressivo</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:14px">
+          <div style="font-size:11px;font-weight:700;color:#f87171;margin-bottom:6px">COMO COMUNICAR COM UM EXECUTOR</div>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.7">Seja suave, dê seu lugar, peça com boas maneiras. Elogie-o. Vá direto ao ponto. Mantenha-se tranquilo. Pergunte, não adivinhe. Espere até que se tranquilize.</p>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted2)">
+          <span>🎯 <strong>Motivação:</strong> Poder, controle, ser o melhor, resultados</span>
+          <span>😰 <strong>Medo:</strong> Perder o controle</span>
+          <span>🗂 <strong>Necessidade:</strong> CONTROLE</span>
+        </div>
+      </div>
+
+      <!-- COMUNICADOR -->
+      <div style="background:rgba(253,216,53,0.07);border:1px solid rgba(253,216,53,0.3);border-radius:var(--r-lg);padding:28px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <span style="font-size:32px">💬</span>
+          <div>
+            <div style="font-size:20px;font-weight:700;color:#fde047">I — Comunicador</div>
+            <div style="font-size:13px;color:var(--muted2);font-style:italic">"A inspiração e a alegria do mundo"</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;background:rgba(253,216,53,0.12);color:#fde047;padding:4px 12px;border-radius:999px;font-weight:600">Ar · Extrovertido</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">✅ Forças</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Brincalhão — busca alegria em tudo</li><li>Otimista — energia positiva</li><li>Entusiasta — dificilmente se deprime</li><li>Efusivo e despreocupado</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">⚠️ Debilidades</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Esquecido e distraído</li><li>Não termina o que começa</li><li>Evasivo e exagerado</li><li>Desorganizado</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:14px">
+          <div style="font-size:11px;font-weight:700;color:#fde047;margin-bottom:6px">COMO COMUNICAR COM UM COMUNICADOR</div>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.7">Seja cálido e pessoal. Mostre apreço por seu idealismo e otimismo. Compartilhe seu entusiasmo. Seja paciente. Ajude-os a aterrissar e peça que tenham um rumo.</p>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted2)">
+          <span>🎯 <strong>Motivação:</strong> Diversão, popularidade, conexão emocional</span>
+          <span>😰 <strong>Medo:</strong> Não ser aceito</span>
+          <span>🗂 <strong>Necessidade:</strong> ATENÇÃO</span>
+        </div>
+      </div>
+
+      <!-- PLANEJADOR -->
+      <div style="background:rgba(56,142,60,0.08);border:1px solid rgba(56,142,60,0.3);border-radius:var(--r-lg);padding:28px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <span style="font-size:32px">🤝</span>
+          <div>
+            <div style="font-size:20px;font-weight:700;color:#4ade80">S — Planejador</div>
+            <div style="font-size:13px;color:var(--muted2);font-style:italic">"A paz e a tranquilidade do mundo"</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;background:rgba(56,142,60,0.12);color:#4ade80;padding:4px 12px;border-radius:999px;font-weight:600">Água · Introvertido</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">✅ Forças</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Fácil de levar — diz sim a todos</li><li>Paciente — prova de tudo</li><li>Bom ouvinte — não julga</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">⚠️ Debilidades</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Inseguro — dificuldade de expor desejos</li><li>Desmotivado — precisa de reafirmação</li><li>Entediado e indeciso</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:14px">
+          <div style="font-size:11px;font-weight:700;color:#4ade80;margin-bottom:6px">COMO COMUNICAR COM UM PLANEJADOR</div>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.7">Mantenha a tranquilidade. Use tom amável. Faça perguntas. Inspire segurança. Use empatia. Seja sensível às emoções. Dê tempo para decidir.</p>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted2)">
+          <span>🎯 <strong>Motivação:</strong> Aprovação, servir, evitar conflitos</span>
+          <span>😰 <strong>Medo:</strong> Mudanças e confrontos</span>
+          <span>🗂 <strong>Necessidade:</strong> PAZ</span>
+        </div>
+      </div>
+
+      <!-- ANALÍTICO -->
+      <div style="background:rgba(21,101,192,0.08);border:1px solid rgba(21,101,192,0.35);border-radius:var(--r-lg);padding:28px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <span style="font-size:32px">🔍</span>
+          <div>
+            <div style="font-size:20px;font-weight:700;color:#60a5fa">C — Analítico</div>
+            <div style="font-size:13px;color:var(--muted2);font-style:italic">"Estrategistas e filósofos da vida"</div>
+          </div>
+          <span style="margin-left:auto;font-size:11px;background:rgba(21,101,192,0.15);color:#60a5fa;padding:4px 12px;border-radius:999px;font-weight:600">Terra · Introvertido</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">✅ Forças</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Comprometido e leal — ético</li><li>Considerado — consulta envolvidos</li><li>Profundo e espiritual</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">⚠️ Debilidades</div>
+            <ul style="font-size:13px;color:var(--muted2);line-height:1.8;padding-left:16px">
+              <li>Muito exigente — falhar não existe</li><li>Apreensivo — tudo é crítico</li><li>Teimoso e pessimista</li><li>Perfeccionista</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:14px">
+          <div style="font-size:11px;font-weight:700;color:#60a5fa;margin-bottom:6px">COMO COMUNICAR COM UM ANALÍTICO</div>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.7">Seja claro, conciso e concreto. Prove o contrário se discordar. Seja organizado e preciso. Use as palavras corretas. Dê tempo para pensar. Respeite o silêncio.</p>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted2)">
+          <span>🎯 <strong>Motivação:</strong> Ordem, informação, ter razão</span>
+          <span>😰 <strong>Medo:</strong> Do irracional e de errar</span>
+          <span>🗂 <strong>Necessidade:</strong> ORDEM</span>
+        </div>
+      </div>
+
+    </div>
+    <div style="margin-top:32px;text-align:center">
+      <button onclick="voltarFicha()" class="btn btn-grad btn-lg">← Voltar ao resultado do candidato</button>
+    </div>
+  </div>
+</div>
+
+<!-- PÁGINA SAIBA MAIS — QUADRANTES CEREBRAIS -->
+<div id="page-saibamaisquad" class="page hidden">
+  <div style="max-width:900px;margin:0 auto;padding:90px 28px 60px">
+    <button onclick="voltarFicha()" class="btn btn-outline btn-sm" style="margin-bottom:28px">← Voltar ao resultado</button>
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:11px;font-weight:600;color:#60a5fa;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Metodologia</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;margin-bottom:10px">Referencial — Quadrantes Cerebrais</h1>
+      <p style="font-size:15px;color:var(--muted2);max-width:560px;margin:0 auto">O ideal é o equilíbrio entre os quadrantes. Normalmente dois quadrantes são mais fortes e determinam as características marcantes.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <div style="background:rgba(74,144,217,0.08);border:1px solid rgba(74,144,217,0.3);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:14px;height:14px;border-radius:3px;background:#4a90d9;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#93c5fd">Pré-Ativo — Quadrante Esquerdo Posterior</span>
+          <span style="margin-left:auto;font-size:11px;background:rgba(74,144,217,0.15);color:#93c5fd;padding:3px 10px;border-radius:999px">Lógico · Analítico</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">Pessoas com foco na <strong style="color:var(--text)">lógica</strong>. São analíticas, racionais, inteligentes, introspectivas, ponderadas, realistas e perfeccionistas. Pensam antes de agir, só agem com certeza. Nos extremos, podem ser inseguras, indecisos — precisam de certeza para agir.</p>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted2)">🎓 <strong>Perfil profissional:</strong> Cientistas, pesquisadores, engenheiros, projetistas, matemáticos, investidores, propagandistas.</div>
+      </div>
+
+      <div style="background:rgba(220,80,80,0.08);border:1px solid rgba(220,80,80,0.3);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:14px;height:14px;border-radius:3px;background:#dc5050;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#fca5a5">Pró-Ativo — Quadrante Direito Posterior</span>
+          <span style="margin-left:auto;font-size:11px;background:rgba(220,80,80,0.15);color:#fca5a5;padding:3px 10px;border-radius:999px">Criativo · Experimental</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">Pessoas com foco no <strong style="color:var(--text)">resultado</strong>. São experimentais, desbravadoras, obstinadas, correm riscos, aventureiras, autoconfiantes, pioneiras, inovadoras, empreendedoras, objetivas, persistentes e competidoras. Nos extremos, podem ser arrogantes ou egoístas.</p>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted2)">🎓 <strong>Perfil profissional:</strong> Criação, artes, pintura, arquitetura, projetos, laboratórios, marketing, vendas — tendem a ter o próprio negócio.</div>
+      </div>
+
+      <div style="background:rgba(80,180,120,0.08);border:1px solid rgba(80,180,120,0.3);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:14px;height:14px;border-radius:3px;background:#50b478;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#86efac">Reativo — Quadrante Esquerdo Anterior</span>
+          <span style="margin-left:auto;font-size:11px;background:rgba(80,180,120,0.15);color:#86efac;padding:3px 10px;border-radius:999px">Regrado · Organizado</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">Pessoas com foco nas <strong style="color:var(--text)">regras</strong>. São organizadas e perfeccionistas dentro do preestabelecido, seguem padrões e são supereficientes. Nos extremos, podem ser acomodadas ou muito metódicas e submissas.</p>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted2)">🎓 <strong>Perfil profissional:</strong> Engenheiros, cirurgiões, financistas, líderes de processos.</div>
+      </div>
+
+      <div style="background:rgba(240,180,60,0.08);border:1px solid rgba(240,180,60,0.3);border-radius:var(--r-lg);padding:24px 28px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:14px;height:14px;border-radius:3px;background:#f0b43c;flex-shrink:0"></div>
+          <span style="font-size:16px;font-weight:700;color:#fcd34d">Relacional — Quadrante Direito Anterior</span>
+          <span style="margin-left:auto;font-size:11px;background:rgba(240,180,60,0.15);color:#fcd34d;padding:3px 10px;border-radius:999px">Relacional · Altruísta</span>
+        </div>
+        <p style="font-size:14px;color:var(--muted2);line-height:1.75">Pessoas com características voltadas para o <strong style="color:var(--text)">humano</strong>. Prezam por ambiente agradável, preocupam-se com colegas, procuram ser agradáveis e gostam de trabalhar em equipe. Nos extremos, podem ser indecisos, muito boazinhos ou cordatas.</p>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted2)">🎓 <strong>Perfil profissional:</strong> Humanas, propaganda, promoção, gerenciamento de pessoas, seleção e áreas afins.</div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px">
+        <div style="font-size:13px;font-weight:600;color:var(--muted2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Combinações importantes</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--muted2)">
+          <div>🔵🔴 <strong style="color:var(--text)">A + B (Pré-Ativo + Pró-Ativo):</strong> Pessoa realista, pé no chão.</div>
+          <div>🟢🟡 <strong style="color:var(--text)">C + D (Reativo + Relacional):</strong> Pessoa sensível e emotiva.</div>
+          <div>🔴🟢 <strong style="color:var(--text)">C + B (Reativo + Pró-Ativo):</strong> Valoriza o trabalho em equipe e é muito responsável.</div>
+          <div>🔵🟡 <strong style="color:var(--text)">D + A (Relacional + Pré-Ativo):</strong> Analítica, inovadora — visa resultados antes de tudo.</div>
+        </div>
+      </div>
     </div>
     <div style="margin-top:32px;text-align:center">
       <button onclick="voltarFicha()" class="btn btn-grad btn-lg">← Voltar ao resultado do candidato</button>
