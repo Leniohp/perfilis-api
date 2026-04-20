@@ -220,3 +220,95 @@ function calcularDISC(body) {
 }
 
 module.exports = app;
+
+// ══════════════════════════════════════
+// STRIPE — Pagamentos PIX e Cartão
+// ══════════════════════════════════════
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+// Criar pagamento (PIX ou Cartão)
+app.post('/api/pagamento', async (req, res) => {
+  const { valor, metodo, nome, email, descricao, parcelas,
+          card_numero, card_validade, card_cvv, card_nome } = req.body;
+
+  try {
+    if (metodo === 'pix') {
+      // PIX via Stripe (Payment Intent com pix)
+      const pi = await stripe.paymentIntents.create({
+        amount: Math.round(valor * 100), // centavos
+        currency: 'brl',
+        payment_method_types: ['pix'],
+        description: descricao,
+        receipt_email: email,
+        metadata: { nome, email }
+      });
+      const pix = pi.next_action?.pix_display_qr_code;
+      return res.json({
+        payment_id: pi.id,
+        client_secret: pi.client_secret,
+        pix_qr_code: pix?.image_url_png || '',
+        pix_copia_cola: pix?.data || '',
+        status: pi.status
+      });
+    }
+
+    if (metodo === 'card') {
+      // Tokenizar cartão
+      const [expMes, expAno] = (card_validade || '').split('/');
+      const pm = await stripe.paymentMethods.create({
+        type: 'card',
+        card: {
+          number: card_numero,
+          exp_month: parseInt(expMes),
+          exp_year: parseInt('20' + expAno),
+          cvc: card_cvv
+        },
+        billing_details: { name: card_nome, email }
+      });
+      const pi = await stripe.paymentIntents.create({
+        amount: Math.round(valor * 100),
+        currency: 'brl',
+        payment_method: pm.id,
+        confirm: true,
+        description: descricao,
+        receipt_email: email,
+        metadata: { nome, email },
+        return_url: 'https://perfilis.com'
+      });
+      return res.json({
+        payment_id: pi.id,
+        status: pi.status === 'succeeded' ? 'approved' : pi.status
+      });
+    }
+
+    res.status(400).json({ erro: 'Método de pagamento inválido' });
+  } catch(e) {
+    console.error('Stripe error:', e.message);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// Status do pagamento (polling PIX)
+app.get('/api/pagamento/status/:payment_id', async (req, res) => {
+  try {
+    const pi = await stripe.paymentIntents.retrieve(req.params.payment_id);
+    res.json({ status: pi.status === 'succeeded' ? 'approved' : pi.status });
+  } catch(e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+// Webhook Stripe (confirmação automática)
+app.post('/api/stripe/webhook', express.raw({type: 'application/json'}), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch(e) {
+    return res.status(400).send('Webhook Error: ' + e.message);
+  }
+  if (event.type === 'payment_intent.succeeded') {
+    console.log('Pagamento confirmado:', event.data.object.id);
+  }
+  res.json({ received: true });
+});
