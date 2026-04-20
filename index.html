@@ -1318,27 +1318,43 @@ function verCandidato(id) {
   setTimeout(()=>{
     const ctx = document.getElementById('chart-disc').getContext('2d');
     state.charts.disc = new Chart(ctx, {
-      type: 'radar',
+      type: 'bar',
       data: {
         labels: ['Executor','Comunicador','Planejador','Analítico'],
         datasets: [{
-          label: c.nome.split(' ')[0],
           data: [c.disc.D, c.disc.I, c.disc.S, c.disc.C],
-          backgroundColor: 'rgba(124,92,252,0.15)',
-          borderColor: '#7c5cfc',
-          pointBackgroundColor: '#1de9b6',
-          pointRadius: 5, borderWidth: 2
+          backgroundColor: ['#e53935','#fdd835','#388e3c','#1565c0'],
+          borderColor:      ['#e53935','#fdd835','#388e3c','#1565c0'],
+          borderWidth: 1,
+          borderRadius: 4
         }]
       },
       options: {
-        scales: { r: {
-          suggestedMin:40, suggestedMax:80,
-          ticks: { color:'#7a798a', font:{size:10}, backdropColor:'transparent' },
-          grid: { color:'rgba(255,255,255,0.06)' },
-          pointLabels: { color:'#f0eff5', font:{size:12,family:'DM Sans'} },
-          angleLines: { color:'rgba(255,255,255,0.06)' }
-        }},
-        plugins: { legend: { labels: { color:'#f0eff5', font:{size:12} } } }
+        indexAxis: 'x',
+        layout: { padding: { top: 20 } },
+        scales: {
+          x: {
+            ticks: { color:'#f0eff5', font:{size:13,weight:'600'} },
+            grid: { display:false },
+            border: { color:'rgba(255,255,255,0.1)' }
+          },
+          y: {
+            min: 40, max: 85,
+            ticks: { color:'#7a798a', font:{size:11}, stepSize:10 },
+            grid: { color:'rgba(255,255,255,0.06)' },
+            border: { color:'rgba(255,255,255,0.1)' }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          datalabels: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) { return ' ' + ctx.parsed.y + ' pts'; }
+            }
+          }
+        },
+        animation: { duration: 800, easing: 'easeOutQuart' }
       }
     });
 
@@ -1864,14 +1880,223 @@ async function verCandidatoReal(candidatoId) {
       perfilSecundario: a.perfil_secundario || ''
     };
 
-    // Encontrar compatibilidade no ranking
+    // Encontrar compatibilidade no ranking real
     const rankItem = (state.rankingReal || []).find(function(x){ return x.candidato_id === candidatoId; });
-    const idx = (state.rankingReal || []).indexOf(rankItem);
+    const compat = rankItem ? (rankItem.compatibilidade || rankItem.compat || 0) : 0;
+    const rankIdx = (state.rankingReal || []).indexOf(rankItem);
     
-    verCandidato(state.candidatoAtual.id);
+    // Renderizar ficha diretamente com dados reais
+    renderizarFichaReal(state.candidatoAtual, compat, rankIdx + 1);
   } catch(e) {
     showToast('Erro ao carregar candidato','❌');
   }
+}
+
+function renderizarFichaReal(c, compat, posicao) {
+  // Destruir charts anteriores
+  Object.values(state.charts).forEach(function(ch){ try{ch.destroy();}catch(e){} });
+  state.charts = {};
+
+  const CORES_GRAD = [
+    ['#7c5cfc','#1de9b6'],['#ff6b6b','#f59e0b'],['#1de9b6','#7c5cfc'],
+    ['#f59e0b','#ff6b6b'],['#a78bfa','#34d399'],['#fb7185','#fbbf24'],
+    ['#60a5fa','#34d399'],['#f472b6','#a78bfa'],['#4ade80','#60a5fa'],
+    ['#fcd34d','#f87171'],['#c084fc','#22d3ee'],['#fb923c','#a3e635'],
+    ['#38bdf8','#f472b6']
+  ];
+  const cor = CORES_GRAD[(posicao-1) % CORES_GRAD.length];
+  const bg = 'linear-gradient(135deg,' + cor[0] + ',' + cor[1] + ')';
+  const nome = c.nome || '';
+  const iniciais = nome.split(' ').map(function(p){return p[0]||'';}).slice(0,2).join('').toUpperCase();
+
+  // Avatar
+  const av = document.getElementById('ficha-avatar');
+  if(av){ av.style.background = bg; av.textContent = iniciais; }
+
+  // Nome e score
+  const fn = document.getElementById('ficha-nome'); if(fn) fn.textContent = nome;
+  const fs = document.getElementById('ficha-score'); if(fs) fs.textContent = compat;
+
+  // Botão contatar
+  const bc = document.getElementById('btn-contatar');
+  if(bc) bc.onclick = function(){
+    var wpp = (c.whatsapp||'').replace(/\D/g,'');
+    window.open('https://wa.me/55'+wpp+'?text=Olá '+encodeURIComponent(nome.split(' ')[0])+', vi seu perfil na Perfilis!','_blank');
+  };
+
+  // Badges
+  const badges = document.getElementById('ficha-badges');
+  if(badges) badges.innerHTML =
+    (c.perfilPrimario ? '<span class="badge badge-purple">'+c.perfilPrimario+'</span>' : '') +
+    (c.perfilSecundario ? '<span class="badge badge-teal">'+c.perfilSecundario+'</span>' : '') +
+    (c.nivel ? '<span class="badge badge-amber">Nível '+c.nivel+'</span>' : '') +
+    (c.experiencia==='Sim' ? '<span class="badge badge-teal">Com experiência</span>' : '') +
+    (posicao<=3 ? '<span class="badge badge-amber">#'+posicao+' no ranking</span>' : '');
+
+  // Contatos
+  const fc = document.getElementById('ficha-contacts');
+  if(fc) fc.innerHTML =
+    (c.whatsapp ? '<a href="tel:+55'+c.whatsapp+'" class="ficha-contact">📱 '+c.whatsapp+'</a>' : '') +
+    (c.email ? '<a href="mailto:'+c.email+'" class="ficha-contact">✉️ '+c.email+'</a>' : '') +
+    (c.dataNasc ? '<span class="ficha-contact">🗓 '+c.dataNasc+'</span>' : '') +
+    (c.linkedin ? '<a href="https://'+c.linkedin+'" class="ficha-contact" target="_blank">🔗 LinkedIn</a>' : '');
+
+  // Respostas
+  const perguntas = [
+    'O que uma empresa precisa ter para você trabalhar feliz?',
+    'O que trabalho em equipe significa para você?',
+    'Quais são seus 5 principais valores pessoais?',
+    'Por que você merece essa vaga?',
+    'Você tem experiência na área?',
+    'Qual seu nível de conhecimento?',
+    'Que feedback você costuma ouvir sobre seu trabalho?'
+  ];
+  const resps = document.getElementById('ficha-respostas');
+  if(resps){
+    const rv = c.respostas || {};
+    const vals = [rv.q1,rv.q2,rv.q3,rv.q4,rv.q5,rv.q6,rv.q7];
+    resps.innerHTML = perguntas.map(function(q,i){
+      return '<div class="qa-item"><div class="qa-question">'+q+'</div>'
+        +'<div class="qa-answer">'+(vals[i]||'—')+'</div></div>';
+    }).join('');
+  }
+
+  // Info pessoal
+  const fi = document.getElementById('ficha-info');
+  if(fi) fi.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px">'
+    +'<div><span style="font-size:12px;color:var(--muted2)">Localização</span><br><span style="font-size:14px">'+(c.endereco||'—')+'</span></div>'
+    +'<div><span style="font-size:12px;color:var(--muted2)">Data de nascimento</span><br><span style="font-size:14px">'+(c.dataNasc||'Não informada')+'</span></div>'
+    +'<div><span style="font-size:12px;color:var(--muted2)">Experiência</span><br><span style="font-size:14px">'+(c.experiencia||'—')+'</span></div>'
+    +'<div><span style="font-size:12px;color:var(--muted2)">Nível</span><br><span style="font-size:14px">'+(c.nivel||'—')+'</span></div>'
+    +'</div>';
+
+  // Perfil comportamental (barrinhas)
+  const fp = document.getElementById('ficha-perfil-card');
+  if(fp){
+    const disc = c.disc || {D:51,I:51,S:51,C:51};
+    const mapN = {D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
+    const sorted = Object.entries(disc).sort(function(a,b){return b[1]-a[1];});
+    fp.innerHTML = '<div style="font-size:14px;font-weight:600;margin-bottom:12px">Perfil Comportamental</div>'
+      + sorted.map(function(kv,i){
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+          +'<span style="font-size:12px;color:var(--muted2);min-width:90px">'+mapN[kv[0]]+'</span>'
+          +'<div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">'
+          +'<div style="height:100%;width:'+kv[1]+'%;background:'+(i===0?'var(--grad)':'var(--border-strong)')+';border-radius:4px;transition:width 1s"></div></div>'
+          +'<span style="font-size:13px;font-weight:600;min-width:24px">'+kv[1]+'</span></div>';
+      }).join('');
+  }
+
+  showPage('candidato');
+
+  // Gráficos
+  setTimeout(function(){
+    // DISC — barras coloridas
+    const ctx = document.getElementById('chart-disc');
+    if(ctx){
+      const disc = c.disc || {D:51,I:51,S:51,C:51};
+      state.charts.disc = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Executor','Comunicador','Planejador','Analítico'],
+          datasets: [{
+            data: [disc.D, disc.I, disc.S, disc.C],
+            backgroundColor: ['#e53935','#fdd835','#388e3c','#1565c0'],
+            borderColor:      ['#e53935','#fdd835','#388e3c','#1565c0'],
+            borderWidth: 1, borderRadius: 4
+          }]
+        },
+        options: {
+          layout: { padding: { top: 20 } },
+          scales: {
+            x: { ticks:{color:'#f0eff5',font:{size:13,weight:'600'}}, grid:{display:false} },
+            y: { min:40, max:85, ticks:{color:'#7a798a',font:{size:11},stepSize:10}, grid:{color:'rgba(255,255,255,0.06)'} }
+          },
+          plugins: {
+            legend: { display:false },
+            tooltip: { callbacks: { label: function(c){ return ' '+c.parsed.y+' pts'; } } }
+          },
+          animation: { duration:800, easing:'easeOutQuart' }
+        }
+      });
+    }
+
+    // Egograma
+    const ego = c.ego || {PC:10,PA:10,A:15,CL:10,CA:8};
+    const egoNomes = {PC:'Pai Crítico',PA:'Pai Amoroso',A:'Adulto',CL:'Criança Livre',CA:'Criança Adaptada'};
+    const egoCores = {PC:'#ff6b6b',PA:'#f59e0b',A:'#1de9b6',CL:'#7c5cfc',CA:'#a78bfa'};
+    const maxEgo = Math.max.apply(null, Object.values(ego)) || 1;
+    const egoBars = document.getElementById('ego-bars');
+    if(egoBars) egoBars.innerHTML = Object.entries(ego).map(function(kv){
+      return '<div class="ego-bar-row">'
+        +'<span class="ego-bar-label">'+egoNomes[kv[0]]+'</span>'
+        +'<div class="ego-bar-bg"><div class="ego-bar-fill" style="width:'+Math.round((kv[1]/maxEgo)*100)+'%;background:'+egoCores[kv[0]]+'"></div></div>'
+        +'<span class="ego-bar-val" style="color:'+egoCores[kv[0]]+'">'+kv[1]+'</span>'
+        +'</div>';
+    }).join('');
+
+    // Quadrantes
+    const quad = c.quad || {A:12,B:12,C:12,D:12};
+    const ctx2 = document.getElementById('chart-quad');
+    if(ctx2){
+      state.charts.quad = new Chart(ctx2.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Analítico','Ordenado','Relacional','Experimental'],
+          datasets: [{ data:[quad.A,quad.B,quad.C,quad.D],
+            backgroundColor:['#7c5cfc33','#1de9b633','#f59e0b33','#ff6b6b33'],
+            borderColor:['#7c5cfc','#1de9b6','#f59e0b','#ff6b6b'], borderWidth:2 }]
+        },
+        options: { cutout:'60%', plugins:{ legend:{ labels:{ color:'#f0eff5',font:{size:11} } } } }
+      });
+    }
+
+    // Virtudes
+    const virt = c.virt || {};
+    const virtEntries = Object.entries(virt).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+    const ctx3 = document.getElementById('chart-virt');
+    if(ctx3 && virtEntries.length > 0){
+      state.charts.virt = new Chart(ctx3.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: virtEntries.map(function(e){return e[0];}),
+          datasets: [{ data: virtEntries.map(function(e){return e[1];}),
+            backgroundColor:'#7c5cfc33', borderColor:'#7c5cfc', borderWidth:2, borderRadius:6 }]
+        },
+        options: {
+          indexAxis:'y',
+          scales: {
+            x:{min:0,max:10,ticks:{color:'#7a798a',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},
+            y:{ticks:{color:'#f0eff5',font:{size:10}},grid:{display:false}}
+          },
+          plugins:{ legend:{display:false} }
+        }
+      });
+    }
+
+    // Descrição DISC
+    const mapDesc = {
+      Executor:{cor:'#e53935',icone:'⚡',desc:'Dominante, direto e orientado a resultados.',fortes:['Decisão rápida','Iniciativa','Liderança'],atencao:['Pode ser impulsivo','Pouca paciência'],ideal:'Desafios e autonomia'},
+      Comunicador:{cor:'#fdd835',icone:'💬',desc:'Influente, entusiasta e social.',fortes:['Comunicação','Entusiasmo','Persuasão'],atencao:['Pode ser disperso','Busca aprovação'],ideal:'Contato com pessoas'},
+      Planejador:{cor:'#388e3c',icone:'🤝',desc:'Estável, paciente e leal.',fortes:['Trabalho em equipe','Paciência','Lealdade'],atencao:['Resistência a mudanças','Pode ser passivo'],ideal:'Ambiente estável e previsível'},
+      'Analítico':{cor:'#1565c0',icone:'🔍',desc:'Criterioso, preciso e orientado à qualidade.',fortes:['Precisão','Análise crítica','Qualidade'],atencao:['Perfeccionista','Lento para decidir'],ideal:'Dados e padrões altos'}
+    };
+    const desc_card = document.getElementById('disc-desc-card');
+    if(desc_card){
+      const perf = c.perfilPrimario || 'Analítico';
+      const d = mapDesc[perf] || mapDesc['Analítico'];
+      desc_card.innerHTML = '<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">'
+        +'<span style="font-size:40px">'+d.icone+'</span>'
+        +'<div><div style="font-size:18px;font-weight:700">'+perf+'</div>'
+        +'<div style="font-size:13px;color:var(--muted2)">'+d.desc+'</div></div></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">'
+        +'<div><div style="font-size:11px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Pontos fortes</div>'
+        +d.fortes.map(function(f){return '<div style="font-size:12px;padding:4px 10px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:inline-block;margin:2px">'+f+'</div>';}).join('')+'</div>'
+        +'<div><div style="font-size:11px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Atenção</div>'
+        +d.atencao.map(function(a){return '<div style="font-size:12px;padding:4px 10px;border-radius:6px;background:var(--surface2);border:1px solid rgba(255,107,107,0.3);display:inline-block;margin:2px">'+a+'</div>';}).join('')+'</div>'
+        +'<div><div style="font-size:11px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Ambiente ideal</div>'
+        +'<div style="font-size:13px;color:var(--muted2);line-height:1.6">'+d.ideal+'</div></div></div>';
+    }
+  }, 150);
 }
 </script>
 
