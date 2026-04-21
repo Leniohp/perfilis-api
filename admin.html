@@ -1,251 +1,1649 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head><meta charset="UTF-8"><title>Admin DISC Corrigido</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfilis — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #e8e8f0;
+      --muted: #5a5a78;
+      --green: #4ade80;
+      --yellow: #fbbf24;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ─── LOGIN SCREEN ─── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #login-screen::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+      top: -100px; left: -100px;
+      pointer-events: none;
+    }
+    #login-screen::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,101,132,0.08) 0%, transparent 70%);
+      bottom: -50px; right: -50px;
+      pointer-events: none;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 52px 48px;
+      width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 4px;
+    }
+    .login-logo span { color: var(--accent); }
+
+    .login-subtitle {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+    }
+
+    .login-field {
+      margin-bottom: 20px;
+    }
+    .login-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .login-field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-field input:focus {
+      border-color: var(--accent);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .login-btn:active { transform: translateY(0); }
+    .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .login-error {
+      background: rgba(255,101,132,0.1);
+      border: 1px solid rgba(255,101,132,0.3);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--accent2);
+      margin-top: 16px;
+      display: none;
+    }
+
+    /* ─── DASHBOARD ─── */
+    #dashboard {
+      display: none;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+    }
+    .sidebar-logo span { color: var(--accent); }
+
+    .sidebar-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+    }
+
+    .sidebar-nav { flex: 1; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.15s;
+      margin-bottom: 4px;
+    }
+    .nav-item:hover { background: var(--border); color: var(--text); }
+    .nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent); }
+
+    .nav-icon { font-size: 16px; }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      transition: all 0.15s;
+      background: none;
+      border: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      width: 100%;
+    }
+    .logout-btn:hover { color: var(--accent2); background: rgba(255,101,132,0.08); }
+
+    /* Main content */
+    .main {
+      margin-left: 240px;
+      padding: 40px 48px;
+      min-height: 100vh;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Header */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .page-title span { color: var(--accent); }
+
+    .page-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Stats cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 80px; height: 80px;
+      background: radial-gradient(circle at top right, rgba(108,99,255,0.1), transparent 70%);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -2px;
+    }
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.yellow { color: var(--yellow); }
+
+    /* Search & filter bar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px 12px 44px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-box input::placeholder { color: var(--muted); }
+    .search-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { background: rgba(108,99,255,0.15); border-color: var(--accent); color: var(--accent); }
+
+    .refresh-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .refresh-btn:hover { opacity: 0.85; }
+
+    /* Table */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: rgba(108,99,255,0.06);
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(108,99,255,0.04); }
+
+    tbody td {
+      padding: 16px 20px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .td-name { font-weight: 700; font-size: 14px; }
+    .td-email { font-family: 'DM Mono', monospace; color: var(--muted); font-size: 12px; }
+    .td-empresa { color: var(--text); }
+
+    .td-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-active { background: rgba(74,222,128,0.12); color: var(--green); }
+    .badge-pending { background: rgba(251,191,36,0.12); color: var(--yellow); }
+
+    .link-cell {
+      display: flex;
+      gap: 8px;
+    }
+
+    .link-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .link-badge.candidatos {
+      border-color: rgba(108,99,255,0.4);
+      color: var(--accent);
+      background: rgba(108,99,255,0.08);
+    }
+    .link-badge.ranking {
+      border-color: rgba(255,101,132,0.4);
+      color: var(--accent2);
+      background: rgba(255,101,132,0.08);
+    }
+    .link-badge:hover { opacity: 0.7; }
+
+    .td-candidatos {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .empty-state-desc { font-size: 13px; }
+
+    /* Loading */
+    .loading-row td {
+      text-align: center;
+      padding: 60px;
+      color: var(--muted);
+    }
+    .spinner {
+      display: inline-block;
+      width: 24px; height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal — detalhes */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 36px;
+      position: relative;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: var(--border);
+      border: none;
+      border-radius: 8px;
+      width: 32px; height: 32px;
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .modal-close:hover { background: var(--accent2); color: #fff; }
+
+    .modal-name {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    .modal-empresa {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .modal-section {
+      margin-bottom: 24px;
+    }
+    .modal-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .info-item {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .info-item label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .info-item value {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .link-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .link-row-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      min-width: 90px;
+    }
+    .link-row-label.candidatos { color: var(--accent); }
+    .link-row-label.ranking { color: var(--accent2); }
+
+    .link-url {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-btn {
+      background: var(--border);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--accent); color: #fff; }
+
+    .open-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .open-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Candidatos list in modal */
+    .candidato-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .candidato-nome { font-size: 13px; font-weight: 600; }
+    .candidato-data { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--green);
+      color: #000;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .page-btns { display: flex; gap: 8px; }
+    .page-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+    .page-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
 <body>
+
+<!-- ═══════════════════ LOGIN ═══════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Perfilis<span>.</span></div>
+    <div class="login-subtitle">Painel Administrativo</div>
+
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="admin@perfilis.com" autocomplete="username"/>
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="login-btn" id="login-btn" onclick="fazerLogin()">Entrar</button>
+    <div class="login-error" id="login-error">Email ou senha incorretos.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div id="dashboard">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">Perfilis<span>.</span></div>
+    <div class="sidebar-tag">Admin</div>
+
+    <div class="sidebar-nav">
+      <div class="nav-item active" onclick="showPage('contratantes')" id="nav-contratantes">
+        <span class="nav-icon">📋</span> Contratantes
+      </div>
+      <div class="nav-item" onclick="showPage('candidatos')" id="nav-candidatos">
+        <span class="nav-icon">👤</span> Candidatos
+      </div>
+      <div class="nav-item" onclick="showPage('links')" id="nav-links">
+        <span class="nav-icon">🔗</span> Base de Links
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="fazerLogout()">
+        <span>⎋</span> Sair
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── PÁGINA: CONTRATANTES ── -->
+    <div class="page active" id="page-contratantes">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Contratantes <span>·</span></div>
+          <div class="page-desc">Todos que se cadastraram, por ordem de data</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value accent" id="stat-total">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Hoje</div>
+          <div class="stat-value green" id="stat-hoje">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Esta semana</div>
+          <div class="stat-value yellow" id="stat-semana">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Candidatos</div>
+          <div class="stat-value" id="stat-candidatos">–</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-contratantes" placeholder="Buscar por nome, email ou empresa..." oninput="filtrarContratantes()"/>
+        </div>
+        <button class="filter-btn active" id="filter-todos" onclick="setFiltro('todos')">Todos</button>
+        <button class="filter-btn" id="filter-hoje" onclick="setFiltro('hoje')">Hoje</button>
+        <button class="filter-btn" id="filter-semana" onclick="setFiltro('semana')">7 dias</button>
+        <button class="refresh-btn" onclick="carregarContratantes()">↻ Atualizar</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome / Email</th>
+              <th>Empresa</th>
+              <th>Candidatos</th>
+              <th>Links</th>
+              <th>Data de Cadastro</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-contratantes">
+            <tr class="loading-row">
+              <td colspan="7">
+                <div class="spinner"></div><br/>Carregando...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span id="pagination-info">–</span>
+        <div class="page-btns" id="pagination-btns"></div>
+      </div>
+    </div>
+
+    <!-- ── PÁGINA: CANDIDATOS ── -->
+    <div class="page" id="page-candidatos">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Candidatos <span>·</span></div>
+          <div class="page-desc">Todos que preencheram o formulário</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-candidatos" placeholder="Buscar por nome ou email..." oninput="filtrarCandidatos()"/>
+        </div>
+        <button class="refresh-btn" onclick="carregarCandidatos()">↻ Atualizar</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Contratante</th>
+              <th>Preenchido em</th>
+              <th>Perfil</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-candidatos">
+            <tr class="loading-row">
+              <td colspan="6">
+                <div class="spinner"></div><br/>Carregando...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PÁGINA: BASE DE LINKS ── -->
+    <div class="page" id="page-links">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Base de Links <span>·</span></div>
+          <div class="page-desc">Todos os links gerados na plataforma</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-links" placeholder="Buscar por token, empresa ou nome..." oninput="filtrarLinks()"/>
+        </div>
+        <button class="refresh-btn" onclick="carregarLinks()">↻ Atualizar</button>
+      </div>
+      <div id="barra-exclusao" style="display:none;align-items:center;gap:12px;padding:10px 16px;
+        background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;margin-bottom:12px">
+        <span id="txt-selecionados" style="font-family:'DM Mono',monospace;font-size:13px;color:#ef4444">0 selecionados</span>
+        <span style="color:var(--muted);font-size:12px">— apenas links gratuitos podem ser excluídos</span>
+        <button onclick="excluirSelecionados()"
+          style="margin-left:auto;background:#ef4444;color:#fff;border:none;border-radius:8px;
+          padding:8px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer">
+          🗑 Excluir selecionados
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px"><input type="checkbox" id="check-all-links" onchange="selecionarTodos(this)" style="cursor:pointer;accent-color:var(--accent)"/></th>
+              <th>Empresa / Contratante</th>
+              <th>Link Candidatos</th>
+              <th>Link Ranking</th>
+              <th>Candidatos</th>
+              <th>Tipo</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-links">
+            <tr class="loading-row">
+              <td colspan="5">
+                <div class="spinner"></div><br/>Carregando...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════ MODAL DETALHES ═══════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="fecharModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="fecharModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
-const PERGUNTAS = [
-  {
-    "pergunta": "1. Em um restaurante. Estou esperando uma mesa e o garçom me diz que em 10 minutos terei uma mesa, porém passam 20 minutos:",
-    "alternativas": [
-      "A. Me aborreço e digo ao garçom que já se passou o dobro do tempo, e lhe informo que se demorar muito irei embora e eles perderão um cliente",
-      "B. Não me dou conta pois estou envolvido em uma conversa.",
-      "C. Não me fixo ao tempo, ainda que eu saiba do atraso, não falo nada.",
-      "D. Informo ao Garçom exatamente a hora que cheguei e exatamente o tempo que passou e peço que por favor me diga com ",
-      "exatidão quanto tempo ainda falta para que eu possa tomar uma decisão."
-    ]
-  },
-  {
-    "pergunta": "2. Tenho muita fome e pressa. O garçom me traz um prato que eu não pedi:",
-    "alternativas": [
-      "A. Digo de maneira direta que este não foi o prato que pedi.",
-      "B. Chamo o garçom e converso com ele explicando que este não era o prato que eu havia pedido.",
-      "C. Fico calado e aceito o prato que me trouxeram.",
-      "D. Me incomodo e pergunto ao garçom de uma forma aborrecida se ele estava prestando atenção quando fiz meu pedido?"
-    ]
-  },
-  {
-    "pergunta": "3. Em uma reunião de amigos:",
-    "alternativas": [
-      "A. Eu gosto de convencer aos demais de minhas opiniões e gosto de falar sobre temas relacionados com meu trabalho.",
-      "B. Escuto as pessoas. As pessoas me procuram pois sou um excelente ouvinte. Escuto as pessoas com atenção.",
-      "C. Falo muito e conto bastante piadas. Geralmente falo mais do que escuto.",
-      "D. Observo e analiso as pessoas, porém dou minha opinião. Todavia só dou minha opinião quando conheço o tema e quando o faço sou preciso."
-    ]
-  },
-  {
-    "pergunta": "4. Meus companheiros de trabalho me descrevem como alguém:",
-    "alternativas": [
-      "A. Tranquilo, Paciente, Amável.",
-      "B. Social, Alegre, Gosta de Conversar.",
-      "C. Enérgico, Forte, Agressivo.",
-      "D. Concreto, Disciplinado, Metódico."
-    ]
-  },
-  {
-    "pergunta": "5. Em uma discussão:",
-    "alternativas": [
-      "A. Trato de dizer que não é para tanto, pois discutir me aborrece.",
-      "B. Busco ter a razão e não paro até que consiga. Gosto de discutir.",
-      "C. Odeio agressões, concordo com o que esta sendo dito para não precisar argumentar.",
-      "D. Me baseio nos fatos e busco comprovar meu ponto de vista de uma forma fundamentada e também espero que os demais hajam assim."
-    ]
-  },
-  {
-    "pergunta": "6. O que realmente me emociona na vida:",
-    "alternativas": [
-      "A. Os desafios, As novidades, Arriscar.",
-      "B. As surpresas, A diversão, O jogo.",
-      "C. A doçura, O carinho, Aceitação",
-      "D. Aprender, Sabedoria, Conhecimento"
-    ]
-  },
-  {
-    "pergunta": "7. Se alguém me agride:",
-    "alternativas": [
-      "A. Fico calado e não demonstro o que sinto.",
-      "B. Escapo da situação ou pergunto a outra pessoa se ela é louca.",
-      "C. Devolvo a agressão pois necessito demonstrar minha insatisfação de imediato. Da mesma forma que me incomodo rapidamente me tranquilizo.",
-      "D. Me angustio, me privo e me resguardo, porém tento descobrir por que isso aconteceu. Demora algum tempo para que passe minha insatisfação ",
-      "com o acontecido."
-    ]
-  },
-  {
-    "pergunta": "8. Quando vou as compras",
-    "alternativas": [
-      "A. Busco ofertas, os descontos me fascinam.",
-      "B. Me divirto indo as compras. Gosto de comprar presentes, dizem que sou um comprador compulsivo.",
-      "C. Sei o que quero e não gasto meu dinheiro se não encontro. Sou muito definido.",
-      "D. Sou indeciso, me dá muito trabalho decidir e escolher."
-    ]
-  },
-  {
-    "pergunta": "9. Que frase te descreve melhor:",
-    "alternativas": [
-      "A. Sou tranquilo e passivo, gosto das pessoas que são fáceis de conviver e que não me agridam. As pessoas me perguntam se nunca me aborreço.",
-      "B. Sou alegre e jovial. Se vejo alguém triste procuro levar alegria a está pessoa. As pessoas me perguntam se nunca me deprimo.",
-      "C. Sou ativo e enérgico, gosto de fazer várias coisas ao mesmo tempo, as pessoas perguntam se não me canso.",
-      "D. Sou analítico e observador, gosto de resolver problemas que me exijam pensar e de encontrar soluções. As pessoas me dizem que ",
-      "sou muito responsável e apreensivo."
-    ]
-  },
-  {
-    "pergunta": "10. Quando estou trabalhando em equipe sou:",
-    "alternativas": [
-      "A. O que organiza a parte estratégica com finalidade de conseguir uma maior probabilidade de êxito.",
-      "B. O que anima o ambiente fazendo com que todos tenham vontade.",
-      "C. O que manda e organiza.",
-      "D. O que apóia com propósito de se ter uma equipe unida."
-    ]
-  },
-  {
-    "pergunta": "11. Meus irmãos e as pessoas que me rodeiam , dizem que meus piores defeitos são:",
-    "alternativas": [
-      "A. Ser teimoso e quadrado",
-      "B. Ser agressivo e temperamental.",
-      "C. Ser submisso e lento.",
-      "D. Ser distraído e desorganizado."
-    ]
-  },
-  {
-    "pergunta": "12. Alguma de minhas qualidades são:",
-    "alternativas": [
-      "A. Ser Determinado e seguro.",
-      "B. Ser Adaptado e pacífico.",
-      "C. Ser Otimista e alegre.",
-      "D. Ser Cumpridor e estável"
-    ]
-  },
-  {
-    "pergunta": "13. Estou caminhando e esbarro com algum desconhecido:",
-    "alternativas": [
-      "A. Dou um passo ao lado e sem falar sigo meu caminho.",
-      "B. Dou um sorriso e sigo em frente.",
-      "C. Espero que a pessoa saia do meu caminho para poder seguir adiante.",
-      "D. Peço que me desculpe e sigo em frente."
-    ]
-  },
-  {
-    "pergunta": "14. No trabalho me sobressaio em:",
-    "alternativas": [
-      "A. Na tomada de decisões rapidamente.",
-      "B. Nas relações públicas",
-      "C. Na capacidade de me adaptar a equipes",
-      "D. Na segurança de ter qualidade e pontualidade."
-    ]
-  },
-  {
-    "pergunta": "15. Meus defeitos no trabalho são:",
-    "alternativas": [
-      "A. Não gosto de delegar, prefiro trabalhar sozinho.",
-      "B. Não gosto que me digam o que fazer.",
-      "C. Trabalho mais sobre baixa pressão.",
-      "D. Desordenado e esquecido e as vezes impontual."
-    ]
-  },
-  {
-    "pergunta": "16. Minha mãe diz que quando criança eu era:",
-    "alternativas": [
-      "A. Obediente e tranquilo.",
-      "B. Mandão e exigente.",
-      "C. Alegre e conversava com todo mundo.",
-      "D. Bem arrumado e eu não gostava de me sujar."
-    ]
-  },
-  {
-    "pergunta": "17. Ao me expressar:",
-    "alternativas": [
-      "A. Falo as coisas de maneira diplomática.",
-      "B. Quase não expresso o que sinto.",
-      "C. Falo de maneira indireta para não magoar.",
-      "D. Falo as coisas como são."
-    ]
-  },
-  {
-    "pergunta": "18. A emoção que demonstro com mais frequência é:",
-    "alternativas": [
-      "A. Medo.",
-      "B. Otimismo",
-      "C. Não demonstro emoção.",
-      "D. Irritação."
-    ]
-  },
-  {
-    "pergunta": "19. Os professores me reconheciam por que:",
-    "alternativas": [
-      "A. Discutia muito e gostava de demonstrar tudo que eu sabia.",
-      "B. Bom estudante e bastante analítico.",
-      "C. Não interrompia e ficava calado.",
-      "D. Era muito amigável e gostava de conversar."
-    ]
-  },
-  {
-    "pergunta": "20. Características que mais te descrevem:",
-    "alternativas": [
-      "A. Auto-suficiente e ambicioso.",
-      "B. Preciso e exato.",
-      "C. Cooperativo e adaptável.",
-      "D. Despreocupado e popular."
-    ]
-  },
-  {
-    "pergunta": "21. Características que mais te descrevem:",
-    "alternativas": [
-      "A. Reservado e educado.",
-      "B. Amigo e conversador.",
-      "C. Tolerante e flexível.",
-      "D. Valente e ousado."
-    ]
-  },
-  {
-    "pergunta": "22. Características que mais te descrevem:",
-    "alternativas": [
-      "A. Obstinado, determinação para me defender.",
-      "B. Confiante, acredito nas pessoas.",
-      "C. Prudente, gosto de refletir bem sobre as coisas.",
-      "D. Pronto a servir, gosto de ajudar aos demais."
-    ]
-  },
-  {
-    "pergunta": "23. Características que mais te descrevem:",
-    "alternativas": [
-      "A. Brincalhão, chama a atenção das pessoas.",
-      "B. Empreendedor, força de vontade.",
-      "C. Generoso, se adapta aos demais.",
-      "D. Cuidadoso, cautela ao tomar decisões."
-    ]
-  },
-  {
-    "pergunta": "24. Características que mais te descrevem:",
-    "alternativas": [
-      "A. Calmo, faz o que te pedem.",
-      "B. Envolvente, motiva aos demais.",
-      "C. Atrevido, crê em si próprio.",
-      "D. Disciplinado, organizado e limpo."
-    ]
-  },
-  {
-    "pergunta": "25. Características que mais te descrevem:",
-    "alternativas": [
-      "A. Culto, busca ter conhecimento.",
-      "B. Animado, alma da festa.",
-      "C. Harmonioso, aberto a sugestões.",
-      "D. Confrontante, gosta de argumentar."
-    ]
-  },
-  {
-    "pergunta": "26. Características que mais te descrevem:",
-    "alternativas": [
-      "A. Humilde, compassivo (condolente) com as pessoas.",
-      "B. Carismático, atrai as pessoas, desinibido.",
-      "C. Tem atitude, persuasivo, convincente.",
-      "D. Sistemático, cético, precavido.",
-      "Dominante",
-      "=C173",
-      "=B10+B20+B23+B31+B36+B41+B49+B54+B62+B69+B74+B79+B87+B91+B98+B104+B112+B118+B121+B127+B136+B139+B146+B153+B160+B165"
-    ]
+  // ═══ CONFIG ═══
+  const API_BASE  = 'https://project-dcveo.vercel.app/api';
+  const ADMIN_BASE = 'https://project-dcveo.vercel.app/admin';
+  const SITE_BASE = 'https://www.perfilis.com';
+
+  let token = null;
+  let contratantesData = [];
+  let candidatosData = [];
+  let filtroAtivo = 'todos';
+  let paginaAtual = 1;
+  const POR_PAGINA = 20;
+
+  // ═══ LOGIN ═══
+  document.getElementById('login-senha').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fazerLogin();
+  });
+
+  async function fazerLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    const btn = document.getElementById('login-btn');
+    const err = document.getElementById('login-error');
+
+    if (!email || !senha) { err.style.display='block'; err.textContent='Preencha email e senha.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+    err.style.display = 'none';
+
+    try {
+      const res = await fetch(`${ADMIN_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        token = data.token;
+        sessionStorage.setItem('admin_token', token);
+        mostrarDashboard();
+      } else {
+        err.style.display = 'block';
+        err.textContent = data.erro || 'Email ou senha incorretos.';
+      }
+    } catch (e) {
+      err.style.display = 'block';
+      err.textContent = 'Erro de conexão com o servidor.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
   }
-];
-console.log(PERGUNTAS);
+
+  function fazerLogout() {
+    token = null;
+    sessionStorage.removeItem('admin_token');
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // Auto-login se token salvo
+  window.addEventListener('load', () => {
+    const saved = sessionStorage.getItem('admin_token');
+    if (saved) { token = saved; mostrarDashboard(); }
+  });
+
+  function mostrarDashboard() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    carregarContratantes();
+    carregarCandidatos();
+    carregarLinks();
+  }
+
+  // ═══ NAVEGAÇÃO ═══
+  function showPage(nome) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + nome).classList.add('active');
+    document.getElementById('nav-' + nome).classList.add('active');
+  }
+
+  // ═══ HEADERS AUTH ═══
+  function authHeaders() {
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  }
+
+  // ═══ CARREGAR CONTRATANTES ═══
+  async function carregarContratantes() {
+    document.getElementById('tabela-contratantes').innerHTML =
+      `<tr class="loading-row"><td colspan="7"><div class="spinner"></div><br/>Carregando...</td></tr>`;
+
+    try {
+      const res = await fetch(`${ADMIN_BASE}/contratantes`, { headers: authHeaders() });
+      if (res.status === 401) { fazerLogout(); return; }
+      const data = await res.json();
+      contratantesData = data.contratantes || [];
+      atualizarStats(contratantesData);
+      renderizarContratantes();
+    } catch (e) {
+      document.getElementById('tabela-contratantes').innerHTML =
+        `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--accent2)">Erro ao carregar dados.</td></tr>`;
+    }
+  }
+
+  function atualizarStats(lista) {
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const semana = new Date(hoje); semana.setDate(semana.getDate() - 7);
+
+    document.getElementById('stat-total').textContent = lista.length;
+    document.getElementById('stat-hoje').textContent = lista.filter(c => new Date(c.criado_em) >= hoje).length;
+    document.getElementById('stat-semana').textContent = lista.filter(c => new Date(c.criado_em) >= semana).length;
+    const totalCand = lista.reduce((sum, c) => sum + (c.total_candidatos || 0), 0);
+    document.getElementById('stat-candidatos').textContent = totalCand;
+  }
+
+  function filtrarContratantes() {
+    paginaAtual = 1;
+    renderizarContratantes();
+  }
+
+  function setFiltro(f) {
+    filtroAtivo = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('filter-' + f).classList.add('active');
+    paginaAtual = 1;
+    renderizarContratantes();
+  }
+
+  function renderizarContratantes() {
+    const busca = document.getElementById('search-contratantes').value.toLowerCase();
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const semana = new Date(hoje); semana.setDate(semana.getDate() - 7);
+
+    let lista = contratantesData.filter(c => {
+      const texto = `${c.nome} ${c.email} ${c.empresa || ''}`.toLowerCase();
+      if (busca && !texto.includes(busca)) return false;
+      if (filtroAtivo === 'hoje') return new Date(c.criado_em) >= hoje;
+      if (filtroAtivo === 'semana') return new Date(c.criado_em) >= semana;
+      return true;
+    });
+
+    // Ordenar por data desc
+    lista.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+
+    const total = lista.length;
+    const totalPags = Math.ceil(total / POR_PAGINA);
+    const inicio = (paginaAtual - 1) * POR_PAGINA;
+    const pagina = lista.slice(inicio, inicio + POR_PAGINA);
+
+    document.getElementById('pagination-info').textContent =
+      `${total === 0 ? 0 : inicio + 1}–${Math.min(inicio + POR_PAGINA, total)} de ${total}`;
+
+    // Paginação
+    const pBtns = document.getElementById('pagination-btns');
+    pBtns.innerHTML = '';
+    const prev = document.createElement('button');
+    prev.className = 'page-btn'; prev.textContent = '← Ant';
+    prev.disabled = paginaAtual <= 1;
+    prev.onclick = () => { paginaAtual--; renderizarContratantes(); };
+    pBtns.appendChild(prev);
+    for (let i = 1; i <= Math.min(totalPags, 5); i++) {
+      const btn = document.createElement('button');
+      btn.className = 'page-btn' + (i === paginaAtual ? ' active' : '');
+      btn.textContent = i;
+      btn.onclick = ((pg) => () => { paginaAtual = pg; renderizarContratantes(); })(i);
+      pBtns.appendChild(btn);
+    }
+    const next = document.createElement('button');
+    next.className = 'page-btn'; next.textContent = 'Próx →';
+    next.disabled = paginaAtual >= totalPags;
+    next.onclick = () => { paginaAtual++; renderizarContratantes(); };
+    pBtns.appendChild(next);
+
+    const tbody = document.getElementById('tabela-contratantes');
+    if (pagina.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <div class="empty-state-title">Nenhum resultado</div>
+        <div class="empty-state-desc">Tente outro termo de busca</div>
+      </div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = pagina.map((c, i) => `
+      <tr onclick="abrirDetalhes('${c.id}')">
+        <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px">${inicio + i + 1}</td>
+        <td>
+          <div class="td-name">${esc(c.nome)}</div>
+          <div class="td-email">${esc(c.email)}</div>
+        </td>
+        <td class="td-empresa">${esc(c.empresa || '–')}</td>
+        <td class="td-candidatos">${c.total_candidatos || 0}</td>
+        <td>
+          <div class="link-cell">
+            ${c.token_formulario ? `<a class="link-badge candidatos" href="${SITE_BASE}/f/${c.token_formulario}" target="_blank" onclick="e=>e.stopPropagation()">F/</a>` : '–'}
+            ${c.token_ranking ? `<a class="link-badge ranking" href="${SITE_BASE}/r/${c.token_ranking}" target="_blank" onclick="e=>e.stopPropagation()">R/</a>` : ''}
+          </div>
+        </td>
+        <td class="td-date">${formatarData(c.criado_em)}</td>
+        <td>
+          <span class="badge ${c.ativo ? 'badge-active' : 'badge-pending'}">
+            ${c.ativo ? '● Ativo' : '○ Pendente'}
+          </span>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ═══ CARREGAR CANDIDATOS ═══
+  async function carregarCandidatos() {
+    document.getElementById('tabela-candidatos').innerHTML =
+      `<tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Carregando...</td></tr>`;
+
+    try {
+      const res = await fetch(`${ADMIN_BASE}/candidatos`, { headers: authHeaders() });
+      if (res.status === 401) { fazerLogout(); return; }
+      const data = await res.json();
+      candidatosData = data.candidatos || [];
+      renderizarCandidatos();
+    } catch (e) {
+      document.getElementById('tabela-candidatos').innerHTML =
+        `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--accent2)">Erro ao carregar dados.</td></tr>`;
+    }
+  }
+
+  function filtrarCandidatos() { renderizarCandidatos(); }
+
+  function renderizarCandidatos() {
+    const busca = document.getElementById('search-candidatos').value.toLowerCase();
+    let lista = candidatosData.filter(c => {
+      const texto = `${c.nome} ${c.email || ''}`.toLowerCase();
+      return !busca || texto.includes(busca);
+    });
+    lista.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+
+    const tbody = document.getElementById('tabela-candidatos');
+    if (lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+        <div class="empty-state-icon">👤</div>
+        <div class="empty-state-title">Nenhum candidato ainda</div>
+      </div></td></tr>`;
+      return;
+    }
+
+    // perfil dominante DISC
+    const discLabel = { D: 'Dominância', I: 'Influência', S: 'Estabilidade', C: 'Conformidade' };
+
+    tbody.innerHTML = lista.map((c, i) => `
+      <tr onclick="abrirCandidato('${c.id}')" style="cursor:pointer">
+        <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px">${i+1}</td>
+        <td class="td-name" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px">${esc(c.nome)}</td>
+        <td class="td-email">${esc(c.email || '–')}</td>
+        <td style="font-size:13px">${esc(c.contratante_nome || '–')}</td>
+        <td class="td-date">${formatarData(c.criado_em)}</td>
+        <td>
+          ${badgePerfil(c.perfil_disc)}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ═══ CARREGAR LINKS ═══
+  async function carregarLinks() {
+    document.getElementById('tabela-links').innerHTML =
+      `<tr class="loading-row"><td colspan="5"><div class="spinner"></div><br/>Carregando...</td></tr>`;
+
+    try {
+      const res = await fetch(`${ADMIN_BASE}/links`, { headers: authHeaders() });
+      if (res.status === 401) { fazerLogout(); return; }
+      const data = await res.json();
+      renderizarLinks(data.links || []);
+    } catch (e) {
+      document.getElementById('tabela-links').innerHTML =
+        `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--accent2)">Erro ao carregar dados.</td></tr>`;
+    }
+  }
+
+  function filtrarLinks() {
+    const busca = document.getElementById('search-links').value.toLowerCase();
+    // re-render com filtro
+    carregarLinksComFiltro(busca);
+  }
+
+  async function carregarLinksComFiltro(busca) {
+    const res = await fetch(`${ADMIN_BASE}/links`, { headers: authHeaders() });
+    const data = await res.json();
+    const lista = (data.links || []).filter(l => {
+      const t = `${l.empresa} ${l.nome} ${l.token_formulario} ${l.token_ranking}`.toLowerCase();
+      return !busca || t.includes(busca);
+    });
+    renderizarLinks(lista);
+  }
+
+  function renderizarLinks(lista) {
+    lista.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+    const tbody = document.getElementById('tabela-links');
+
+    if (lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">
+        <div class="empty-state-icon">🔗</div>
+        <div class="empty-state-title">Nenhum link ainda</div>
+      </div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = lista.map(l => {
+      const gratis = !l.pago && (l.quantidade <= 10);
+      const usados = l.usados || 0;
+      const tipoBadge = gratis
+        ? `<span style="font-size:11px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3)">Gratuito</span>`
+        : `<span style="font-size:11px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:rgba(108,99,255,0.12);color:#a89bff;border:1px solid rgba(108,99,255,0.3)">Pago</span>`;
+      return `
+      <tr id="row-${l.id}">
+        <td>
+          ${gratis
+            ? `<input type="checkbox" class="link-check" data-id="${l.id}" onchange="atualizarSelecao()"
+                style="cursor:pointer;accent-color:#ef4444">`
+            : `<span title="Links pagos não podem ser excluídos" style="color:var(--muted);font-size:16px;cursor:not-allowed">🔒</span>`
+          }
+        </td>
+        <td>
+          <div class="td-name">${esc(l.empresa || l.nome)}</div>
+          <div class="td-email">${esc(l.nome)}</div>
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)">/f/${esc(l.token_formulario)}</span>
+            <button class="copy-btn" onclick="copiar('${SITE_BASE}/f/${l.token_formulario}')">Copiar</button>
+            <a class="open-btn" href="${SITE_BASE}/f/${l.token_formulario}" target="_blank">↗</a>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            ${l.token_ranking
+              ? `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2)">/r/${esc(l.token_ranking)}</span>
+                 <button class="copy-btn" onclick="copiar('${SITE_BASE}/r/${l.token_ranking}')">Copiar</button>
+                 <a class="open-btn" href="${SITE_BASE}/r/${l.token_ranking}" target="_blank">↗</a>`
+              : '<span style="color:var(--muted);font-size:12px">–</span>'
+            }
+          </div>
+        </td>
+        <td class="td-candidatos">
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:${usados>0?'var(--text)':'var(--muted)'}">${usados}</span>
+          <span style="color:var(--muted);font-size:11px"> / ${l.quantidade || '–'}</span>
+        </td>
+        <td>${tipoBadge}</td>
+        <td class="td-date">${formatarData(l.criado_em)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ═══ MODAL DETALHES ═══
+  async function abrirDetalhes(id) {
+    document.getElementById('modal-overlay').classList.add('open');
+    document.getElementById('modal-content').innerHTML =
+      `<div style="text-align:center;padding:40px"><div class="spinner"></div><br/>Carregando...</div>`;
+
+    try {
+      const res = await fetch(`${ADMIN_BASE}/contratante/${id}`, { headers: authHeaders() });
+      const c = await res.json();
+
+      const candidatosHtml = (c.candidatos || []).length > 0
+        ? (c.candidatos || []).map(cd => `
+            <div class="candidato-item">
+              <div>
+                <div class="candidato-nome">${esc(cd.nome)}</div>
+                <div class="candidato-data">${esc(cd.email || '')}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                ${cd.perfil_disc ? badgePerfil(cd.perfil_disc) : ''}
+                <span class="candidato-data">${formatarData(cd.criado_em)}</span>
+              </div>
+            </div>
+          `).join('')
+        : `<div style="color:var(--muted);font-size:13px;padding:16px 0">Nenhum candidato preencheu ainda.</div>`;
+
+      document.getElementById('modal-content').innerHTML = `
+        <div class="modal-name">${esc(c.nome)}</div>
+        <div class="modal-empresa">${esc(c.empresa || 'Sem empresa')}</div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">Informações</div>
+          <div class="info-grid">
+            <div class="info-item"><label>Email</label><value>${esc(c.email)}</value></div>
+            <div class="info-item"><label>Cadastro</label><value>${formatarData(c.criado_em)}</value></div>
+            <div class="info-item"><label>Candidatos</label><value>${c.total_candidatos || 0}</value></div>
+            <div class="info-item"><label>Status</label><value>${c.ativo ? 'Ativo' : 'Pendente'}</value></div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">Links Gerados</div>
+          <div class="link-row">
+            <span class="link-row-label candidatos">Candidatos</span>
+            <span class="link-url">${SITE_BASE}/f/${c.token_formulario}</span>
+            <button class="copy-btn" onclick="copiar('${SITE_BASE}/f/${c.token_formulario}')">Copiar</button>
+            <a class="open-btn" href="${SITE_BASE}/f/${c.token_formulario}" target="_blank">Abrir ↗</a>
+          </div>
+          <div class="link-row">
+            <span class="link-row-label ranking">Ranking</span>
+            <span class="link-url">${SITE_BASE}/r/${c.token_ranking}</span>
+            <button class="copy-btn" onclick="copiar('${SITE_BASE}/r/${c.token_ranking}')">Copiar</button>
+            <a class="open-btn" href="${SITE_BASE}/r/${c.token_ranking}" target="_blank">Abrir ↗</a>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">Candidatos (${(c.candidatos || []).length})</div>
+          ${candidatosHtml}
+        </div>
+      `;
+    } catch (e) {
+      document.getElementById('modal-content').innerHTML =
+        `<div style="color:var(--accent2);text-align:center;padding:40px">Erro ao carregar detalhes.</div>`;
+    }
+  }
+
+  function corPerfil(perfil) {
+    const map = {
+      'Executor':    { bg: 'rgba(239,68,68,0.15)',  color: '#ef4444', border: 'rgba(239,68,68,0.35)'  },
+      'Comunicador': { bg: 'rgba(251,191,36,0.15)', color: '#f59e0b', border: 'rgba(251,191,36,0.35)' },
+      'Planejador':  { bg: 'rgba(34,197,94,0.15)',  color: '#22c55e', border: 'rgba(34,197,94,0.35)'  },
+      'Analítico':   { bg: 'rgba(108,99,255,0.15)', color: '#6c63ff', border: 'rgba(108,99,255,0.35)' },
+    };
+    return map[perfil] || { bg: 'rgba(74,222,128,0.12)', color: '#4ade80', border: 'rgba(74,222,128,0.3)' };
+  }
+
+  function badgePerfil(perfil, extra) {
+    if (!perfil) return '<span style="color:var(--muted);font-size:12px">–</span>';
+    const c = corPerfil(perfil);
+    return `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-family:'DM Mono',monospace;background:${c.bg};color:${c.color};border:1px solid ${c.border};${extra||''}">${perfil}</span>`;
+  }
+
+  // ═══ SELEÇÃO E EXCLUSÃO DE LINKS ═══
+  function selecionarTodos(cb) {
+    document.querySelectorAll('.link-check').forEach(c => c.checked = cb.checked);
+    atualizarSelecao();
+  }
+
+  function atualizarSelecao() {
+    const selecionados = document.querySelectorAll('.link-check:checked');
+    const barra = document.getElementById('barra-exclusao');
+    const txt = document.getElementById('txt-selecionados');
+    if (selecionados.length > 0) {
+      barra.style.display = 'flex';
+      txt.textContent = `${selecionados.length} selecionado${selecionados.length>1?'s':''}`;
+    } else {
+      barra.style.display = 'none';
+    }
+  }
+
+  async function excluirSelecionados() {
+    const checks = document.querySelectorAll('.link-check:checked');
+    if (checks.length === 0) return;
+    if (!confirm(`Confirma a exclusão de ${checks.length} link(s) gratuito(s)? Esta ação não pode ser desfeita.`)) return;
+
+    const ids = Array.from(checks).map(c => c.dataset.id);
+    let erros = 0;
+
+    for (const id of ids) {
+      try {
+        const res = await fetch(`${ADMIN_BASE}/link/${id}`, {
+          method: 'DELETE',
+          headers: authHeaders()
+        });
+        if (res.ok) {
+          document.getElementById('row-' + id)?.remove();
+        } else {
+          erros++;
+        }
+      } catch(e) { erros++; }
+    }
+
+    document.getElementById('barra-exclusao').style.display = 'none';
+    document.getElementById('check-all-links').checked = false;
+    if (erros > 0) mostrarToast(`${erros} link(s) não puderam ser excluídos`);
+    else mostrarToast(`${ids.length} link(s) excluído(s) com sucesso!`);
+    carregarLinks();
+  }
+
+  function fecharModal(e) {
+    if (!e || e.target === document.getElementById('modal-overlay')) {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+  }
+
+  // ═══ MODAL CANDIDATO ═══
+  async function abrirCandidato(id) {
+    document.getElementById('modal-overlay').classList.add('open');
+    document.getElementById('modal-content').innerHTML =
+      `<div style="text-align:center;padding:40px"><div class="spinner"></div><br/>Carregando...</div>`;
+
+    try {
+      const res = await fetch(`${API_BASE}/candidato/${id}`, { headers: authHeaders() });
+      const c = await res.json();
+      const a = c.analises?.[0] || {};
+
+      const discData = [
+        { label: 'Executor (D)',    value: a.disc_executor    || 0, color: '#ef4444' },
+        { label: 'Comunicador (I)', value: a.disc_comunicador || 0, color: '#f59e0b' },
+        { label: 'Planejador (S)',  value: a.disc_planejador  || 0, color: '#22c55e' },
+        { label: 'Analítico (C)',   value: a.disc_analitico   || 0, color: '#6c63ff' },
+      ];
+      const maxVal = Math.max(...discData.map(d => d.value), 1);
+
+      const discBars = discData.map(d => `
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:13px;color:var(--text)">${d.label}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">${d.value}</span>
+          </div>
+          <div style="height:10px;background:var(--border);border-radius:6px;overflow:hidden">
+            <div style="height:100%;width:${Math.round((d.value/maxVal)*100)}%;background:${d.color};border-radius:6px;transition:width 0.6s ease"></div>
+          </div>
+        </div>`).join('');
+
+      // Campos de respostas abertas
+      const respostas = [
+        ['Vaga de interesse',       c.resp_vaga],
+        ['Empresa ideal',           c.resp_empresa],
+        ['Valores que busca',       c.resp_valores],
+        ['Gestão de equipe',        c.resp_equipe],
+        ['Feedback que dá',         c.resp_feedback],
+        ['Experiência profissional',c.experiencia],
+        ['Nível',                   c.nivel],
+        ['Endereço',                c.endereco],
+        ['LinkedIn',                c.linkedin],
+      ].filter(([, v]) => v && v !== '0');
+
+      const respostasHtml = respostas.length > 0
+        ? respostas.map(([k, v]) => `
+            <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${k}</div>
+              <div style="font-size:14px;color:var(--text)">${esc(v)}</div>
+            </div>`).join('')
+        : `<div style="color:var(--muted);font-size:13px;padding:12px 0">Sem respostas detalhadas registradas.</div>`;
+
+      document.getElementById('modal-content').innerHTML = `
+        <div class="modal-name">${esc(c.nome)}</div>
+        <div class="modal-empresa">${esc(c.email || '')}</div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">Resultado DISC</div>
+          <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+            ${a.perfil_primario ? badgePerfil(a.perfil_primario, 'font-size:13px;padding:5px 14px') : ''}
+            ${a.perfil_secundario ? badgePerfil(a.perfil_secundario, 'font-size:12px;padding:4px 12px;opacity:.75') : ''}
+          </div>
+          ${discBars}
+        </div>
+
+        <div class="modal-section" id="sec-respostas" style="display:none">
+          <div class="modal-section-title">Respostas Detalhadas</div>
+          ${respostasHtml}
+        </div>
+
+        <div class="modal-section" id="sec-questionario" style="display:none">
+          <div class="modal-section-title">Questionário DISC completo</div>
+          <div id="disc-questoes-html"></div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px;flex-wrap:wrap">
+          <button onclick="toggleQuestionario()" id="btn-ver-questionario"
+            style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px 24px;font-size:14px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:opacity .2s"
+            onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">
+            Ver questionário ↓
+          </button>
+          <button onclick="toggleRespostas()" id="btn-ver-detalhes"
+            style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:14px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:opacity .2s"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            Ver detalhes ↓
+          </button>
+        </div>
+      `;
+      // Render questionário after a tick
+      setTimeout(() => renderQuestionario(c), 50);
+    } catch (e) {
+      document.getElementById('modal-content').innerHTML =
+        `<div style="color:var(--accent2);text-align:center;padding:40px">Erro ao carregar candidato.</div>`;
+    }
+  }
+
+  function toggleRespostas() {
+    const sec = document.getElementById('sec-respostas');
+    const btn = document.getElementById('btn-ver-detalhes');
+    if (sec.style.display === 'none') {
+      sec.style.display = 'block';
+      btn.textContent = 'Ocultar detalhes ↑';
+    } else {
+      sec.style.display = 'none';
+      btn.textContent = 'Ver detalhes ↓';
+    }
+  }
+
+  const DISC_QUESTOES = [
+    ['Ao lidar com problemas no trabalho, você tende a ser...','Direto e decisivo','Entusiasmado e criativo','Paciente e metódico','Cuidadoso e analítico'],
+    ['Em relação a prazos e metas, você...','Foca em resultados rápidos','Motiva os outros a alcançá-los','Trabalha de forma consistente','Planeja cada etapa com precisão'],
+    ['Quando precisa convencer alguém, você...','Usa argumentos diretos e assertivos','Apela às emoções e ao entusiasmo','Busca consenso e harmonia','Apresenta dados e fatos detalhados'],
+    ['Em situações de pressão, você tende a...','Agir rapidamente e tomar controle','Manter o otimismo e energizar o grupo','Manter a calma e seguir o plano','Analisar antes de agir'],
+    ['Ao trabalhar em equipe, você prefere...','Liderar e definir direção','Inspirar e engajar os membros','Apoiar e manter a estabilidade','Organizar e verificar detalhes'],
+    ['Diante de mudanças, você...','Abraça como oportunidade de liderar','Vê como algo empolgante','Prefere transições graduais','Avalia riscos antes de aceitar'],
+    ['Sua maior força no trabalho é...','Capacidade de decisão','Habilidade de comunicação','Consistência e confiabilidade','Precisão e qualidade'],
+    ['Quando comete um erro, você...','Assume e busca solução imediata','Tende a minimizar e seguir em frente','Reflete e evita repetir','Analisa a causa raiz detalhadamente'],
+    ['Em reuniões, você costuma...','Ir direto ao ponto e propor ações','Compartilhar ideias e animar o grupo','Ouvir e contribuir quando necessário','Apresentar análises e dados precisos'],
+    ['Sua abordagem com regras e procedimentos é...','Segue se fizer sentido estratégico','Flexibiliza quando necessário','Segue consistentemente','Segue rigorosamente'],
+    ['O que mais te motiva no trabalho é...','Desafios e resultados concretos','Reconhecimento e interação social','Estabilidade e ambiente harmonioso','Excelência e qualidade do trabalho'],
+    ['Ao aprender algo novo, você prefere...','Testar na prática imediatamente','Aprender interativamente em grupo','Seguir um ritmo e método definido','Estudar a fundo antes de aplicar'],
+    ['Sua comunicação é geralmente...','Direta e objetiva','Expressiva e persuasiva','Calma e diplomática','Precisa e detalhada'],
+    ['Em relação a riscos, você tende a...','Assumir riscos calculados','Assumir riscos com otimismo','Evitar riscos desnecessários','Minimizar riscos com análise'],
+    ['Ao receber críticas, você...','Ouve mas mantém seu ponto se acreditar','Tende a rebater emocionalmente','Aceita com calma e reflete','Analisa se há embasamento técnico'],
+    ['Seu estilo de liderança é mais...','Diretivo — dou direção e espero resultados','Inspirador — motivo e envolvo todos','Colaborativo — apoio e desenvolvo o time','Técnico — garanto qualidade e processos'],
+    ['Quando tem múltiplas tarefas, você...','Prioriza o que gera mais impacto','Começa pelo que é mais empolgante','Segue uma ordem lógica e consistente','Organiza meticulosamente antes de começar'],
+    ['Em conflitos, você tende a...','Enfrentar diretamente','Tentar reconciliar com entusiasmo','Evitar e buscar harmonia','Analisar os fatos objetivamente'],
+    ['Sua relação com detalhes é...','Delega — foca no todo estratégico','Depende do impacto nas pessoas','Acompanha com consistência','Preza pela perfeição nos detalhes'],
+    ['Quanto ao planejamento, você...','Define metas arrojadas e age','Prefere flexibilidade e improvisa','Planeja com antecedência e segue','Cria planos detalhados e os executa'],
+    ['Ao tomar decisões importantes, você...','Decide rápido com base na intuição','Considera o impacto nas pessoas','Busca consenso e pensa nas consequências','Coleta dados antes de decidir'],
+    ['Seu maior desafio costuma ser...','Impaciência com lentidão','Dificuldade de foco','Resistência a mudanças','Dificuldade de delegar'],
+    ['Em apresentações, você prefere...','Ir direto ao ponto com impacto','Usar histórias e ser carismático','Ser claro, organizado e preciso','Apresentar dados e análises detalhadas'],
+    ['Seu ritmo de trabalho é geralmente...','Intenso e orientado a resultados','Variável conforme a energia e interação','Constante e previsível','Metódico e orientado à qualidade'],
+    ['O que seus colegas mais valorizam em você é...','Liderança e objetividade','Energia e criatividade','Confiabilidade e paciência','Precisão e competência técnica'],
+    ['Em negociações, sua abordagem é...','Firme e orientada ao resultado','Persuasiva e empática','Buscadora de acordos justos','Baseada em dados e argumentos sólidos'],
+  ];
+
+  function toggleQuestionario() {
+    const sec = document.getElementById('sec-questionario');
+    const btn = document.getElementById('btn-ver-questionario');
+    if (sec.style.display === 'none') {
+      sec.style.display = 'block';
+      btn.textContent = 'Ocultar questionário ↑';
+    } else {
+      sec.style.display = 'none';
+      btn.textContent = 'Ver questionário ↓';
+    }
+  }
+
+  function renderQuestionario(c) {
+    const container = document.getElementById('disc-questoes-html');
+    if (!container) return;
+    const a = c.analises?.[0] || {};
+
+    // DISC map: mesma lógica do backend
+    const DISC_MAP = [
+      ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
+      ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
+      ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
+      ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
+      ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],['S','I','D','C']
+    ];
+    const discColor = { D:'#ef4444', I:'#f59e0b', S:'#22c55e', C:'#6c63ff' };
+    const discNome  = { D:'Executor', I:'Comunicador', S:'Planejador', C:'Analítico' };
+
+    const html = DISC_QUESTOES.map((q, idx) => {
+      const qNum = String(idx+1).padStart(2,'0');
+      const letras = ['a','b','c','d'];
+
+      // Pega valores salvos do candidato
+      const vals = letras.map(l => {
+        const v = c[`disc_q${qNum}_${l}`];
+        return v != null ? parseInt(v) : null;
+      });
+      const hasVals = vals.some(v => v != null);
+      const maxVal = hasVals ? Math.max(...vals.filter(v => v != null)) : null;
+
+      const resps = letras.map((l, li) => {
+        const dim = DISC_MAP[idx][li]; // D, I, S ou C
+        const val = vals[li];
+        const isMost = val === maxVal && maxVal === 4;
+        const cor = discColor[dim];
+        
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;margin-bottom:4px;
+                  background:${isMost ? cor+'22' : 'transparent'};
+                  border:1px solid ${isMost ? cor+'55' : 'transparent'}">
+          <span style="font-family:'DM Mono',monospace;font-size:11px;min-width:16px;
+                color:${isMost ? cor : 'var(--muted)'}">
+            ${isMost ? '●' : '○'} ${l.toUpperCase()}
+          </span>
+          <span style="flex:1;font-size:13px;color:${isMost ? 'var(--text)' : 'var(--muted)'}">
+            ${q[li+1]}
+          </span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;
+                color:${isMost ? cor : 'transparent'};
+                background:${isMost ? cor+'22' : 'transparent'};
+                padding:2px 6px;border-radius:4px;min-width:22px;text-align:center">
+            ${isMost ? discNome[dim] : ''}
+          </span>
+          ${val != null ? `<span style="font-family:'DM Mono',monospace;font-size:12px;
+              color:${val===4?cor:val===1?'var(--accent2)':'var(--muted)'};min-width:14px;text-align:right">${val}</span>` : 
+            `<span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-width:14px;text-align:right">–</span>`}
+        </div>`;
+      }).join('');
+
+      return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:6px;letter-spacing:.08em">Q${qNum}</div>
+        <div style="font-size:14px;color:var(--text);margin-bottom:10px;font-weight:500">${q[0]}</div>
+        ${resps}
+        ${!hasVals ? '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:4px 0">Resposta não registrada individualmente</div>' : ''}
+      </div>`;
+    }).join('');
+
+    container.innerHTML = html || '<div style="color:var(--muted);font-size:13px;padding:12px">As respostas individuais não foram armazenadas neste cadastro. Apenas os scores finais estão disponíveis acima.</div>';
+  }
+
+  // ═══ HELPERS ═══
+  function formatarData(iso) {
+    if (!iso) return '–';
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function copiar(url) {
+    navigator.clipboard.writeText(url).then(() => mostrarToast('Link copiado!'));
+  }
+
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
 </script>
 </body>
 </html>
