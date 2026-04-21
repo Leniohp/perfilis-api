@@ -7,7 +7,7 @@ app.use(express.json({ limit: '2mb' }));
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
@@ -454,4 +454,34 @@ app.get('/admin/candidato/:id', adminAuth, async (req, res) => {
     .single();
   if (error || !data) return res.status(404).json({ erro: 'Não encontrado' });
   res.json(data);
+});
+
+// Admin: excluir link gratuito (pacote)
+app.delete('/admin/link/:id', adminAuth, async (req, res) => {
+  // Busca o pacote
+  const { data: pacote, error } = await supabase
+    .from('pacotes')
+    .select('id, quantidade, pago')
+    .eq('id', req.params.id)
+    .single();
+
+  if (error || !pacote) return res.status(404).json({ erro: 'Link não encontrado' });
+
+  // Bloqueia exclusão de links pagos
+  if (pacote.pago === true || pacote.quantidade > 10) {
+    return res.status(403).json({ erro: 'Links pagos não podem ser excluídos' });
+  }
+
+  // Exclui candidatos e análises vinculados
+  const { data: cands } = await supabase
+    .from('candidatos').select('id').eq('pacote_id', pacote.id);
+  if (cands?.length) {
+    const candIds = cands.map(c => c.id);
+    await supabase.from('analises').delete().in('candidato_id', candIds);
+    await supabase.from('candidatos').delete().in('id', candIds);
+  }
+
+  // Exclui o pacote
+  await supabase.from('pacotes').delete().eq('id', pacote.id);
+  res.json({ ok: true });
 });
