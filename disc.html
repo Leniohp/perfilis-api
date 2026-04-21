@@ -780,6 +780,7 @@ footer a { color: var(--accent2); text-decoration: none; }
           </div>
           <input type="range" min="1" max="1000" value="10" step="1" id="qty-slider" oninput="updateQty(this.value)">
           <div class="qty-range"><span>1</span><span>1.000</span></div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:10px"><input type="number" min="1" max="1000" value="10" id="qty-input" oninput="updateQty(this.value)" style="width:100px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font-sans);font-size:14px;font-weight:600;outline:none;text-align:center"><span style="font-size:13px;color:var(--muted2)">análises (ou use a barra acima)</span></div>
           <!-- Painel de preço dinâmico -->
           <div style="margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -1304,7 +1305,9 @@ function updateQty(val) {
   state.cadastro.qty = val;
   const pct = ((val-1)/(1000-1))*100;
   const slider = document.getElementById('qty-slider');
-  if (slider) slider.style.setProperty('--pct', pct+'%');
+  if (slider) { slider.value = val; slider.style.setProperty('--pct', pct+'%'); }
+  const inputEl = document.getElementById('qty-input');
+  if (inputEl && document.activeElement !== inputEl) inputEl.value = val;
   document.getElementById('qty-val').textContent = val;
   const p = calcPreco(val);
   const precoEl = document.getElementById('qty-preco');
