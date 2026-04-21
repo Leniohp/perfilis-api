@@ -1,14 +1,28 @@
 {
   "version": 2,
   "builds": [
-    { "src": "index.html", "use": "@vercel/static" },
-    { "src": "admin.html", "use": "@vercel/static" },
-    { "src": "api/index.js", "use": "@vercel/node" }
+    { "src": "index.html",      "use": "@vercel/static" },
+    { "src": "admin.html",      "use": "@vercel/static" },
+    { "src": "nr1.html",        "use": "@vercel/static" },
+    { "src": "nr1-admin.html",  "use": "@vercel/static" },
+    { "src": "api/index.js",    "use": "@vercel/node" },
+    { "src": "api/nr1.js",      "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/admin/(.+)", "dest": "/api/index.js" },
-    { "src": "/admin", "dest": "/admin.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
+    { "src": "/api/nr1/(.*)",        "dest": "/api/nr1.js" },
+    { "src": "/admin/nr1/(.*)",      "dest": "/api/nr1.js" },
+    { "src": "/admin/nr1",           "dest": "/nr1-admin.html" },
+    { "src": "/nr1-admin",           "dest": "/nr1-admin.html" },
+    { "src": "/nr1/(.*)",            "dest": "/nr1.html" },
+    { "src": "/nr1",                 "dest": "/nr1.html" },
+    { "src": "/q/(.*)",              "dest": "/nr1.html" },
+    { "src": "/r/(.*)",              "dest": "/nr1.html" },
+    { "src": "/api/(.*)",            "dest": "/api/index.js" },
+    { "src": "/admin/(.+)",          "dest": "/api/index.js" },
+    { "src": "/admin",               "dest": "/admin.html" },
+    { "src": "/(.*)",                "dest": "/index.html" }
+  ],
+  "env": {
+    "BASE_URL": "https://nr1.perfilis.com"
+  }
 }
