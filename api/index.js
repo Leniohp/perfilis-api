@@ -353,11 +353,24 @@ app.get('/admin/contratantes', adminAuth, async (req, res) => {
     pacoteMap[p.contratante_id].push(p);
   });
 
-  const resultado = contratantes.map(c => ({
-    ...c,
-    pacotes: pacoteMap[c.id] || [],
-    candidatos_count: (pacoteMap[c.id] || []).reduce((s, p) => s + (p.usados || 0), 0)
-  }));
+  const resultado = contratantes.map(c => {
+    const pkgs = pacoteMap[c.id] || [];
+    const primeiroPacote = pkgs[0] || {};
+    return {
+      id: c.id,
+      nome: c.nome,
+      email: c.email,
+      empresa: c.empresa,
+      whatsapp: c.whatsapp,
+      criado_em: c.created_at,
+      ativo: true,
+      token_formulario: primeiroPacote.token || null,
+      token_ranking: primeiroPacote.token_ranking || null,
+      total_candidatos: pkgs.reduce((s, p) => s + (p.usados || 0), 0),
+      candidatos_count: pkgs.reduce((s, p) => s + (p.usados || 0), 0),
+      pacotes: pkgs
+    };
+  });
 
   res.json({ total: resultado.length, contratantes: resultado });
 });
@@ -371,7 +384,6 @@ app.get('/admin/candidatos', adminAuth, async (req, res) => {
 
   if (error) return res.status(500).json({ erro: error.message });
 
-  // Buscar info do contratante via pacote
   const { data: pacotes } = await supabase
     .from('pacotes')
     .select('id, contratante_id, vaga, contratantes(nome, empresa)');
@@ -379,11 +391,21 @@ app.get('/admin/candidatos', adminAuth, async (req, res) => {
   const pacoteMap = {};
   (pacotes || []).forEach(p => { pacoteMap[p.id] = p; });
 
-  const resultado = (candidatos || []).map(c => ({
-    ...c,
-    pacote_info: pacoteMap[c.pacote_id] || null,
-    perfil_primario: c.analises?.[0]?.perfil_primario || null
-  }));
+  const resultado = (candidatos || []).map(c => {
+    const pacote = pacoteMap[c.pacote_id] || {};
+    const analise = c.analises?.[0] || {};
+    return {
+      id: c.id,
+      nome: c.nome,
+      email: c.email,
+      criado_em: c.created_at,
+      contratante_nome: pacote.contratantes?.nome || '–',
+      contratante_empresa: pacote.contratantes?.empresa || '–',
+      vaga: pacote.vaga || '–',
+      perfil_disc: analise.perfil_primario || null,
+      perfil_secundario: analise.perfil_secundario || null
+    };
+  });
 
   res.json({ total: resultado.length, candidatos: resultado });
 });
@@ -398,9 +420,19 @@ app.get('/admin/links', adminAuth, async (req, res) => {
   if (error) return res.status(500).json({ erro: error.message });
 
   const resultado = (pacotes || []).map(p => ({
-    ...p,
+    id: p.id,
+    nome: p.contratantes?.nome || '–',
+    empresa: p.contratantes?.empresa || '–',
+    email: p.contratantes?.email || '–',
+    vaga: p.vaga || '–',
+    token_formulario: p.token,
+    token_ranking: p.token_ranking,
     link_candidatos: `https://perfilis.com/f/${p.token}`,
-    link_ranking: p.token_ranking ? `https://perfilis.com/r/${p.token_ranking}` : null
+    link_ranking: p.token_ranking ? `https://perfilis.com/r/${p.token_ranking}` : null,
+    usados: p.usados || 0,
+    quantidade: p.quantidade,
+    ativo: p.ativo,
+    criado_em: p.created_at
   }));
 
   res.json({ total: resultado.length, links: resultado });
