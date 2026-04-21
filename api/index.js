@@ -437,3 +437,14 @@ app.get('/admin/links', adminAuth, async (req, res) => {
 
   res.json({ total: resultado.length, links: resultado });
 });
+
+// Admin: detalhe completo de um candidato (com respostas)
+app.get('/admin/candidato/:id', adminAuth, async (req, res) => {
+  const { data, error } = await supabase
+    .from('candidatos')
+    .select('*, analises(*)')
+    .eq('id', req.params.id)
+    .single();
+  if (error || !data) return res.status(404).json({ erro: 'Não encontrado' });
+  res.json(data);
+});
