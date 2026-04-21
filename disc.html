@@ -1028,32 +1028,12 @@ footer a { color: var(--accent2); text-decoration: none; }
 // ══════════════════════════════════════
 
 const DISC_MAP = [
-  ['D', 'I', 'S', 'C'],
-  ['C', 'I', 'S', 'D'],
-  ['D', 'S', 'I', 'C'],
-  ['S', 'I', 'D', 'C'],
-  ['I', 'D', 'S', 'C'],
-  ['D', 'I', 'S', 'C'],
-  ['S', 'I', 'D', 'C'],
-  ['D', 'I', 'C', 'S'],
-  ['S', 'I', 'D', 'C'],
-  ['C', 'I', 'D', 'S'],
-  ['C', 'D', 'S', 'I'],
-  ['D', 'S', 'I', 'C'],
-  ['C', 'I', 'D', 'S'],
-  ['D', 'I', 'S', 'C'],
-  ['C', 'D', 'S', 'I'],
-  ['S', 'D', 'I', 'C'],
-  ['C', 'S', 'I', 'D'],
-  ['C', 'I', 'S', 'D'],
-  ['D', 'C', 'S', 'I'],
-  ['D', 'C', 'S', 'I'],
-  ['C', 'I', 'S', 'D'],
-  ['D', 'I', 'C', 'S'],
-  ['I', 'D', 'S', 'C'],
-  ['S', 'I', 'D', 'C'],
-  ['C', 'I', 'S', 'D'],
-  ['S', 'I', 'D', 'C']
+  ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
+  ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
+  ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
+  ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
+  ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],
+  ['S','I','D','C']
 ];
 
 const EGO_MAP = [
@@ -1759,14 +1739,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const path = window.location.pathname;
   
   // /f/TOKEN — formulário do candidato
-  const matchF = path.match(/^\/f\/([A-Z0-9_-]{3,16})$/i);
+  const matchF = path.match(/^\/f\/([A-Z0-9-]{3,16})$/i);
   if (matchF) {
     carregarFormulario(matchF[1].toUpperCase());
     return;
   }
   
   // /r/TOKEN — ranking privado do contratante
-  const matchR = path.match(/^\/r\/([A-Z0-9_-]{3,17})$/i);
+  const matchR = path.match(/^\/r\/([A-Z0-9-]{3,17})$/i);
   if (matchR) {
     carregarRankingPrivado(matchR[1].toUpperCase());
     return;
@@ -1876,8 +1856,8 @@ var DQ=[
 {q:'Características que mais te descrevem:',o:['Culto, busca ter conhecimento.','Animado, alma da festa.','Harmonioso, aberto a sugestões.','Confrontante, gosta de argumentar.']},
 {q:'Características que mais te descrevem:',o:['Humilde, compassivo com as pessoas.','Carismático, atrai as pessoas, desinibido.','Tem atitude, persuasivo, convincente.','Sistemático, cético, precavido.']}
 ];
-var DP=[[4,3,2,1],[4,3,1,2],[4,1,3,2],[1,4,3,2],[2,3,1,4],[4,2,1,3],[1,4,3,2],[1,3,4,2],[1,3,4,2],[1,4,2,3],[3,2,1,4],[4,2,3,1],[2,3,1,4],[4,3,2,1],[3,2,1,4],[1,4,3,2],[3,1,2,4],[3,4,1,2],[4,2,1,3],[3,1,4,2],[1,3,2,4],[4,3,1,2],[3,4,2,1],[1,3,4,2],[4,3,2,1],[2,3,4,1]];
-var EQ=['Tem movimentos firmes e ativos?','É espontâneo e livre?','Despreza os outros?','Harmoniza-se com quem o cerca?','Valoriza as tradições?','Percebe qualidades alheias?','Interessa-se pelas conversas alheias?','Analisa a realidade e decide?','Expressa logo os sentimentos?','É crítico às coisas e fatos?','É cerimonioso e retraído?','É extremamente atencioso?','Protela decisões desagradáveis?','Valoriza responsabilidade?','Conversa encarando o interlocutor?','Vive se queixando?','Gosta de ajudar os outros?','Examina a reação alheia?','Pergunta Por quê? Como?','É moralista?','Julga corretamente os fatos?','Manifesta espanto: Não diga!?','É rigoroso com fracassos alheios?','Limpa e organiza por iniciativa?','Consegue dizer o que pensa?','Arranja boas desculpas?','Expressa-se dizendo Deve fazer?','Tem dificuldade em ficar quieto?','Cumpre rigorosamente regulamentos?','Sabe lidar bem com pessoas?','Esforça-se para contentar os outros?','Fala sem cerimônia o que pensa?','Colhe informações e analisa?','É egoísta?','Diz Desculpe-me, Sinto muito?','Julga fatos sem opinião pessoal?','É extremamente curioso?','É indiferente a assuntos alheios?','Age em busca do ideal?','Planeja antes de agir?','Não se torna emotivo?','Consola pessoas em dificuldades?','Assume liderança coletiva?','Expressa com clareza sua opinião?','Decide pela intuição?','É maleável?','É obstinado em seus desejos?','Perdoa com sinceridade?','Dialoga facilmente com todos?','Não consegue recusar pedidos?'];
+var DP=[[1,4,3,2],[4,2,3,1],[1,4,2,3],[4,3,1,2],[4,1,2,3],[1,2,3,4],[1,2,3,4],[4,1,2,3],[1,3,2,4],[4,3,2,1],[4,2,3,1],[4,3,2,1],[1,4,2,3],[4,1,3,2],[2,3,4,1],[4,1,2,3],[4,1,2,3],[1,4,2,3],[1,4,2,3],[1,4,3,2],[4,3,2,1],[3,4,2,1],[1,2,3,4],[3,4,1,2],[4,3,2,1],[4,3,2,1]];
+var EQ=["Tem movimentos firmes e ativos- eficazes?","É espontâneo e livre?","Despreza os outros?","Procura harmonizar- se com os que o cercam?","Valoriza as tradições","Percebe as qualidades alheias e as ressalta?","Interessa- se pelas conversas alheias?","Analisa bem a realidade e toma decisões?","Expressa logo os sentimentos na fisionomia?","É crítico às coisas e fatos?","É cerimonioso e retraído?","É extremamente atencioso com os outros?","Protela as decisões referente a questões desagradáveis?","Valoriza o senso de responsabilidade?","Conversa com o parceiro em postura correta, encarando- o?","Vive se queixando e se lamentando?","Gosta de ajudar os outros","Examina a reação alheia?","Costuma perguntar\"Por que? Como?\"","É moralista","Julga corretamente os fatos?","Manifesta expressões de espanto:\"Não diga!\"?","É rigoroso com os fracassos e defeitos alheios?","Cozinha, lava e limpa por iniciativa própria?","É do tipo que consegue dizer o que pensa?","Sempre arranja boas desculpas?","Costumeiramente expressa- se dizendo:\"Deve fazer?\"","Tem dificuldades em ficar quieto e parado?","Cumpre rigorosamente os regulamentos?","Sabe lidar relativamente bem com as pessoas?","Esforça- se para contentar os outros?","Fala sem cerimônia sobre o que pensa?","Colhe várias informações (fatos) e os analisa bem?","Você é egoísta?","Diz:\"Desculpe- me\", \"Sinto muito?\"","Julga os fatos sem interferir a sua opinião pessoal?","É extremamente curioso","É indiferente a assuntos alheios","Age sempre em busca do ideal","Sempre planeja conscientemente antes de agir?","Não se torna emotivo numa conversa","Sempre que vê uma pessoa em dificuldades, consola- a?","Assume a liderança do trabalho em atividades coletivas?","Expressa com clareza e firmeza sua opinião pessoal?","Decide pela intuição em lugar da razão","É maleáavel?","É obstinado em relação aos seus desejos?","Perdoa com sinceridade as falhas alheias?","Dialoga facilmente com qualquer pessoa?","Não consegue recusar um pedido?"];
 var VQ=['Criatividade','Descobridor','Mente aberta','Amor ao aprendizado','Perspectiva','Perseverança','Integridade','Entusiasmo','Amor','Compaixão','Inteligência social','Cidadania','Igualdade','Liderança','Perdoar','Humildade','Prudência','Controle','Espiritualidade','Humor','Esperança','Otimismo','Gratidão','Apreciação de beleza'];
 
 function renderEgoQ(){var c=document.getElementById('ego-questions');if(!c||c.children.length>0)return;EQ.forEach(function(q,i){var d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';var btns=[3,2,1,0].map(function(v){return'<button onclick="setEgo('+i+','+v+',this)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted2);cursor:pointer;font-size:13px">'+v+'</button>';}).join('');d.innerHTML='<span style="font-size:13px;flex:1;line-height:1.4">'+(i+1)+'. '+q+'</span><div style="display:flex;gap:5px">'+btns+'</div>';c.appendChild(d);});}
@@ -2027,7 +2007,7 @@ function renderizarRankingReal() {
     const pos = i + 1;
     const cls = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
     const compat = c.compatibilidade || c.compat || 0;
-    const bar = Math.max(0, Math.min(100, Math.round((compat / 104) * 100)));
+    const bar = Math.round((compat / 75) * 100);
     const cor = CORES_GRAD[i % CORES_GRAD.length];
     const bg = 'linear-gradient(135deg,' + cor[0] + ',' + cor[1] + ')';
     const nome = c.nome || 'Candidato';
@@ -2090,13 +2070,13 @@ async function verCandidatoReal(candidatoId) {
         q5: c.experiencia || '', q6: c.nivel || '', q7: c.resp_feedback || ''
       },
       disc: {
-        D: a.disc_executor || 0, I: a.disc_comunicador || 0,
-        S: a.disc_planejador || 0, C: a.disc_analitico || 0
+        D: a.disc_executor || 51, I: a.disc_comunicador || 51,
+        S: a.disc_planejador || 51, C: a.disc_analitico || 51
       },
       ego: {
-        PC: egoPC||a.ego_pai_critico||10, PA: egoPA||a.ego_pai_amoroso||10,
-        A: egoA||a.ego_adulto||15, CL: egoCL||a.ego_crianca_livre||10,
-        CA: egoCA||a.ego_crianca_adapt||8
+        PC: egoPC, PA: egoPA,
+        A: egoA, CL: egoCL,
+        CA: egoCA
       },
       quad: {
         A: a.quad_analitico || 12, B: a.quad_ordenado || 12,
@@ -2248,7 +2228,7 @@ function renderizarFichaReal(c, compat, posicao) {
     }
 
     // Egograma — gráfico de linha
-    const ego = c.ego || {PC:10,PA:10,A:15,CL:10,CA:8};
+    const ego = c.ego || {PC:0,PA:0,A:0,CL:0,CA:0};
     renderEgoLineChart(ego);
 
     // Quadrantes — barras horizontais
