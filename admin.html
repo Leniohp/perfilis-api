@@ -1470,40 +1470,77 @@
     if (sec.style.display === 'none') {
       sec.style.display = 'block';
       btn.textContent = 'Ocultar questionário ↑';
-      // Render if empty
-      const container = document.getElementById('disc-questoes-html');
-      if (!container.innerHTML) {
-        container.innerHTML = '<div style="color:var(--muted);font-size:13px">As respostas do questionário são calculadas internamente no score DISC. Exibindo pontuações por alternativa:</div>';
-      }
     } else {
       sec.style.display = 'none';
       btn.textContent = 'Ver questionário ↓';
     }
   }
 
-  function renderQuestionario(candidato) {
+  function renderQuestionario(c) {
     const container = document.getElementById('disc-questoes-html');
     if (!container) return;
-    const letras = ['a','b','c','d'];
+    const a = c.analises?.[0] || {};
+
+    // DISC map: mesma lógica do backend
+    const DISC_MAP = [
+      ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
+      ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
+      ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
+      ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
+      ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],['S','I','D','C']
+    ];
+    const discColor = { D:'#ef4444', I:'#f59e0b', S:'#22c55e', C:'#6c63ff' };
+    const discNome  = { D:'Executor', I:'Comunicador', S:'Planejador', C:'Analítico' };
+
     const html = DISC_QUESTOES.map((q, idx) => {
       const qNum = String(idx+1).padStart(2,'0');
+      const letras = ['a','b','c','d'];
+
+      // Pega valores salvos do candidato
+      const vals = letras.map(l => {
+        const v = c[`disc_q${qNum}_${l}`];
+        return v != null ? parseInt(v) : null;
+      });
+      const hasVals = vals.some(v => v != null);
+      const maxVal = hasVals ? Math.max(...vals.filter(v => v != null)) : null;
+
       const resps = letras.map((l, li) => {
-        const key = `disc_q${qNum}_${l}`;
-        const val = candidato[key];
-        const isHighest = val === 4;
-        return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;opacity:${val == null ? '.4' : '1'}">
-          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:14px">${l.toUpperCase()}</span>
-          <div style="flex:1;font-size:13px;color:${isHighest ? 'var(--text)' : 'var(--muted)'}">${q[li+1]}</div>
-          ${val != null ? `<span style="font-family:'DM Mono',monospace;font-size:12px;color:${val===4?'var(--green)':val===1?'var(--accent2)':'var(--muted)'};min-width:16px;text-align:right">${val}</span>` : ''}
+        const dim = DISC_MAP[idx][li]; // D, I, S ou C
+        const val = vals[li];
+        const isMost = val === maxVal && maxVal === 4;
+        const cor = discColor[dim];
+        
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;margin-bottom:4px;
+                  background:${isMost ? cor+'22' : 'transparent'};
+                  border:1px solid ${isMost ? cor+'55' : 'transparent'}">
+          <span style="font-family:'DM Mono',monospace;font-size:11px;min-width:16px;
+                color:${isMost ? cor : 'var(--muted)'}">
+            ${isMost ? '●' : '○'} ${l.toUpperCase()}
+          </span>
+          <span style="flex:1;font-size:13px;color:${isMost ? 'var(--text)' : 'var(--muted)'}">
+            ${q[li+1]}
+          </span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;
+                color:${isMost ? cor : 'transparent'};
+                background:${isMost ? cor+'22' : 'transparent'};
+                padding:2px 6px;border-radius:4px;min-width:22px;text-align:center">
+            ${isMost ? discNome[dim] : ''}
+          </span>
+          ${val != null ? `<span style="font-family:'DM Mono',monospace;font-size:12px;
+              color:${val===4?cor:val===1?'var(--accent2)':'var(--muted)'};min-width:14px;text-align:right">${val}</span>` : 
+            `<span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-width:14px;text-align:right">–</span>`}
         </div>`;
       }).join('');
+
       return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
-        <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:8px">Q${qNum}</div>
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:6px;letter-spacing:.08em">Q${qNum}</div>
         <div style="font-size:14px;color:var(--text);margin-bottom:10px;font-weight:500">${q[0]}</div>
         ${resps}
+        ${!hasVals ? '<div style="font-size:12px;color:var(--muted);font-style:italic;padding:4px 0">Resposta não registrada individualmente</div>' : ''}
       </div>`;
     }).join('');
-    container.innerHTML = html;
+
+    container.innerHTML = html || '<div style="color:var(--muted);font-size:13px;padding:12px">As respostas individuais não foram armazenadas neste cadastro. Apenas os scores finais estão disponíveis acima.</div>';
   }
 
   // ═══ HELPERS ═══
