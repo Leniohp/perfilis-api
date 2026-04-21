@@ -318,7 +318,7 @@ app.post('/api/stripe/webhook', express.raw({type: 'application/json'}), (req, r
 // ══════════════════════════════════════
 const ADMIN_EMAIL    = 'adm@maximagestao.com';
 const ADMIN_PASSWORD = 'Admzykbx250848_@perfilis2026';
-const ADMIN_TOKEN    = crypto.randomBytes(32).toString('hex');
+const ADMIN_TOKEN    = process.env.ADMIN_SECRET || 'perfilis-admin-2026';
 
 app.post('/admin/login', (req, res) => {
   const { email, senha } = req.body;
