@@ -3,6 +3,7 @@
   "builds": [
     { "src": "index.html",      "use": "@vercel/static" },
     { "src": "admin.html",      "use": "@vercel/static" },
+    { "src": "disc.html",       "use": "@vercel/static" },
     { "src": "nr1.html",        "use": "@vercel/static" },
     { "src": "nr1-admin.html",  "use": "@vercel/static" },
     { "src": "api/index.js",    "use": "@vercel/node" },
@@ -17,12 +18,13 @@
     { "src": "/nr1",                 "dest": "/nr1.html" },
     { "src": "/q/(.*)",              "dest": "/nr1.html" },
     { "src": "/r/(.*)",              "dest": "/nr1.html" },
+    { "src": "/disc",                "dest": "/disc.html" },
     { "src": "/api/(.*)",            "dest": "/api/index.js" },
     { "src": "/admin/(.+)",          "dest": "/api/index.js" },
     { "src": "/admin",               "dest": "/admin.html" },
     { "src": "/(.*)",                "dest": "/index.html" }
   ],
   "env": {
-    "BASE_URL": "https://nr1.perfilis.com"
+    "BASE_URL": "https://www.perfilis.com"
   }
 }
