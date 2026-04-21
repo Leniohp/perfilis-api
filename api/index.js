@@ -198,10 +198,10 @@ app.get('/api/candidato/:id', async (req, res) => {
 
 // Algoritmo DISC
 const DISC_MAP = [
-  ['D','I','S','C'],['C','I','S','D'],['D','S','I','C'],['S','I','D','C'],['I','D','S','C'],
-  ['D','I','S','C'],['S','I','D','C'],['D','I','C','S'],['S','I','D','C'],['C','I','D','S'],
+  ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
+  ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
   ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
-  ['S','D','I','C'],['C','S','I','D'],['C','I','S','D'],['D','C','S','I'],['D','C','S','I'],
+  ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
   ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],['S','I','D','C']
 ];
 
@@ -213,14 +213,15 @@ function calcularDISC(body) {
       sc[DISC_MAP[q][j]] += parseInt(body[key])||0;
     }
   }
+  const vals = Object.values(sc), min=Math.min(...vals), max=Math.max(...vals), range=max-min||1;
   const sorted = Object.entries(sc).sort((a,b)=>b[1]-a[1]);
   const mapNome = {D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
   return {
-    disc_executor: sc.D,
-    disc_comunicador: sc.I,
-    disc_planejador: sc.S,
-    disc_analitico: sc.C,
-    perfil_primario: mapNome[sorted[0][0]],
+    disc_executor:    Math.round(((sc.D-min)/range)*24+51),
+    disc_comunicador: Math.round(((sc.I-min)/range)*24+51),
+    disc_planejador:  Math.round(((sc.S-min)/range)*24+51),
+    disc_analitico:   Math.round(((sc.C-min)/range)*24+51),
+    perfil_primario:   mapNome[sorted[0][0]],
     perfil_secundario: mapNome[sorted[1][0]],
   };
 }
@@ -471,4 +472,22 @@ app.delete('/admin/link/:id', adminAuth, async (req, res) => {
   // Exclui o pacote
   await supabase.from('pacotes').delete().eq('id', pacote.id);
   res.json({ ok: true });
+});
+
+
+app.delete('/admin/link/:id', async (req, res) => {
+  try {
+    const auth = req.headers.authorization || '';
+    if (!auth.startsWith('Bearer ')) return res.status(401).json({ erro: 'Sem token' });
+    const ok = verifyAdminToken(auth.slice(7));
+    if (!ok) return res.status(401).json({ erro: 'Token inválido' });
+
+    const id = req.params.id;
+    const { error } = await supabase.from('pacotes').delete().eq('id', id);
+    if (error) return res.status(500).json({ erro: error.message });
+
+    res.json({ ok: true, excluido: id });
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
 });
