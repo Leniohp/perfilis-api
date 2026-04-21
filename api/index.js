@@ -235,14 +235,13 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Criar pagamento (PIX ou Cartão)
 app.post('/api/pagamento', async (req, res) => {
-  const { valor, metodo, nome, email, descricao, parcelas,
-          card_numero, card_validade, card_cvv, card_nome } = req.body;
+  const { valor, metodo, nome, email, descricao } = req.body;
 
   try {
     if (metodo === 'pix') {
-      // PIX via Stripe (Payment Intent com pix)
+      // PIX via Stripe — cria PaymentIntent com pix
       const pi = await stripe.paymentIntents.create({
-        amount: Math.round(valor * 100), // centavos
+        amount: Math.round(valor * 100),
         currency: 'brl',
         payment_method_types: ['pix'],
         description: descricao,
@@ -260,31 +259,20 @@ app.post('/api/pagamento', async (req, res) => {
     }
 
     if (metodo === 'card') {
-      // Tokenizar cartão
-      const [expMes, expAno] = (card_validade || '').split('/');
-      const pm = await stripe.paymentMethods.create({
-        type: 'card',
-        card: {
-          number: card_numero,
-          exp_month: parseInt(expMes),
-          exp_year: parseInt('20' + expAno),
-          cvc: card_cvv
-        },
-        billing_details: { name: card_nome, email }
-      });
+      // Cartão — cria PaymentIntent e retorna client_secret
+      // O frontend (Stripe Elements) confirma o pagamento diretamente com a Stripe
+      // Os dados do cartão NUNCA passam pelo servidor — segurança PCI garantida
       const pi = await stripe.paymentIntents.create({
         amount: Math.round(valor * 100),
         currency: 'brl',
-        payment_method: pm.id,
-        confirm: true,
+        payment_method_types: ['card'],
         description: descricao,
         receipt_email: email,
-        metadata: { nome, email },
-        return_url: 'https://perfilis.com'
+        metadata: { nome, email }
       });
       return res.json({
         payment_id: pi.id,
-        status: pi.status === 'succeeded' ? 'approved' : pi.status
+        client_secret: pi.client_secret
       });
     }
 
