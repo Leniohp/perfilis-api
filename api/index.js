@@ -197,15 +197,7 @@ app.get('/api/candidato/:id', async (req, res) => {
   res.json(data);
 });
 
-// Algoritmo DISC
-const DISC_MAP = [
-  ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
-  ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
-  ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
-  ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
-  ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],['S','I','D','C']
-];
-
+// Algoritmo Egograma + DISC
 
 const EGO_MAP = ["A", "CL", "PC", "CA", "PC", "PA", "PA", "A", "CL", "PC", "CA", "PA", "CA", "PC", "A", "CA", "PA", "CA", "A", "PC", "A", "CL", "PC", "PA", "CA", "CA", "PC", "CL", "PC", "CA", "CA", "CL", "A", "CL", "CA", "A", "CL", "CL", "PC", "A", "A", "PA", "PA", "PC", "CL", "PA", "CL", "PA", "A", "PA"];
 
@@ -225,6 +217,15 @@ function calcularEgograma(body) {
     ego_crianca_adapt: sc.CA
   };
 }
+
+
+const DISC_MAP = [
+  ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
+  ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
+  ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
+  ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
+  ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],['S','I','D','C']
+];
 
 function calcularDISC(body) {
   const sc = {D:0,I:0,S:0,C:0};
@@ -465,25 +466,26 @@ app.get('/admin/candidato/:id', adminAuth, async (req, res) => {
   res.json(data);
 });
 
-// Admin: excluir link gratuito (pacote)
+
+// Admin: excluir link (pacote)
 app.delete('/admin/link/:id', adminAuth, async (req, res) => {
   // Busca o pacote
   const { data: pacote, error } = await supabase
     .from('pacotes')
-    .select('id, quantidade, pago')
+    .select('id')
     .eq('id', req.params.id)
     .single();
 
-  if (error || !pacote) return res.status(404).json({ erro: 'Link não encontrado' });
-
-  // Bloqueia exclusão de links pagos
-  if (pacote.pago === true || pacote.quantidade > 10) {
-    return res.status(403).json({ erro: 'Links pagos não podem ser excluídos' });
+  if (error || !pacote) {
+    return res.status(404).json({ erro: 'Link não encontrado' });
   }
 
   // Exclui candidatos e análises vinculados
   const { data: cands } = await supabase
-    .from('candidatos').select('id').eq('pacote_id', pacote.id);
+    .from('candidatos')
+    .select('id')
+    .eq('pacote_id', pacote.id);
+
   if (cands?.length) {
     const candIds = cands.map(c => c.id);
     await supabase.from('analises').delete().in('candidato_id', candIds);
@@ -491,6 +493,16 @@ app.delete('/admin/link/:id', adminAuth, async (req, res) => {
   }
 
   // Exclui o pacote
-  await supabase.from('pacotes').delete().eq('id', pacote.id);
+  const { error: delError } = await supabase
+    .from('pacotes')
+    .delete()
+    .eq('id', pacote.id);
+
+  if (delError) {
+    return res.status(500).json({ erro: delError.message });
+  }
+
   res.json({ ok: true });
 });
+
+// Admin: excluir link gratuito (pacote)
