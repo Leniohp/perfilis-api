@@ -829,11 +829,22 @@
         </div>
         <button class="refresh-btn" onclick="carregarCandidatos()">↻ Atualizar</button>
       </div>
+      <div id="barra-exclusao-candidatos" style="display:none;align-items:center;gap:12px;padding:10px 16px;
+        background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;margin-bottom:12px">
+        <span id="txt-selecionados-candidatos" style="font-family:'DM Mono',monospace;font-size:13px;color:#ef4444">0 selecionados</span>
+        <span style="color:var(--muted);font-size:12px">— exclui o candidato e todos os testes/análises vinculados</span>
+        <button onclick="excluirCandidatosSelecionados()"
+          style="margin-left:auto;background:#ef4444;color:#fff;border:none;border-radius:8px;
+          padding:8px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer">
+          🗑 Excluir selecionados
+        </button>
+      </div>
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              <th style="width:36px"><input type="checkbox" id="check-all-candidatos" onchange="selecionarTodosCandidatos(this)" style="cursor:pointer;accent-color:#ef4444"/></th>
               <th>#</th>
               <th>Nome</th>
               <th>Email</th>
@@ -1132,7 +1143,7 @@
   // ═══ CARREGAR CANDIDATOS ═══
   async function carregarCandidatos() {
     document.getElementById('tabela-candidatos').innerHTML =
-      `<tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Carregando...</td></tr>`;
+      `<tr class="loading-row"><td colspan="7"><div class="spinner"></div><br/>Carregando...</td></tr>`;
 
     try {
       const res = await fetch(`${ADMIN_BASE}/candidatos`, { headers: authHeaders() });
@@ -1142,7 +1153,7 @@
       renderizarCandidatos();
     } catch (e) {
       document.getElementById('tabela-candidatos').innerHTML =
-        `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--accent2)">Erro ao carregar dados.</td></tr>`;
+        `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--accent2)">Erro ao carregar dados.</td></tr>`;
     }
   }
 
@@ -1158,7 +1169,7 @@
 
     const tbody = document.getElementById('tabela-candidatos');
     if (lista.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
         <div class="empty-state-icon">👤</div>
         <div class="empty-state-title">Nenhum candidato ainda</div>
       </div></td></tr>`;
@@ -1169,7 +1180,11 @@
     const discLabel = { D: 'Dominância', I: 'Influência', S: 'Estabilidade', C: 'Conformidade' };
 
     tbody.innerHTML = lista.map((c, i) => `
-      <tr onclick="abrirCandidato('${c.id}')" style="cursor:pointer">
+      <tr onclick="abrirCandidato('${c.id}')" id="cand-row-${c.id}" style="cursor:pointer">
+        <td onclick="event.stopPropagation()">
+          <input type="checkbox" class="cand-check" data-id="${c.id}" onchange="atualizarSelecaoCandidatos()"
+            style="cursor:pointer;accent-color:#ef4444">
+        </td>
         <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px">${i+1}</td>
         <td class="td-name" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px">${esc(c.nome)}</td>
         <td class="td-email">${esc(c.email || '–')}</td>
@@ -1812,6 +1827,54 @@
 
     container.innerHTML = html || '<div style="color:var(--muted);font-size:13px;padding:12px">As respostas individuais não foram armazenadas neste cadastro. Apenas os scores finais estão disponíveis acima.</div>';
   }
+
+  // ═══ SELEÇÃO E EXCLUSÃO DE CANDIDATOS ═══
+  function selecionarTodosCandidatos(cb) {
+    document.querySelectorAll('.cand-check').forEach(c => c.checked = cb.checked);
+    atualizarSelecaoCandidatos();
+  }
+
+  function atualizarSelecaoCandidatos() {
+    const selecionados = document.querySelectorAll('.cand-check:checked');
+    const barra = document.getElementById('barra-exclusao-candidatos');
+    const txt = document.getElementById('txt-selecionados-candidatos');
+    if (selecionados.length > 0) {
+      barra.style.display = 'flex';
+      txt.textContent = `${selecionados.length} selecionado${selecionados.length>1?'s':''}`;
+    } else {
+      barra.style.display = 'none';
+    }
+  }
+
+  async function excluirCandidatosSelecionados() {
+    const checks = document.querySelectorAll('.cand-check:checked');
+    if (checks.length === 0) return;
+    if (!confirm(`Confirma a exclusão de ${checks.length} candidato(s)? Esta ação remove também os testes/análises vinculados e não pode ser desfeita.`)) return;
+
+    const ids = Array.from(checks).map(c => c.dataset.id);
+
+    try {
+      const res = await fetch(`${ADMIN_BASE}/candidatos/excluir`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ ids })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.erro || 'Erro ao excluir candidatos');
+
+      document.getElementById('barra-exclusao-candidatos').style.display = 'none';
+      const all = document.getElementById('check-all-candidatos');
+      if (all) all.checked = false;
+      mostrarToast(`${data.excluidos || ids.length} candidato(s) excluído(s) com sucesso!`);
+      carregarCandidatos();
+      carregarLinks();
+      carregarContratantes();
+    } catch (e) {
+      mostrarToast(e.message || 'Erro ao excluir candidatos');
+    }
+  }
+
 
   // ═══ HELPERS ═══
   function formatarData(iso) {
