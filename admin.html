@@ -1157,9 +1157,9 @@
     const discLabel = { D: 'Dominância', I: 'Influência', S: 'Estabilidade', C: 'Conformidade' };
 
     tbody.innerHTML = lista.map((c, i) => `
-      <tr>
+      <tr onclick="abrirCandidato('${c.id}')" style="cursor:pointer">
         <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px">${i+1}</td>
-        <td class="td-name">${esc(c.nome)}</td>
+        <td class="td-name" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px">${esc(c.nome)}</td>
         <td class="td-email">${esc(c.email || '–')}</td>
         <td style="font-size:13px">${esc(c.contratante_nome || '–')}</td>
         <td class="td-date">${formatarData(c.criado_em)}</td>
@@ -1309,6 +1309,101 @@
   function fecharModal(e) {
     if (!e || e.target === document.getElementById('modal-overlay')) {
       document.getElementById('modal-overlay').classList.remove('open');
+    }
+  }
+
+  // ═══ MODAL CANDIDATO ═══
+  async function abrirCandidato(id) {
+    document.getElementById('modal-overlay').classList.add('open');
+    document.getElementById('modal-content').innerHTML =
+      `<div style="text-align:center;padding:40px"><div class="spinner"></div><br/>Carregando...</div>`;
+
+    try {
+      const res = await fetch(`${API_BASE}/candidato/${id}`, { headers: authHeaders() });
+      const c = await res.json();
+      const a = c.analises?.[0] || {};
+
+      const discData = [
+        { label: 'Executor (D)',    value: a.disc_executor    || 0, color: '#ef4444' },
+        { label: 'Comunicador (I)', value: a.disc_comunicador || 0, color: '#f59e0b' },
+        { label: 'Planejador (S)',  value: a.disc_planejador  || 0, color: '#22c55e' },
+        { label: 'Analítico (C)',   value: a.disc_analitico   || 0, color: '#6c63ff' },
+      ];
+      const maxVal = Math.max(...discData.map(d => d.value), 1);
+
+      const discBars = discData.map(d => `
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:13px;color:var(--text)">${d.label}</span>
+            <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">${d.value}</span>
+          </div>
+          <div style="height:10px;background:var(--border);border-radius:6px;overflow:hidden">
+            <div style="height:100%;width:${Math.round((d.value/maxVal)*100)}%;background:${d.color};border-radius:6px;transition:width 0.6s ease"></div>
+          </div>
+        </div>`).join('');
+
+      // Campos de respostas abertas
+      const respostas = [
+        ['Vaga de interesse',       c.resp_vaga],
+        ['Empresa ideal',           c.resp_empresa],
+        ['Valores que busca',       c.resp_valores],
+        ['Gestão de equipe',        c.resp_equipe],
+        ['Feedback que dá',         c.resp_feedback],
+        ['Experiência profissional',c.experiencia],
+        ['Nível',                   c.nivel],
+        ['Endereço',                c.endereco],
+        ['LinkedIn',                c.linkedin],
+      ].filter(([, v]) => v && v !== '0');
+
+      const respostasHtml = respostas.length > 0
+        ? respostas.map(([k, v]) => `
+            <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${k}</div>
+              <div style="font-size:14px;color:var(--text)">${esc(v)}</div>
+            </div>`).join('')
+        : `<div style="color:var(--muted);font-size:13px;padding:12px 0">Sem respostas detalhadas registradas.</div>`;
+
+      document.getElementById('modal-content').innerHTML = `
+        <div class="modal-name">${esc(c.nome)}</div>
+        <div class="modal-empresa">${esc(c.email || '')}</div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">Resultado DISC</div>
+          <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+            ${a.perfil_primario ? `<span class="badge badge-active" style="font-size:13px;padding:5px 14px">Primário: ${a.perfil_primario}</span>` : ''}
+            ${a.perfil_secundario ? `<span class="badge badge-pending" style="font-size:13px;padding:5px 14px">Secundário: ${a.perfil_secundario}</span>` : ''}
+          </div>
+          ${discBars}
+        </div>
+
+        <div class="modal-section" id="sec-respostas" style="display:none">
+          <div class="modal-section-title">Respostas Detalhadas</div>
+          ${respostasHtml}
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:24px">
+          <button onclick="toggleRespostas()" id="btn-ver-detalhes"
+            style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:14px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:opacity .2s"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            Ver detalhes ↓
+          </button>
+        </div>
+      `;
+    } catch (e) {
+      document.getElementById('modal-content').innerHTML =
+        `<div style="color:var(--accent2);text-align:center;padding:40px">Erro ao carregar candidato.</div>`;
+    }
+  }
+
+  function toggleRespostas() {
+    const sec = document.getElementById('sec-respostas');
+    const btn = document.getElementById('btn-ver-detalhes');
+    if (sec.style.display === 'none') {
+      sec.style.display = 'block';
+      btn.textContent = 'Ocultar detalhes ↑';
+    } else {
+      sec.style.display = 'none';
+      btn.textContent = 'Ver detalhes ↓';
     }
   }
 
