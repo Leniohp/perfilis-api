@@ -41,7 +41,7 @@
     #login-screen::before {
       content: '';
       position: absolute;
-      width: 600px; height: 600px;
+      width: 760px; height: 600px;
       background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
       top: -100px; left: -100px;
       pointer-events: none;
@@ -1426,16 +1426,49 @@
       ];
       const maxVal = Math.max(...discData.map(d => d.value), 1);
 
-      const discBars = discData.map(d => `
-        <div style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:13px;color:var(--text)">${d.label}</span>
-            <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">${d.value}</span>
+      const discBars = `
+        <div style="background:rgba(255,255,255,0.03);padding:20px 18px 14px;border-radius:16px;border:1px solid var(--border)">
+          <div style="text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:16px">
+            Perfil DISC
           </div>
-          <div style="height:10px;background:var(--border);border-radius:6px;overflow:hidden">
-            <div style="height:100%;width:${Math.round((d.value/maxVal)*100)}%;background:${d.color};border-radius:6px;transition:width 0.6s ease"></div>
+          <div style="height:340px;display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:18px 8px 8px;background:
+            linear-gradient(to top,
+              transparent 0%,
+              transparent 19%,
+              rgba(255,255,255,0.05) 19%,
+              rgba(255,255,255,0.05) 20%,
+              transparent 20%,
+              transparent 39%,
+              rgba(255,255,255,0.05) 39%,
+              rgba(255,255,255,0.05) 40%,
+              transparent 40%,
+              transparent 59%,
+              rgba(255,255,255,0.05) 59%,
+              rgba(255,255,255,0.05) 60%,
+              transparent 60%,
+              transparent 79%,
+              rgba(255,255,255,0.05) 79%,
+              rgba(255,255,255,0.05) 80%,
+              transparent 80%,
+              transparent 100%);
+            border-radius:12px">
+            ${discData.map(d => `
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                <div style="font-family:'DM Mono',monospace;font-size:14px;color:#cbd5e1;margin-bottom:8px">${d.value}</div>
+                <div style="
+                  width:100%;
+                  max-width:82px;
+                  height:${Math.max(12, Math.round((d.value/maxVal)*210))}px;
+                  background:${d.color};
+                  border-radius:4px 4px 0 0;
+                  box-shadow:0 0 0 1px rgba(255,255,255,0.03) inset;
+                  transition:height 0.6s ease;
+                "></div>
+                <div style="margin-top:10px;text-align:center;font-size:13px;font-weight:700;color:#fff;line-height:1.25">${d.label.replace(' (D)','').replace(' (I)','').replace(' (S)','').replace(' (C)','')}</div>
+              </div>
+            `).join('')}
           </div>
-        </div>`).join('');
+        </div>`;
 
       // Campos de respostas abertas
       const respostas = [
