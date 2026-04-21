@@ -1036,7 +1036,13 @@ const DISC_MAP = [
   ['S','I','D','C']
 ];
 
-const EGO_MAP = ["A", "CL", "PC", "CA", "PC", "PA", "PA", "A", "CL", "PC", "CA", "PA", "CA", "PC", "A", "CA", "PA", "CA", "A", "PC", "A", "CL", "PC", "PA", "CA", "CA", "PC", "CL", "PC", "CA", "CA", "CL", "A", "CL", "CA", "A", "CL", "CL", "PC", "A", "A", "PA", "PA", "PC", "CL", "PA", "CL", "PA", "A", "PA"];
+const EGO_MAP = [
+  ['A'],['CL'],['PC'],['CA'],['PC'],['PA'],['PA'],['A'],['CL'],['PC'],
+  ['CA'],['PA'],['CA'],['PC'],['A'],['CA'],['PA'],['CA'],['A'],['PC'],
+  ['A'],['CL'],['PC'],['PA'],['CL'],['CA'],['PC'],['CL'],['PC'],['A'],
+  ['CA'],['CL'],['A'],['PC'],['CA'],['A'],['CL'],['PC'],['PA'],['A'],
+  ['A'],['PA'],['PC'],['CL'],['CL'],['A'],['CL'],['PA'],['A'],['CA']
+];
 
 const QUAD_MAP = [
   'A','B','C','D','A','B','A','B','D','D','C','B','B','A','C','D','C','B','D','B','D','A','D','C','B','C','B'
@@ -1460,23 +1466,19 @@ function verCandidato(id) {
     </div>
   `;
 
-  // Perfil card — vertical, sem voltar ao layout horizontal
+  // Perfil card
   const mapD={D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
-  const coresD={D:'#e53935',I:'#fdd835',S:'#388e3c',C:'#1565c0'};
-  const ordemD=['D','I','S','C'];
+  const sortedD = Object.entries(c.disc).sort((a,b)=>b[1]-a[1]);
   document.getElementById('ficha-perfil-card').innerHTML = `
-    <div style="font-size:14px;font-weight:600;margin-bottom:14px;">Perfil Comportamental</div>
-    <div style="height:210px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:8px">
-      ${ordemD.map(k=>{
-        const v=c.disc[k]||0;
-        return `
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-          <div style="font-family:'DM Mono',monospace;font-size:13px;color:#cbd5e1;margin-bottom:6px">${v}</div>
-          <div style="width:100%;max-width:58px;height:${Math.max(8, Math.round((v/85)*115))}px;background:${coresD[k]};border-radius:4px 4px 0 0;transition:height 1s"></div>
-          <div style="margin-top:8px;text-align:center;font-size:12px;font-weight:700;color:#fff;line-height:1.2">${mapD[k]}</div>
-        </div>`;
-      }).join('')}
-    </div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Perfil Comportamental</div>
+    ${sortedD.map(([k,v],i)=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <span style="font-size:12px;color:var(--muted);min-width:90px">${mapD[k]}</span>
+      <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${v}%;background:${i===0?'var(--grad)':'var(--border-strong)'};border-radius:4px;transition:width 1s"></div>
+      </div>
+      <span style="font-size:13px;font-weight:600;min-width:24px">${v}</span>
+    </div>`).join('')}
   `;
 
   // Gráfico DISC (radar)
@@ -1737,14 +1739,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const path = window.location.pathname;
   
   // /f/TOKEN — formulário do candidato
-  const matchF = path.match(/^\/f\/([A-Z0-9-]{3,16})$/i);
+  const matchF = path.match(/^\/f\/([A-Z0-9_-]{3,16})$/i);
   if (matchF) {
     carregarFormulario(matchF[1].toUpperCase());
     return;
   }
   
   // /r/TOKEN — ranking privado do contratante
-  const matchR = path.match(/^\/r\/([A-Z0-9-]{3,17})$/i);
+  const matchR = path.match(/^\/r\/([A-Z0-9_-]{3,17})$/i);
   if (matchR) {
     carregarRankingPrivado(matchR[1].toUpperCase());
     return;
@@ -1855,7 +1857,7 @@ var DQ=[
 {q:'Características que mais te descrevem:',o:['Humilde, compassivo com as pessoas.','Carismático, atrai as pessoas, desinibido.','Tem atitude, persuasivo, convincente.','Sistemático, cético, precavido.']}
 ];
 var DP=[[1,4,3,2],[4,2,3,1],[1,4,2,3],[4,3,1,2],[4,1,2,3],[1,2,3,4],[1,2,3,4],[4,1,2,3],[1,3,2,4],[4,3,2,1],[4,2,3,1],[4,3,2,1],[1,4,2,3],[4,1,3,2],[2,3,4,1],[4,1,2,3],[4,1,2,3],[1,4,2,3],[1,4,2,3],[1,4,3,2],[4,3,2,1],[3,4,2,1],[1,2,3,4],[3,4,1,2],[4,3,2,1],[4,3,2,1]];
-var EQ=["Tem movimentos firmes e ativos- eficazes?","É espontâneo e livre?","Despreza os outros?","Procura harmonizar- se com os que o cercam?","Valoriza as tradições","Percebe as qualidades alheias e as ressalta?","Interessa- se pelas conversas alheias?","Analisa bem a realidade e toma decisões?","Expressa logo os sentimentos na fisionomia?","É crítico às coisas e fatos?","É cerimonioso e retraído?","É extremamente atencioso com os outros?","Protela as decisões referente a questões desagradáveis?","Valoriza o senso de responsabilidade?","Conversa com o parceiro em postura correta, encarando- o?","Vive se queixando e se lamentando?","Gosta de ajudar os outros","Examina a reação alheia?","Costuma perguntar\"Por que? Como?\"","É moralista","Julga corretamente os fatos?","Manifesta expressões de espanto:\"Não diga!\"?","É rigoroso com os fracassos e defeitos alheios?","Cozinha, lava e limpa por iniciativa própria?","É do tipo que consegue dizer o que pensa?","Sempre arranja boas desculpas?","Costumeiramente expressa- se dizendo:\"Deve fazer?\"","Tem dificuldades em ficar quieto e parado?","Cumpre rigorosamente os regulamentos?","Sabe lidar relativamente bem com as pessoas?","Esforça- se para contentar os outros?","Fala sem cerimônia sobre o que pensa?","Colhe várias informações (fatos) e os analisa bem?","Você é egoísta?","Diz:\"Desculpe- me\", \"Sinto muito?\"","Julga os fatos sem interferir a sua opinião pessoal?","É extremamente curioso","É indiferente a assuntos alheios","Age sempre em busca do ideal","Sempre planeja conscientemente antes de agir?","Não se torna emotivo numa conversa","Sempre que vê uma pessoa em dificuldades, consola- a?","Assume a liderança do trabalho em atividades coletivas?","Expressa com clareza e firmeza sua opinião pessoal?","Decide pela intuição em lugar da razão","É maleáavel?","É obstinado em relação aos seus desejos?","Perdoa com sinceridade as falhas alheias?","Dialoga facilmente com qualquer pessoa?","Não consegue recusar um pedido?"];
+var EQ=['Tem movimentos firmes e ativos?','É espontâneo e livre?','Despreza os outros?','Harmoniza-se com quem o cerca?','Valoriza as tradições?','Percebe qualidades alheias?','Interessa-se pelas conversas alheias?','Analisa a realidade e decide?','Expressa logo os sentimentos?','É crítico às coisas e fatos?','É cerimonioso e retraído?','É extremamente atencioso?','Protela decisões desagradáveis?','Valoriza responsabilidade?','Conversa encarando o interlocutor?','Vive se queixando?','Gosta de ajudar os outros?','Examina a reação alheia?','Pergunta Por quê? Como?','É moralista?','Julga corretamente os fatos?','Manifesta espanto: Não diga!?','É rigoroso com fracassos alheios?','Limpa e organiza por iniciativa?','Consegue dizer o que pensa?','Arranja boas desculpas?','Expressa-se dizendo Deve fazer?','Tem dificuldade em ficar quieto?','Cumpre rigorosamente regulamentos?','Sabe lidar bem com pessoas?','Esforça-se para contentar os outros?','Fala sem cerimônia o que pensa?','Colhe informações e analisa?','É egoísta?','Diz Desculpe-me, Sinto muito?','Julga fatos sem opinião pessoal?','É extremamente curioso?','É indiferente a assuntos alheios?','Age em busca do ideal?','Planeja antes de agir?','Não se torna emotivo?','Consola pessoas em dificuldades?','Assume liderança coletiva?','Expressa com clareza sua opinião?','Decide pela intuição?','É maleável?','É obstinado em seus desejos?','Perdoa com sinceridade?','Dialoga facilmente com todos?','Não consegue recusar pedidos?'];
 var VQ=['Criatividade','Descobridor','Mente aberta','Amor ao aprendizado','Perspectiva','Perseverança','Integridade','Entusiasmo','Amor','Compaixão','Inteligência social','Cidadania','Igualdade','Liderança','Perdoar','Humildade','Prudência','Controle','Espiritualidade','Humor','Esperança','Otimismo','Gratidão','Apreciação de beleza'];
 
 function renderEgoQ(){var c=document.getElementById('ego-questions');if(!c||c.children.length>0)return;EQ.forEach(function(q,i){var d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';var btns=[3,2,1,0].map(function(v){return'<button onclick="setEgo('+i+','+v+',this)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted2);cursor:pointer;font-size:13px">'+v+'</button>';}).join('');d.innerHTML='<span style="font-size:13px;flex:1;line-height:1.4">'+(i+1)+'. '+q+'</span><div style="display:flex;gap:5px">'+btns+'</div>';c.appendChild(d);});}
@@ -2042,12 +2044,16 @@ async function verCandidatoReal(candidatoId) {
     
     // Montar objeto no formato esperado pela ficha
     const a = (c.analises && c.analises[0]) || {};
-    // Egograma vem do backend em campos próprios, sem misturar com o DISC
-    var egoPC = parseInt(a.ego_pai_critico) || 0;
-    var egoPA = parseInt(a.ego_pai_amoroso) || 0;
-    var egoA  = parseInt(a.ego_adulto) || 0;
-    var egoCL = parseInt(a.ego_crianca_livre) || 0;
-    var egoCA = parseInt(a.ego_crianca_adapt) || 0;
+    // Calcular ego totais das 50 questões
+    var egoPC=0, egoPA=0, egoA=0, egoCL=0, egoCA=0;
+    for(var qi=1;qi<=50;qi++){
+      var v=a['ego_r'+String(qi).padStart(2,'0')]||0;
+      if([1,2,3,6,10,20,23,29,34,37,47].indexOf(qi)>=0) egoPC+=v;
+      else if([5,12,14,17,25,28,30,31,35,38,42,46,49].indexOf(qi)>=0) egoPA+=v;
+      else if([8,13,15,19,21,27,32,33,36,39,40,44,50].indexOf(qi)>=0) egoA+=v;
+      else if([2,7,9,16,18,22,24,26,43,45,48].indexOf(qi)>=0) egoCL+=v;
+      else egoCA+=v;
+    }
     state.candidatoAtual = {
       id: c.id,
       nome: c.nome,
@@ -2222,7 +2228,7 @@ function renderizarFichaReal(c, compat, posicao) {
     }
 
     // Egograma — gráfico de linha
-    const ego = c.ego || {PC:0,PA:0,A:0,CL:0,CA:0};
+    const ego = c.ego || {PC:10,PA:10,A:15,CL:10,CA:8};
     renderEgoLineChart(ego);
 
     // Quadrantes — barras horizontais
@@ -2275,14 +2281,12 @@ function renderEgoLineChart(ego) {
   
   const labels = ['Pai Crítico','Pai Amoroso','Adulto','Criança Livre','Criança Adaptada'];
   const valores = [
-    parseInt(ego.PC) || 0,
-    parseInt(ego.PA) || 0,
-    parseInt(ego.A)  || 0,
-    parseInt(ego.CL) || 0,
-    parseInt(ego.CA) || 0
+    ego.PC || 0,
+    ego.PA || 0,
+    ego.A  || 0,
+    ego.CL || 0,
+    ego.CA || 0
   ];
-  const maxValor = Math.max(...valores, 0);
-  const maxEscala = maxValor > 0 ? Math.max(20, maxValor + 2) : 20;
   
   state.charts.egoLine = new Chart(ctx.getContext('2d'), {
     type: 'line',
@@ -2312,8 +2316,7 @@ function renderEgoLineChart(ego) {
         },
         y: {
           min: 0,
-          max: maxEscala,
-          ticks: { color: '#7a798a', font: { size: 10 }, stepSize: 2 },
+          ticks: { color: '#7a798a', font: { size: 10 } },
           grid: { color: 'rgba(255,255,255,0.05)' },
           border: { color: 'rgba(255,255,255,0.1)' }
         }
