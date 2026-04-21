@@ -869,15 +869,27 @@
         </div>
         <button class="refresh-btn" onclick="carregarLinks()">↻ Atualizar</button>
       </div>
+      <div id="barra-exclusao" style="display:none;align-items:center;gap:12px;padding:10px 16px;
+        background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;margin-bottom:12px">
+        <span id="txt-selecionados" style="font-family:'DM Mono',monospace;font-size:13px;color:#ef4444">0 selecionados</span>
+        <span style="color:var(--muted);font-size:12px">— apenas links gratuitos podem ser excluídos</span>
+        <button onclick="excluirSelecionados()"
+          style="margin-left:auto;background:#ef4444;color:#fff;border:none;border-radius:8px;
+          padding:8px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer">
+          🗑 Excluir selecionados
+        </button>
+      </div>
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              <th style="width:36px"><input type="checkbox" id="check-all-links" onchange="selecionarTodos(this)" style="cursor:pointer;accent-color:var(--accent)"/></th>
               <th>Empresa / Contratante</th>
               <th>Link Candidatos</th>
               <th>Link Ranking</th>
               <th>Candidatos</th>
+              <th>Tipo</th>
               <th>Criado em</th>
             </tr>
           </thead>
@@ -1214,8 +1226,21 @@
       return;
     }
 
-    tbody.innerHTML = lista.map(l => `
-      <tr>
+    tbody.innerHTML = lista.map(l => {
+      const gratis = !l.pago && (l.quantidade <= 10);
+      const usados = l.usados || 0;
+      const tipoBadge = gratis
+        ? `<span style="font-size:11px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3)">Gratuito</span>`
+        : `<span style="font-size:11px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:rgba(108,99,255,0.12);color:#a89bff;border:1px solid rgba(108,99,255,0.3)">Pago</span>`;
+      return `
+      <tr id="row-${l.id}">
+        <td>
+          ${gratis
+            ? `<input type="checkbox" class="link-check" data-id="${l.id}" onchange="atualizarSelecao()"
+                style="cursor:pointer;accent-color:#ef4444">`
+            : `<span title="Links pagos não podem ser excluídos" style="color:var(--muted);font-size:16px;cursor:not-allowed">🔒</span>`
+          }
+        </td>
         <td>
           <div class="td-name">${esc(l.empresa || l.nome)}</div>
           <div class="td-email">${esc(l.nome)}</div>
@@ -1229,15 +1254,22 @@
         </td>
         <td>
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2)">/r/${esc(l.token_ranking)}</span>
-            <button class="copy-btn" onclick="copiar('${SITE_BASE}/r/${l.token_ranking}')">Copiar</button>
-            <a class="open-btn" href="${SITE_BASE}/r/${l.token_ranking}" target="_blank">↗</a>
+            ${l.token_ranking
+              ? `<span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2)">/r/${esc(l.token_ranking)}</span>
+                 <button class="copy-btn" onclick="copiar('${SITE_BASE}/r/${l.token_ranking}')">Copiar</button>
+                 <a class="open-btn" href="${SITE_BASE}/r/${l.token_ranking}" target="_blank">↗</a>`
+              : '<span style="color:var(--muted);font-size:12px">–</span>'
+            }
           </div>
         </td>
-        <td class="td-candidatos">${l.total_candidatos || 0}</td>
+        <td class="td-candidatos">
+          <span style="font-family:'DM Mono',monospace;font-size:14px;color:${usados>0?'var(--text)':'var(--muted)'}">${usados}</span>
+          <span style="color:var(--muted);font-size:11px"> / ${l.quantidade || '–'}</span>
+        </td>
+        <td>${tipoBadge}</td>
         <td class="td-date">${formatarData(l.criado_em)}</td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   }
 
   // ═══ MODAL DETALHES ═══
@@ -1320,6 +1352,53 @@
     if (!perfil) return '<span style="color:var(--muted);font-size:12px">–</span>';
     const c = corPerfil(perfil);
     return `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-family:'DM Mono',monospace;background:${c.bg};color:${c.color};border:1px solid ${c.border};${extra||''}">${perfil}</span>`;
+  }
+
+  // ═══ SELEÇÃO E EXCLUSÃO DE LINKS ═══
+  function selecionarTodos(cb) {
+    document.querySelectorAll('.link-check').forEach(c => c.checked = cb.checked);
+    atualizarSelecao();
+  }
+
+  function atualizarSelecao() {
+    const selecionados = document.querySelectorAll('.link-check:checked');
+    const barra = document.getElementById('barra-exclusao');
+    const txt = document.getElementById('txt-selecionados');
+    if (selecionados.length > 0) {
+      barra.style.display = 'flex';
+      txt.textContent = `${selecionados.length} selecionado${selecionados.length>1?'s':''}`;
+    } else {
+      barra.style.display = 'none';
+    }
+  }
+
+  async function excluirSelecionados() {
+    const checks = document.querySelectorAll('.link-check:checked');
+    if (checks.length === 0) return;
+    if (!confirm(`Confirma a exclusão de ${checks.length} link(s) gratuito(s)? Esta ação não pode ser desfeita.`)) return;
+
+    const ids = Array.from(checks).map(c => c.dataset.id);
+    let erros = 0;
+
+    for (const id of ids) {
+      try {
+        const res = await fetch(`${ADMIN_BASE}/link/${id}`, {
+          method: 'DELETE',
+          headers: authHeaders()
+        });
+        if (res.ok) {
+          document.getElementById('row-' + id)?.remove();
+        } else {
+          erros++;
+        }
+      } catch(e) { erros++; }
+    }
+
+    document.getElementById('barra-exclusao').style.display = 'none';
+    document.getElementById('check-all-links').checked = false;
+    if (erros > 0) mostrarToast(`${erros} link(s) não puderam ser excluídos`);
+    else mostrarToast(`${ids.length} link(s) excluído(s) com sucesso!`);
+    carregarLinks();
   }
 
   function fecharModal(e) {
