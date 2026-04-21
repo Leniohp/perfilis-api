@@ -2027,7 +2027,7 @@ function renderizarRankingReal() {
     const pos = i + 1;
     const cls = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
     const compat = c.compatibilidade || c.compat || 0;
-    const bar = Math.round((compat / 75) * 100);
+    const bar = Math.max(0, Math.min(100, Math.round((compat / 104) * 100)));
     const cor = CORES_GRAD[i % CORES_GRAD.length];
     const bg = 'linear-gradient(135deg,' + cor[0] + ',' + cor[1] + ')';
     const nome = c.nome || 'Candidato';
@@ -2090,8 +2090,8 @@ async function verCandidatoReal(candidatoId) {
         q5: c.experiencia || '', q6: c.nivel || '', q7: c.resp_feedback || ''
       },
       disc: {
-        D: a.disc_executor || 51, I: a.disc_comunicador || 51,
-        S: a.disc_planejador || 51, C: a.disc_analitico || 51
+        D: a.disc_executor || 0, I: a.disc_comunicador || 0,
+        S: a.disc_planejador || 0, C: a.disc_analitico || 0
       },
       ego: {
         PC: egoPC||a.ego_pai_critico||10, PA: egoPA||a.ego_pai_amoroso||10,
