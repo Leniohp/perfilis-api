@@ -232,17 +232,17 @@ function calcularDISC(body) {
   for(let q=0;q<26;q++){
     for(let j=0;j<4;j++){
       const key = 'disc_q' + String(q+1).padStart(2,'0') + '_' + 'abcd'[j];
-      sc[DISC_MAP[q][j]] += parseInt(body[key])||0;
+      sc[DISC_MAP[q][j]] += parseInt(body[key]) || 0;
     }
   }
-  const vals = Object.values(sc), min=Math.min(...vals), max=Math.max(...vals), range=max-min||1;
   const sorted = Object.entries(sc).sort((a,b)=>b[1]-a[1]);
   const mapNome = {D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
   return {
-    disc_executor:    Math.round(((sc.D-min)/range)*24+51),
-    disc_comunicador: Math.round(((sc.I-min)/range)*24+51),
-    disc_planejador:  Math.round(((sc.S-min)/range)*24+51),
-    disc_analitico:   Math.round(((sc.C-min)/range)*24+51),
+    // Igual à planilha: soma bruta por fator, sem normalização
+    disc_executor:    sc.D,
+    disc_comunicador: sc.I,
+    disc_planejador:  sc.S,
+    disc_analitico:   sc.C,
     perfil_primario:   mapNome[sorted[0][0]],
     perfil_secundario: mapNome[sorted[1][0]],
   };
