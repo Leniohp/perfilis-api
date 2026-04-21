@@ -908,7 +908,8 @@
 
 <script>
   // ═══ CONFIG ═══
-  const API_BASE = 'https://project-dcveo.vercel.app/api';
+  const API_BASE  = 'https://project-dcveo.vercel.app/api';
+  const ADMIN_BASE = 'https://project-dcveo.vercel.app/admin';
   const SITE_BASE = 'https://www.perfilis.com';
 
   let token = null;
@@ -936,7 +937,7 @@
     err.style.display = 'none';
 
     try {
-      const res = await fetch(`${API_BASE}/admin/login`, {
+      const res = await fetch(`${ADMIN_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, senha })
@@ -1000,7 +1001,7 @@
       `<tr class="loading-row"><td colspan="7"><div class="spinner"></div><br/>Carregando...</td></tr>`;
 
     try {
-      const res = await fetch(`${API_BASE}/admin/contratantes`, { headers: authHeaders() });
+      const res = await fetch(`${ADMIN_BASE}/contratantes`, { headers: authHeaders() });
       if (res.status === 401) { fazerLogout(); return; }
       const data = await res.json();
       contratantesData = data.contratantes || [];
@@ -1122,7 +1123,7 @@
       `<tr class="loading-row"><td colspan="6"><div class="spinner"></div><br/>Carregando...</td></tr>`;
 
     try {
-      const res = await fetch(`${API_BASE}/admin/candidatos`, { headers: authHeaders() });
+      const res = await fetch(`${ADMIN_BASE}/candidatos`, { headers: authHeaders() });
       if (res.status === 401) { fazerLogout(); return; }
       const data = await res.json();
       candidatosData = data.candidatos || [];
@@ -1175,7 +1176,7 @@
       `<tr class="loading-row"><td colspan="5"><div class="spinner"></div><br/>Carregando...</td></tr>`;
 
     try {
-      const res = await fetch(`${API_BASE}/admin/links`, { headers: authHeaders() });
+      const res = await fetch(`${ADMIN_BASE}/links`, { headers: authHeaders() });
       if (res.status === 401) { fazerLogout(); return; }
       const data = await res.json();
       renderizarLinks(data.links || []);
@@ -1192,7 +1193,7 @@
   }
 
   async function carregarLinksComFiltro(busca) {
-    const res = await fetch(`${API_BASE}/admin/links`, { headers: authHeaders() });
+    const res = await fetch(`${ADMIN_BASE}/links`, { headers: authHeaders() });
     const data = await res.json();
     const lista = (data.links || []).filter(l => {
       const t = `${l.empresa} ${l.nome} ${l.token_formulario} ${l.token_ranking}`.toLowerCase();
@@ -1246,7 +1247,7 @@
       `<div style="text-align:center;padding:40px"><div class="spinner"></div><br/>Carregando...</div>`;
 
     try {
-      const res = await fetch(`${API_BASE}/admin/contratante/${id}`, { headers: authHeaders() });
+      const res = await fetch(`${ADMIN_BASE}/contratante/${id}`, { headers: authHeaders() });
       const c = await res.json();
 
       const candidatosHtml = (c.candidatos || []).length > 0
