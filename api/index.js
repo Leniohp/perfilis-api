@@ -361,3 +361,47 @@ app.get('/admin/contratantes', adminAuth, async (req, res) => {
 
   res.json({ total: resultado.length, contratantes: resultado });
 });
+
+// Admin: todos os candidatos
+app.get('/admin/candidatos', adminAuth, async (req, res) => {
+  const { data: candidatos, error } = await supabase
+    .from('candidatos')
+    .select('*, analises(*)')
+    .order('created_at', { ascending: false });
+
+  if (error) return res.status(500).json({ erro: error.message });
+
+  // Buscar info do contratante via pacote
+  const { data: pacotes } = await supabase
+    .from('pacotes')
+    .select('id, contratante_id, vaga, contratantes(nome, empresa)');
+
+  const pacoteMap = {};
+  (pacotes || []).forEach(p => { pacoteMap[p.id] = p; });
+
+  const resultado = (candidatos || []).map(c => ({
+    ...c,
+    pacote_info: pacoteMap[c.pacote_id] || null,
+    perfil_primario: c.analises?.[0]?.perfil_primario || null
+  }));
+
+  res.json({ total: resultado.length, candidatos: resultado });
+});
+
+// Admin: base de links (todos os pacotes)
+app.get('/admin/links', adminAuth, async (req, res) => {
+  const { data: pacotes, error } = await supabase
+    .from('pacotes')
+    .select('*, contratantes(nome, empresa, email)')
+    .order('created_at', { ascending: false });
+
+  if (error) return res.status(500).json({ erro: error.message });
+
+  const resultado = (pacotes || []).map(p => ({
+    ...p,
+    link_candidatos: `https://perfilis.com/f/${p.token}`,
+    link_ranking: p.token_ranking ? `https://perfilis.com/r/${p.token_ranking}` : null
+  }));
+
+  res.json({ total: resultado.length, links: resultado });
+});
