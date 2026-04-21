@@ -198,10 +198,10 @@ app.get('/api/candidato/:id', async (req, res) => {
 
 // Algoritmo DISC
 const DISC_MAP = [
-  ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
-  ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
+  ['D','I','S','C'],['C','I','S','D'],['D','S','I','C'],['S','I','D','C'],['I','D','S','C'],
+  ['D','I','S','C'],['S','I','D','C'],['D','I','C','S'],['S','I','D','C'],['C','I','D','S'],
   ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
-  ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
+  ['S','D','I','C'],['C','S','I','D'],['C','I','S','D'],['D','C','S','I'],['D','C','S','I'],
   ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],['S','I','D','C']
 ];
 
@@ -213,15 +213,14 @@ function calcularDISC(body) {
       sc[DISC_MAP[q][j]] += parseInt(body[key])||0;
     }
   }
-  const vals = Object.values(sc), min=Math.min(...vals), max=Math.max(...vals), range=max-min||1;
   const sorted = Object.entries(sc).sort((a,b)=>b[1]-a[1]);
   const mapNome = {D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
   return {
-    disc_executor:    Math.round(((sc.D-min)/range)*24+51),
-    disc_comunicador: Math.round(((sc.I-min)/range)*24+51),
-    disc_planejador:  Math.round(((sc.S-min)/range)*24+51),
-    disc_analitico:   Math.round(((sc.C-min)/range)*24+51),
-    perfil_primario:   mapNome[sorted[0][0]],
+    disc_executor: sc.D,
+    disc_comunicador: sc.I,
+    disc_planejador: sc.S,
+    disc_analitico: sc.C,
+    perfil_primario: mapNome[sorted[0][0]],
     perfil_secundario: mapNome[sorted[1][0]],
   };
 }
