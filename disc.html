@@ -1036,13 +1036,7 @@ const DISC_MAP = [
   ['S','I','D','C']
 ];
 
-const EGO_MAP = [
-  ['A'],['CL'],['PC'],['CA'],['PC'],['PA'],['PA'],['A'],['CL'],['PC'],
-  ['CA'],['PA'],['CA'],['PC'],['A'],['CA'],['PA'],['CA'],['A'],['PC'],
-  ['A'],['CL'],['PC'],['PA'],['CL'],['CA'],['PC'],['CL'],['PC'],['A'],
-  ['CA'],['CL'],['A'],['PC'],['CA'],['A'],['CL'],['PC'],['PA'],['A'],
-  ['A'],['PA'],['PC'],['CL'],['CL'],['A'],['CL'],['PA'],['A'],['CA']
-];
+const EGO_MAP = ["A", "CL", "PC", "CA", "PC", "PA", "PA", "A", "CL", "PC", "CA", "PA", "CA", "PC", "A", "CA", "PA", "CA", "A", "PC", "A", "CL", "PC", "PA", "CA", "CA", "PC", "CL", "PC", "CA", "CA", "CL", "A", "CL", "CA", "A", "CL", "CL", "PC", "A", "A", "PA", "PA", "PC", "CL", "PA", "CL", "PA", "A", "PA"];
 
 const QUAD_MAP = [
   'A','B','C','D','A','B','A','B','D','D','C','B','B','A','C','D','C','B','D','B','D','A','D','C','B','C','B'
@@ -1466,19 +1460,23 @@ function verCandidato(id) {
     </div>
   `;
 
-  // Perfil card
+  // Perfil card — vertical, sem voltar ao layout horizontal
   const mapD={D:'Executor',I:'Comunicador',S:'Planejador',C:'Analítico'};
-  const sortedD = Object.entries(c.disc).sort((a,b)=>b[1]-a[1]);
+  const coresD={D:'#e53935',I:'#fdd835',S:'#388e3c',C:'#1565c0'};
+  const ordemD=['D','I','S','C'];
   document.getElementById('ficha-perfil-card').innerHTML = `
-    <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Perfil Comportamental</div>
-    ${sortedD.map(([k,v],i)=>`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <span style="font-size:12px;color:var(--muted);min-width:90px">${mapD[k]}</span>
-      <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
-        <div style="height:100%;width:${v}%;background:${i===0?'var(--grad)':'var(--border-strong)'};border-radius:4px;transition:width 1s"></div>
-      </div>
-      <span style="font-size:13px;font-weight:600;min-width:24px">${v}</span>
-    </div>`).join('')}
+    <div style="font-size:14px;font-weight:600;margin-bottom:14px;">Perfil Comportamental</div>
+    <div style="height:210px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:8px">
+      ${ordemD.map(k=>{
+        const v=c.disc[k]||0;
+        return `
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+          <div style="font-family:'DM Mono',monospace;font-size:13px;color:#cbd5e1;margin-bottom:6px">${v}</div>
+          <div style="width:100%;max-width:58px;height:${Math.max(8, Math.round((v/85)*115))}px;background:${coresD[k]};border-radius:4px 4px 0 0;transition:height 1s"></div>
+          <div style="margin-top:8px;text-align:center;font-size:12px;font-weight:700;color:#fff;line-height:1.2">${mapD[k]}</div>
+        </div>`;
+      }).join('')}
+    </div>
   `;
 
   // Gráfico DISC (radar)
@@ -2044,16 +2042,12 @@ async function verCandidatoReal(candidatoId) {
     
     // Montar objeto no formato esperado pela ficha
     const a = (c.analises && c.analises[0]) || {};
-    // Calcular ego totais das 50 questões
-    var egoPC=0, egoPA=0, egoA=0, egoCL=0, egoCA=0;
-    for(var qi=1;qi<=50;qi++){
-      var v=a['ego_r'+String(qi).padStart(2,'0')]||0;
-      if([1,2,3,6,10,20,23,29,34,37,47].indexOf(qi)>=0) egoPC+=v;
-      else if([5,12,14,17,25,28,30,31,35,38,42,46,49].indexOf(qi)>=0) egoPA+=v;
-      else if([8,13,15,19,21,27,32,33,36,39,40,44,50].indexOf(qi)>=0) egoA+=v;
-      else if([2,7,9,16,18,22,24,26,43,45,48].indexOf(qi)>=0) egoCL+=v;
-      else egoCA+=v;
-    }
+    // Egograma vem do backend em campos próprios, sem misturar com o DISC
+    var egoPC = parseInt(a.ego_pai_critico) || 0;
+    var egoPA = parseInt(a.ego_pai_amoroso) || 0;
+    var egoA  = parseInt(a.ego_adulto) || 0;
+    var egoCL = parseInt(a.ego_crianca_livre) || 0;
+    var egoCA = parseInt(a.ego_crianca_adapt) || 0;
     state.candidatoAtual = {
       id: c.id,
       nome: c.nome,
@@ -2074,9 +2068,9 @@ async function verCandidatoReal(candidatoId) {
         S: a.disc_planejador || 51, C: a.disc_analitico || 51
       },
       ego: {
-        PC: egoPC, PA: egoPA,
-        A: egoA, CL: egoCL,
-        CA: egoCA
+        PC: egoPC||a.ego_pai_critico||10, PA: egoPA||a.ego_pai_amoroso||10,
+        A: egoA||a.ego_adulto||15, CL: egoCL||a.ego_crianca_livre||10,
+        CA: egoCA||a.ego_crianca_adapt||8
       },
       quad: {
         A: a.quad_analitico || 12, B: a.quad_ordenado || 12,
@@ -2281,12 +2275,14 @@ function renderEgoLineChart(ego) {
   
   const labels = ['Pai Crítico','Pai Amoroso','Adulto','Criança Livre','Criança Adaptada'];
   const valores = [
-    ego.PC || 0,
-    ego.PA || 0,
-    ego.A  || 0,
-    ego.CL || 0,
-    ego.CA || 0
+    parseInt(ego.PC) || 0,
+    parseInt(ego.PA) || 0,
+    parseInt(ego.A)  || 0,
+    parseInt(ego.CL) || 0,
+    parseInt(ego.CA) || 0
   ];
+  const maxValor = Math.max(...valores, 0);
+  const maxEscala = maxValor > 0 ? Math.max(20, maxValor + 2) : 20;
   
   state.charts.egoLine = new Chart(ctx.getContext('2d'), {
     type: 'line',
@@ -2316,7 +2312,8 @@ function renderEgoLineChart(ego) {
         },
         y: {
           min: 0,
-          ticks: { color: '#7a798a', font: { size: 10 } },
+          max: maxEscala,
+          ticks: { color: '#7a798a', font: { size: 10 }, stepSize: 2 },
           grid: { color: 'rgba(255,255,255,0.05)' },
           border: { color: 'rgba(255,255,255,0.1)' }
         }
