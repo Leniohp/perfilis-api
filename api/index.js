@@ -444,25 +444,26 @@ app.get('/admin/candidato/:id', adminAuth, async (req, res) => {
   res.json(data);
 });
 
-// Admin: excluir link gratuito (pacote)
+
+// Admin: excluir link (pacote)
 app.delete('/admin/link/:id', adminAuth, async (req, res) => {
   // Busca o pacote
   const { data: pacote, error } = await supabase
     .from('pacotes')
-    .select('id, quantidade, pago')
+    .select('id')
     .eq('id', req.params.id)
     .single();
 
-  if (error || !pacote) return res.status(404).json({ erro: 'Link não encontrado' });
-
-  // Bloqueia exclusão de links pagos
-  if (pacote.pago === true || pacote.quantidade > 10) {
-    return res.status(403).json({ erro: 'Links pagos não podem ser excluídos' });
+  if (error || !pacote) {
+    return res.status(404).json({ erro: 'Link não encontrado' });
   }
 
   // Exclui candidatos e análises vinculados
   const { data: cands } = await supabase
-    .from('candidatos').select('id').eq('pacote_id', pacote.id);
+    .from('candidatos')
+    .select('id')
+    .eq('pacote_id', pacote.id);
+
   if (cands?.length) {
     const candIds = cands.map(c => c.id);
     await supabase.from('analises').delete().in('candidato_id', candIds);
@@ -470,24 +471,16 @@ app.delete('/admin/link/:id', adminAuth, async (req, res) => {
   }
 
   // Exclui o pacote
-  await supabase.from('pacotes').delete().eq('id', pacote.id);
+  const { error: delError } = await supabase
+    .from('pacotes')
+    .delete()
+    .eq('id', pacote.id);
+
+  if (delError) {
+    return res.status(500).json({ erro: delError.message });
+  }
+
   res.json({ ok: true });
 });
 
-
-app.delete('/admin/link/:id', async (req, res) => {
-  try {
-    const auth = req.headers.authorization || '';
-    if (!auth.startsWith('Bearer ')) return res.status(401).json({ erro: 'Sem token' });
-    const ok = verifyAdminToken(auth.slice(7));
-    if (!ok) return res.status(401).json({ erro: 'Token inválido' });
-
-    const id = req.params.id;
-    const { error } = await supabase.from('pacotes').delete().eq('id', id);
-    if (error) return res.status(500).json({ erro: error.message });
-
-    res.json({ ok: true, excluido: id });
-  } catch (e) {
-    res.status(500).json({ erro: e.message });
-  }
-});
+// Admin: excluir link gratuito (pacote)
