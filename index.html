@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
 :root {
   --bg: #05050a;
@@ -860,21 +861,21 @@ footer a { color: var(--accent2); text-decoration: none; }
             <p style="font-size:11px;color:var(--muted);margin-top:8px">Após o pagamento, seus links serão liberados automaticamente.</p>
           </div>
         </div>
-        <!-- Área Cartão -->
+        <!-- Área Cartão — Stripe Elements -->
         <div id="pag-area-card" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px">
-          <div class="form-group"><label>Número do cartão</label>
-            <input class="input" type="text" id="card-numero" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCartao(this)">
+          <div class="form-group"><label>Nome no cartão</label>
+            <input class="input" type="text" id="card-nome" placeholder="Como está no cartão">
           </div>
-          <div class="grid2">
-            <div class="form-group"><label>Validade</label><input class="input" type="text" id="card-validade" placeholder="MM/AA" maxlength="5" oninput="formatValidade(this)"></div>
-            <div class="form-group"><label>CVV</label><input class="input" type="text" id="card-cvv" placeholder="123" maxlength="4"></div>
+          <div class="form-group">
+            <label>Dados do cartão</label>
+            <div id="stripe-card-element" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;transition:border-color 0.2s"></div>
+            <div id="stripe-card-error" style="color:#f87171;font-size:12px;margin-top:6px;display:none"></div>
           </div>
-          <div class="form-group"><label>Nome no cartão</label><input class="input" type="text" id="card-nome" placeholder="Como está no cartão"></div>
           <div class="form-group">
             <label>Parcelamento</label>
             <select class="input" id="card-parcelas"></select>
           </div>
-          <button class="btn btn-grad" style="width:100%" onclick="gerarPagamento('card')">Pagar agora →</button>
+          <button class="btn btn-grad" style="width:100%" id="btn-pagar" onclick="gerarPagamento('card')">Pagar agora →</button>
         </div>
         <div style="display:flex;gap:10px;margin-top:6px">
           <button class="btn btn-outline" onclick="nextStep(2)">← Voltar</button>
@@ -2413,6 +2414,48 @@ window.formatValidade = function(el) {
   el.value = v;
 };
 
+// ── STRIPE ELEMENTS ──────────────────────────────────────────────
+var stripe = null;
+var stripeCardElement = null;
+
+function initStripeElements() {
+  if (stripe) return; // já inicializado
+  stripe = Stripe('pk_live_51TOLYNAx1VHNMjzaKNvb0OjO0WvJrsMB9mjzeMgPJ8RQIQiJ2P0JhMSnVEJXbC2T5fHiQjX3gPzB4W3zIGZk5YHR00e2wsTcjv');
+  var elements = stripe.elements({
+    appearance: {
+      theme: 'night',
+      variables: {
+        colorPrimary: '#6c4fee',
+        colorBackground: '#13131c',
+        colorText: '#e8e6f0',
+        colorDanger: '#f87171',
+        fontFamily: 'Inter, sans-serif',
+        borderRadius: '10px',
+      }
+    }
+  });
+  stripeCardElement = elements.create('card', {
+    hidePostalCode: true,
+    style: {
+      base: {
+        color: '#e8e6f0',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: '14px',
+        '::placeholder': { color: '#6b6a7a' }
+      },
+      invalid: { color: '#f87171' }
+    }
+  });
+  stripeCardElement.mount('#stripe-card-element');
+  stripeCardElement.on('change', function(e) {
+    var errEl = document.getElementById('stripe-card-error');
+    if (errEl) {
+      if (e.error) { errEl.style.display='block'; errEl.textContent=e.error.message; }
+      else { errEl.style.display='none'; errEl.textContent=''; }
+    }
+  });
+}
+
 // Selecionar método de pagamento
 window.selecionarPagamento = function(tipo) {
   state.pagamento = state.pagamento || {};
@@ -2427,8 +2470,9 @@ window.selecionarPagamento = function(tipo) {
   if (pixArea)  pixArea.style.display  = tipo==='pix'  ? 'block' : 'none';
   if (cardArea) cardArea.style.display = tipo==='card' ? 'block' : 'none';
 
-  // Popular parcelas
+  // Inicializar Stripe Elements ao mostrar área do cartão
   if (tipo === 'card') {
+    setTimeout(initStripeElements, 50);
     var sel = document.getElementById('card-parcelas');
     if (sel) {
       var total = calcPreco(state.cadastro.qty).total;
@@ -2468,16 +2512,18 @@ window.aplicarCupom = function() {
 window.gerarPagamento = async function(tipo) {
   var p = calcPreco(state.cadastro.qty);
   if (p.total === 0) {
-    // Gratuito — pular pagamento
     await criarPacoteAposPagamento(null);
     return;
   }
   var desconto = (state.pagamento && state.pagamento.desconto) || 0;
   var total = Math.round(p.total * (1 - desconto/100));
 
+  var btnPagar = document.getElementById('btn-pagar');
+  if (btnPagar) { btnPagar.disabled = true; btnPagar.textContent = 'Processando...'; }
   showToast('Processando...','⏳');
 
   try {
+    // 1️⃣ Pede ao backend o client_secret do PaymentIntent
     var body = {
       valor: total,
       metodo: tipo,
@@ -2486,39 +2532,50 @@ window.gerarPagamento = async function(tipo) {
       email: state.cadastro.email,
       descricao: 'Perfilis — ' + state.cadastro.qty + ' análises DISC'
     };
-    if (tipo === 'card') {
-      body.card_numero = (document.getElementById('card-numero').value||'').replace(/\s/g,'');
-      body.card_validade = document.getElementById('card-validade').value||'';
-      body.card_cvv = document.getElementById('card-cvv').value||'';
-      body.card_nome = document.getElementById('card-nome').value||'';
-      body.parcelas = parseInt(document.getElementById('card-parcelas').value)||1;
-    }
     var r = await fetch('https://project-dcveo.vercel.app/api/pagamento', {
       method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
     });
     var d = await r.json();
-    if (d.erro) { showToast(d.erro,'❌'); return; }
+    if (d.erro) { showToast(d.erro,'❌'); if(btnPagar){btnPagar.disabled=false;btnPagar.textContent='Pagar agora →';} return; }
 
     if (tipo === 'pix') {
-      // Mostrar QR / chave PIX
       var qrEl = document.getElementById('pix-qr');
       var codeEl = document.getElementById('pix-code');
       if (qrEl) qrEl.style.display = 'block';
       if (codeEl) codeEl.textContent = d.pix_copia_cola || d.pix_key || '';
       state.pagamento.payment_id = d.payment_id;
       showToast('PIX gerado! Copie a chave para pagar','✅');
-      // Polling status
       iniciarPollingPIX(d.payment_id);
+
     } else {
-      // Cartão — aprovado imediato
-      if (d.status === 'approved' || d.status === 'succeeded') {
-        await criarPacoteAposPagamento(d.payment_id);
-      } else {
-        showToast(d.mensagem || 'Pagamento recusado. Verifique os dados.','❌');
+      // 2️⃣ Cartão — confirmar com Stripe Elements (dados NUNCA passam pelo servidor)
+      if (!d.client_secret) {
+        showToast('Erro: backend não retornou client_secret','❌');
+        if(btnPagar){btnPagar.disabled=false;btnPagar.textContent='Pagar agora →';}
+        return;
       }
+      var nomeCartao = (document.getElementById('card-nome').value||'').trim();
+      var result = await stripe.confirmCardPayment(d.client_secret, {
+        payment_method: {
+          card: stripeCardElement,
+          billing_details: { name: nomeCartao, email: state.cadastro.email }
+        }
+      });
+      if (result.error) {
+        var errEl = document.getElementById('stripe-card-error');
+        if (errEl) { errEl.style.display='block'; errEl.textContent=result.error.message; }
+        showToast(result.error.message,'❌');
+      } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+        showToast('Pagamento aprovado! 🎉','✅');
+        await criarPacoteAposPagamento(result.paymentIntent.id);
+      } else {
+        showToast('Pagamento recusado. Verifique os dados.','❌');
+      }
+      if(btnPagar){btnPagar.disabled=false;btnPagar.textContent='Pagar agora →';}
     }
   } catch(e) {
     showToast('Erro de conexão com o gateway de pagamento','❌');
+    if(btnPagar){btnPagar.disabled=false;btnPagar.textContent='Pagar agora →';}
   }
 };
 
