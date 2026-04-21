@@ -312,3 +312,52 @@ app.post('/api/stripe/webhook', express.raw({type: 'application/json'}), (req, r
   }
   res.json({ received: true });
 });
+
+// ══════════════════════════════════════
+// ADMIN — Rotas protegidas
+// ══════════════════════════════════════
+const ADMIN_EMAIL    = 'adm@maximagestao.com';
+const ADMIN_PASSWORD = 'Admzykbx250848_@perfilis2026';
+const ADMIN_TOKEN    = crypto.randomBytes(32).toString('hex');
+
+app.post('/admin/login', (req, res) => {
+  const { email, senha } = req.body;
+  if (email === ADMIN_EMAIL && senha === ADMIN_PASSWORD) {
+    return res.json({ token: ADMIN_TOKEN });
+  }
+  res.status(401).json({ erro: 'Email ou senha incorretos.' });
+});
+
+function adminAuth(req, res, next) {
+  const auth = req.headers['authorization'] || '';
+  const token = auth.replace('Bearer ', '').trim();
+  if (token !== ADMIN_TOKEN) return res.status(403).json({ erro: 'Não autorizado' });
+  next();
+}
+
+app.get('/admin/contratantes', adminAuth, async (req, res) => {
+  const { data: contratantes, error } = await supabase
+    .from('contratantes')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) return res.status(500).json({ erro: error.message });
+
+  const { data: pacotes } = await supabase
+    .from('pacotes')
+    .select('id, contratante_id, token, token_ranking, vaga, quantidade, usados, ativo, created_at');
+
+  const pacoteMap = {};
+  (pacotes || []).forEach(p => {
+    if (!pacoteMap[p.contratante_id]) pacoteMap[p.contratante_id] = [];
+    pacoteMap[p.contratante_id].push(p);
+  });
+
+  const resultado = contratantes.map(c => ({
+    ...c,
+    pacotes: pacoteMap[c.id] || [],
+    candidatos_count: (pacoteMap[c.id] || []).reduce((s, p) => s + (p.usados || 0), 0)
+  }));
+
+  res.json({ total: resultado.length, contratantes: resultado });
+});
