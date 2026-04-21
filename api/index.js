@@ -466,6 +466,68 @@ app.get('/admin/candidato/:id', adminAuth, async (req, res) => {
   res.json(data);
 });
 
+// Admin: excluir candidatos em lote (e análises vinculadas)
+app.post('/admin/candidatos/excluir', adminAuth, async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.filter(Boolean) : [];
+    if (!ids.length) return res.status(400).json({ erro: 'Nenhum candidato selecionado' });
+
+    // Exclui análises vinculadas
+    const { error: analisesError } = await supabase
+      .from('analises')
+      .delete()
+      .in('candidato_id', ids);
+
+    if (analisesError) return res.status(500).json({ erro: analisesError.message });
+
+    // Buscar pacotes para recalcular contador usados
+    const { data: candidatosRef, error: refError } = await supabase
+      .from('candidatos')
+      .select('id, pacote_id')
+      .in('id', ids);
+
+    if (refError) return res.status(500).json({ erro: refError.message });
+
+    const pacoteIds = [...new Set((candidatosRef || []).map(c => c.pacote_id).filter(Boolean))];
+
+    // Exclui candidatos
+    const { error: candError } = await supabase
+      .from('candidatos')
+      .delete()
+      .in('id', ids);
+
+    if (candError) return res.status(500).json({ erro: candError.message });
+
+    // Atualiza usados/ativo dos pacotes afetados
+    for (const pacoteId of pacoteIds) {
+      const { count, error: countError } = await supabase
+        .from('candidatos')
+        .select('*', { count: 'exact', head: true })
+        .eq('pacote_id', pacoteId);
+
+      if (!countError) {
+        const { data: pacote } = await supabase
+          .from('pacotes')
+          .select('quantidade')
+          .eq('id', pacoteId)
+          .single();
+
+        const usados = count || 0;
+        const ativo = pacote ? usados < (pacote.quantidade || 0) : true;
+
+        await supabase
+          .from('pacotes')
+          .update({ usados, ativo })
+          .eq('id', pacoteId);
+      }
+    }
+
+    res.json({ ok: true, excluidos: ids.length });
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
 
 // Admin: excluir link (pacote)
 app.delete('/admin/link/:id', adminAuth, async (req, res) => {
