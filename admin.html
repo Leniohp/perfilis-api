@@ -1515,33 +1515,189 @@
   }
 
   const DISC_QUESTOES = [
-    ['Ao lidar com problemas no trabalho, você tende a ser...','Direto e decisivo','Entusiasmado e criativo','Paciente e metódico','Cuidadoso e analítico'],
-    ['Em relação a prazos e metas, você...','Foca em resultados rápidos','Motiva os outros a alcançá-los','Trabalha de forma consistente','Planeja cada etapa com precisão'],
-    ['Quando precisa convencer alguém, você...','Usa argumentos diretos e assertivos','Apela às emoções e ao entusiasmo','Busca consenso e harmonia','Apresenta dados e fatos detalhados'],
-    ['Em situações de pressão, você tende a...','Agir rapidamente e tomar controle','Manter o otimismo e energizar o grupo','Manter a calma e seguir o plano','Analisar antes de agir'],
-    ['Ao trabalhar em equipe, você prefere...','Liderar e definir direção','Inspirar e engajar os membros','Apoiar e manter a estabilidade','Organizar e verificar detalhes'],
-    ['Diante de mudanças, você...','Abraça como oportunidade de liderar','Vê como algo empolgante','Prefere transições graduais','Avalia riscos antes de aceitar'],
-    ['Sua maior força no trabalho é...','Capacidade de decisão','Habilidade de comunicação','Consistência e confiabilidade','Precisão e qualidade'],
-    ['Quando comete um erro, você...','Assume e busca solução imediata','Tende a minimizar e seguir em frente','Reflete e evita repetir','Analisa a causa raiz detalhadamente'],
-    ['Em reuniões, você costuma...','Ir direto ao ponto e propor ações','Compartilhar ideias e animar o grupo','Ouvir e contribuir quando necessário','Apresentar análises e dados precisos'],
-    ['Sua abordagem com regras e procedimentos é...','Segue se fizer sentido estratégico','Flexibiliza quando necessário','Segue consistentemente','Segue rigorosamente'],
-    ['O que mais te motiva no trabalho é...','Desafios e resultados concretos','Reconhecimento e interação social','Estabilidade e ambiente harmonioso','Excelência e qualidade do trabalho'],
-    ['Ao aprender algo novo, você prefere...','Testar na prática imediatamente','Aprender interativamente em grupo','Seguir um ritmo e método definido','Estudar a fundo antes de aplicar'],
-    ['Sua comunicação é geralmente...','Direta e objetiva','Expressiva e persuasiva','Calma e diplomática','Precisa e detalhada'],
-    ['Em relação a riscos, você tende a...','Assumir riscos calculados','Assumir riscos com otimismo','Evitar riscos desnecessários','Minimizar riscos com análise'],
-    ['Ao receber críticas, você...','Ouve mas mantém seu ponto se acreditar','Tende a rebater emocionalmente','Aceita com calma e reflete','Analisa se há embasamento técnico'],
-    ['Seu estilo de liderança é mais...','Diretivo — dou direção e espero resultados','Inspirador — motivo e envolvo todos','Colaborativo — apoio e desenvolvo o time','Técnico — garanto qualidade e processos'],
-    ['Quando tem múltiplas tarefas, você...','Prioriza o que gera mais impacto','Começa pelo que é mais empolgante','Segue uma ordem lógica e consistente','Organiza meticulosamente antes de começar'],
-    ['Em conflitos, você tende a...','Enfrentar diretamente','Tentar reconciliar com entusiasmo','Evitar e buscar harmonia','Analisar os fatos objetivamente'],
-    ['Sua relação com detalhes é...','Delega — foca no todo estratégico','Depende do impacto nas pessoas','Acompanha com consistência','Preza pela perfeição nos detalhes'],
-    ['Quanto ao planejamento, você...','Define metas arrojadas e age','Prefere flexibilidade e improvisa','Planeja com antecedência e segue','Cria planos detalhados e os executa'],
-    ['Ao tomar decisões importantes, você...','Decide rápido com base na intuição','Considera o impacto nas pessoas','Busca consenso e pensa nas consequências','Coleta dados antes de decidir'],
-    ['Seu maior desafio costuma ser...','Impaciência com lentidão','Dificuldade de foco','Resistência a mudanças','Dificuldade de delegar'],
-    ['Em apresentações, você prefere...','Ir direto ao ponto com impacto','Usar histórias e ser carismático','Ser claro, organizado e preciso','Apresentar dados e análises detalhadas'],
-    ['Seu ritmo de trabalho é geralmente...','Intenso e orientado a resultados','Variável conforme a energia e interação','Constante e previsível','Metódico e orientado à qualidade'],
-    ['O que seus colegas mais valorizam em você é...','Liderança e objetividade','Energia e criatividade','Confiabilidade e paciência','Precisão e competência técnica'],
-    ['Em negociações, sua abordagem é...','Firme e orientada ao resultado','Persuasiva e empática','Buscadora de acordos justos','Baseada em dados e argumentos sólidos'],
-  ];
+    [
+        "1. Em um restaurante. Estou esperando uma mesa e o garçom me diz que em 10 minutos terei uma mesa, porém passam 20 minutos:",
+        "A. Me aborreço e digo ao garçom que já se passou o dobro do tempo, e lhe informo que se demorar muito irei embora e eles perderão um cliente",
+        "B. Não me dou conta pois estou envolvido em uma conversa.",
+        "C. Não me fixo ao tempo, ainda que eu saiba do atraso, não falo nada.",
+        "D. Informo ao Garçom exatamente a hora que cheguei e exatamente o tempo que passou e peço que por favor me diga com exatidão quanto tempo ainda falta para que eu possa tomar uma decisão."
+    ],
+    [
+        "2. Tenho muita fome e pressa. O garçom me traz um prato que eu não pedi:",
+        "A. Digo de maneira direta que este não foi o prato que pedi.",
+        "B. Chamo o garçom e converso com ele explicando que este não era o prato que eu havia pedido.",
+        "C. Fico calado e aceito o prato que me trouxeram.",
+        "D. Me incomodo e pergunto ao garçom de uma forma aborrecida se ele estava prestando atenção quando fiz meu pedido?"
+    ],
+    [
+        "3. Em uma reunião de amigos:",
+        "A. Eu gosto de convencer aos demais de minhas opiniões e gosto de falar sobre temas relacionados com meu trabalho.",
+        "B. Escuto as pessoas. As pessoas me procuram pois sou um excelente ouvinte. Escuto as pessoas com atenção.",
+        "C. Falo muito e conto bastante piadas. Geralmente falo mais do que escuto.",
+        "D. Observo e analiso as pessoas, porém dou minha opinião. Todavia só dou minha opinião quando conheço o tema e quando o faço sou preciso."
+    ],
+    [
+        "4. Meus companheiros de trabalho me descrevem como alguém:",
+        "A. Tranquilo, Paciente, Amável.",
+        "B. Social, Alegre, Gosta de Conversar.",
+        "C. Enérgico, Forte, Agressivo.",
+        "D. Concreto, Disciplinado, Metódico."
+    ],
+    [
+        "5. Em uma discussão:",
+        "A. Trato de dizer que não é para tanto, pois discutir me aborrece.",
+        "B. Busco ter a razão e não paro até que consiga. Gosto de discutir.",
+        "C. Odeio agressões, concordo com o que esta sendo dito para não precisar argumentar.",
+        "D. Me baseio nos fatos e busco comprovar meu ponto de vista de uma forma fundamentada e também espero que os demais hajam assim."
+    ],
+    [
+        "6. O que realmente me emociona na vida:",
+        "A. Os desafios, As novidades, Arriscar.",
+        "B. As surpresas, A diversão, O jogo.",
+        "C. A doçura, O carinho, Aceitação",
+        "D. Aprender, Sabedoria, Conhecimento"
+    ],
+    [
+        "7. Se alguém me agride:",
+        "A. Fico calado e não demonstro o que sinto.",
+        "B. Escapo da situação ou pergunto a outra pessoa se ela é louca.",
+        "C. Devolvo a agressão pois necessito demonstrar minha insatisfação de imediato. Da mesma forma que me incomodo rapidamente me tranquilizo.",
+        "D. Me angustio, me privo e me resguardo, porém tento descobrir por que isso aconteceu. Demora algum tempo para que passe minha insatisfação com o acontecido."
+    ],
+    [
+        "8. Quando vou as compras",
+        "A. Busco ofertas, os descontos me fascinam.",
+        "B. Me divirto indo as compras. Gosto de comprar presentes, dizem que sou um comprador compulsivo.",
+        "C. Sei o que quero e não gasto meu dinheiro se não encontro. Sou muito definido.",
+        "D. Sou indeciso, me dá muito trabalho decidir e escolher."
+    ],
+    [
+        "9. Que frase te descreve melhor:",
+        "A. Sou tranquilo e passivo, gosto das pessoas que são fáceis de conviver e que não me agridam. As pessoas me perguntam se nunca me aborreço.",
+        "B. Sou alegre e jovial. Se vejo alguém triste procuro levar alegria a está pessoa. As pessoas me perguntam se nunca me deprimo.",
+        "C. Sou ativo e enérgico, gosto de fazer várias coisas ao mesmo tempo, as pessoas perguntam se não me canso.",
+        "D. Sou analítico e observador, gosto de resolver problemas que me exijam pensar e de encontrar soluções. As pessoas me dizem que sou muito responsável e apreensivo."
+    ],
+    [
+        "10. Quando estou trabalhando em equipe sou:",
+        "A. O que organiza a parte estratégica com finalidade de conseguir uma maior probabilidade de êxito.",
+        "B. O que anima o ambiente fazendo com que todos tenham vontade.",
+        "C. O que manda e organiza.",
+        "D. O que apóia com propósito de se ter uma equipe unida."
+    ],
+    [
+        "11. Meus irmãos e as pessoas que me rodeiam , dizem que meus piores defeitos são:",
+        "A. Ser teimoso e quadrado",
+        "B. Ser agressivo e temperamental.",
+        "C. Ser submisso e lento.",
+        "D. Ser distraído e desorganizado."
+    ],
+    [
+        "12. Alguma de minhas qualidades são:",
+        "A. Ser Determinado e seguro.",
+        "B. Ser Adaptado e pacífico.",
+        "C. Ser Otimista e alegre.",
+        "D. Ser Cumpridor e estável"
+    ],
+    [
+        "13. Estou caminhando e esbarro com algum desconhecido:",
+        "A. Dou um passo ao lado e sem falar sigo meu caminho.",
+        "B. Dou um sorriso e sigo em frente.",
+        "C. Espero que a pessoa saia do meu caminho para poder seguir adiante.",
+        "D. Peço que me desculpe e sigo em frente."
+    ],
+    [
+        "14. No trabalho me sobressaio em:",
+        "A. Na tomada de decisões rapidamente.",
+        "B. Nas relações públicas",
+        "C. Na capacidade de me adaptar a equipes",
+        "D. Na segurança de ter qualidade e pontualidade."
+    ],
+    [
+        "15. Meus defeitos no trabalho são:",
+        "A. Não gosto de delegar, prefiro trabalhar sozinho.",
+        "B. Não gosto que me digam o que fazer.",
+        "C. Trabalho mais sobre baixa pressão.",
+        "D. Desordenado e esquecido e as vezes impontual."
+    ],
+    [
+        "16. Minha mãe diz que quando criança eu era:",
+        "A. Obediente e tranquilo.",
+        "B. Mandão e exigente.",
+        "C. Alegre e conversava com todo mundo.",
+        "D. Bem arrumado e eu não gostava de me sujar."
+    ],
+    [
+        "17. Ao me expressar:",
+        "A. Falo as coisas de maneira diplomática.",
+        "B. Quase não expresso o que sinto.",
+        "C. Falo de maneira indireta para não magoar.",
+        "D. Falo as coisas como são."
+    ],
+    [
+        "18. A emoção que demonstro com mais frequência é:",
+        "A. Medo.",
+        "B. Otimismo",
+        "C. Não demonstro emoção.",
+        "D. Irritação."
+    ],
+    [
+        "19. Os professores me reconheciam por que:",
+        "A. Discutia muito e gostava de demonstrar tudo que eu sabia.",
+        "B. Bom estudante e bastante analítico.",
+        "C. Não interrompia e ficava calado.",
+        "D. Era muito amigável e gostava de conversar."
+    ],
+    [
+        "20. Características que mais te descrevem:",
+        "A. Auto-suficiente e ambicioso.",
+        "B. Preciso e exato.",
+        "C. Cooperativo e adaptável.",
+        "D. Despreocupado e popular."
+    ],
+    [
+        "21. Características que mais te descrevem:",
+        "A. Reservado e educado.",
+        "B. Amigo e conversador.",
+        "C. Tolerante e flexível.",
+        "D. Valente e ousado."
+    ],
+    [
+        "22. Características que mais te descrevem:",
+        "A. Obstinado, determinação para me defender.",
+        "B. Confiante, acredito nas pessoas.",
+        "C. Prudente, gosto de refletir bem sobre as coisas.",
+        "D. Pronto a servir, gosto de ajudar aos demais."
+    ],
+    [
+        "23. Características que mais te descrevem:",
+        "A. Brincalhão, chama a atenção das pessoas.",
+        "B. Empreendedor, força de vontade.",
+        "C. Generoso, se adapta aos demais.",
+        "D. Cuidadoso, cautela ao tomar decisões."
+    ],
+    [
+        "24. Características que mais te descrevem:",
+        "A. Calmo, faz o que te pedem.",
+        "B. Envolvente, motiva aos demais.",
+        "C. Atrevido, crê em si próprio.",
+        "D. Disciplinado, organizado e limpo."
+    ],
+    [
+        "25. Características que mais te descrevem:",
+        "A. Culto, busca ter conhecimento.",
+        "B. Animado, alma da festa.",
+        "C. Harmonioso, aberto a sugestões.",
+        "D. Confrontante, gosta de argumentar."
+    ],
+    [
+        "26. Características que mais te descrevem:",
+        "A. Humilde, compassivo (condolente) com as pessoas.",
+        "B. Carismático, atrai as pessoas, desinibido.",
+        "C. Tem atitude, persuasivo, convincente.",
+        "D. Sistemático, cético, precavido. Dominante 81 81"
+    ]
+];
 
   function toggleQuestionario() {
     const sec = document.getElementById('sec-questionario');
