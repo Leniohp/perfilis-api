@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfilis NR-1 — Avaliação de Riscos Psicossociais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06070d;
+  --surface: #0c0e1a;
+  --surface2: #111426;
+  --surface3: #161929;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --text: #e9eaf5;
+  --muted: #5e6180;
+  --muted2: #9395b0;
+  --accent: #4f6ef7;
+  --accent2: #2dd4a0;
+  --accent3: #f7c94f;
+  --danger: #f25757;
+  --grad: linear-gradient(135deg, #4f6ef7 0%, #2dd4a0 100%);
+  --grad2: linear-gradient(135deg, #1a2060 0%, #0d3d2e 100%);
+  --font-sans: 'Instrument Sans', sans-serif;
+  --font-serif: 'DM Serif Display', serif;
+  --font-mono: 'DM Mono', monospace;
+  --r: 10px; --r-lg: 16px; --r-xl: 22px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.hidden { display: none !important; }
+.page { min-height: 100vh; }
+.container { max-width: 1040px; margin: 0 auto; padding: 0 28px; }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 22px; border-radius: var(--r); font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; letter-spacing: 0.01em; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #3d5ce8; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,110,247,0.4); }
+.btn-teal { background: var(--accent2); color: #06150f; }
+.btn-teal:hover { background: #1ec48e; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,212,160,0.35); }
+.btn-grad { background: var(--grad); color: white; font-weight: 700; }
+.btn-grad:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(79,110,247,0.35); }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,110,247,0.06); }
+.btn-ghost { background: transparent; color: var(--muted2); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+.btn-danger { background: rgba(242,87,87,0.12); color: var(--danger); border: 1px solid rgba(242,87,87,0.25); }
+.btn-danger:hover { background: rgba(242,87,87,0.2); }
+.btn-lg { padding: 14px 32px; font-size: 16px; border-radius: 12px; }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+/* INPUTS */
+.input { width: 100%; padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font-family: var(--font-sans); font-size: 14px; outline: none; transition: border-color 0.2s; }
+.input:focus { border-color: var(--accent); background: var(--surface3); }
+.input::placeholder { color: var(--muted); }
+label { display: block; font-size: 11px; font-weight: 600; color: var(--muted2); margin-bottom: 5px; letter-spacing: 0.05em; text-transform: uppercase; }
+.form-group { margin-bottom: 16px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* CARDS */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px 28px; }
+.card-sm { padding: 16px 20px; }
+
+/* BADGE */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
+.badge-blue   { background: rgba(79,110,247,0.12); color: #8ba5fa; border: 1px solid rgba(79,110,247,0.2); }
+.badge-teal   { background: rgba(45,212,160,0.1); color: #2dd4a0; border: 1px solid rgba(45,212,160,0.2); }
+.badge-amber  { background: rgba(247,201,79,0.1); color: #f7c94f; border: 1px solid rgba(247,201,79,0.2); }
+.badge-red    { background: rgba(242,87,87,0.1); color: #f87171; border: 1px solid rgba(242,87,87,0.2); }
+.badge-gray   { background: var(--surface2); color: var(--muted2); border: 1px solid var(--border); }
+.badge-green  { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+
+/* PROGRESS */
+.progress-bar { width: 100%; height: 4px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--grad); border-radius: 99px; transition: width 0.4s ease; }
+
+/* ALERT */
+.alert { padding: 12px 16px; border-radius: var(--r); font-size: 13px; margin-bottom: 14px; }
+.alert-danger { background: rgba(242,87,87,0.08); border: 1px solid rgba(242,87,87,0.2); color: #f87171; }
+.alert-success { background: rgba(45,212,160,0.08); border: 1px solid rgba(45,212,160,0.2); color: #2dd4a0; }
+.alert-info { background: rgba(79,110,247,0.08); border: 1px solid rgba(79,110,247,0.2); color: #8ba5fa; }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+.anim-up { animation: fadeUp 0.5s ease both; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+.pulse { animation: pulse 1.8s ease infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.8s linear infinite; }
+
+/* ─── NAV ─── */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 0; background: rgba(6,7,13,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { font-family: var(--font-serif); font-size: 22px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+.nav-logo-badge { font-family: var(--font-mono); font-size: 10px; background: rgba(79,110,247,0.15); color: var(--accent); border: 1px solid rgba(79,110,247,0.25); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.08em; }
+.nav-links { display: flex; align-items: center; gap: 8px; }
+
+/* ─── LANDING ─── */
+#page-landing { padding-top: 68px; }
+
+.hero { padding: 80px 0 60px; display: grid; grid-template-columns: 1fr 480px; gap: 60px; align-items: center; }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.hero-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--accent2); }
+.hero-h1 { font-family: var(--font-serif); font-size: 50px; line-height: 1.12; margin-bottom: 22px; color: #fff; }
+.hero-h1 em { font-style: italic; color: var(--accent2); }
+.hero-desc { font-size: 16px; color: var(--muted2); line-height: 1.75; margin-bottom: 32px; max-width: 440px; }
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.hero-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-xl); padding: 28px; position: relative; overflow: hidden; }
+.hero-card::before { content: ''; position: absolute; top: -80px; right: -80px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(79,110,247,0.1) 0%, transparent 70%); pointer-events: none; }
+.hero-card-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px; }
+.hero-dims { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+.hero-dim { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; }
+.hero-dim-cat { font-size: 10px; font-family: var(--font-mono); color: var(--muted); margin-bottom: 3px; }
+.hero-dim-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.hero-dim-bar { margin-top: 6px; height: 3px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+.hero-dim-fill { height: 100%; border-radius: 99px; }
+
+/* FEATURES SECTION */
+.section { padding: 80px 0; }
+.section-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+.section-title { font-family: var(--font-serif); font-size: 38px; color: #fff; margin-bottom: 16px; line-height: 1.2; }
+.section-desc { font-size: 15px; color: var(--muted2); max-width: 540px; line-height: 1.75; }
+.section-divider { height: 1px; background: var(--border); margin: 0; }
+
+.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+.feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px; transition: border-color 0.2s; }
+.feature-card:hover { border-color: var(--border2); }
+.feature-icon { width: 40px; height: 40px; border-radius: var(--r); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 14px; }
+.feature-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.feature-desc { font-size: 13px; color: var(--muted2); line-height: 1.65; }
+
+/* HOW IT WORKS */
+.steps { display: flex; flex-direction: column; gap: 0; margin-top: 48px; }
+.step { display: grid; grid-template-columns: 60px 1fr; gap: 24px; align-items: start; padding: 28px 0; border-bottom: 1px solid var(--border); }
+.step:last-child { border-bottom: none; }
+.step-num { width: 44px; height: 44px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 16px; font-weight: 500; color: var(--accent); flex-shrink: 0; }
+.step-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.step-desc { font-size: 14px; color: var(--muted2); line-height: 1.65; }
+
+/* PRICING */
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+.pricing-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 28px; position: relative; }
+.pricing-card.featured { background: linear-gradient(160deg, #0e1535 0%, #0c2a1e 100%); border-color: rgba(79,110,247,0.3); }
+.pricing-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--grad); color: white; font-size: 11px; font-weight: 700; padding: 3px 14px; border-radius: 99px; letter-spacing: 0.05em; white-space: nowrap; }
+.pricing-name { font-size: 13px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+.pricing-price { font-family: var(--font-serif); font-size: 40px; color: #fff; margin-bottom: 4px; }
+.pricing-price span { font-family: var(--font-sans); font-size: 18px; font-weight: 500; color: var(--muted2); }
+.pricing-period { font-size: 12px; color: var(--muted); margin-bottom: 22px; }
+.pricing-features { list-style: none; margin-bottom: 24px; }
+.pricing-features li { font-size: 13px; color: var(--muted2); padding: 7px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.pricing-features li:last-child { border-bottom: none; }
+.pricing-features li::before { content: '✓'; color: var(--accent2); font-weight: 700; flex-shrink: 0; }
+
+/* FOOTER */
+.footer { border-top: 1px solid var(--border); padding: 40px 0; }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; }
+.footer-copy { font-size: 13px; color: var(--muted); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--muted2); }
+
+/* ─── CHECKOUT MODAL ─── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(6,7,13,0.9); backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-xl); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+.modal-header { padding: 24px 28px 0; }
+.modal-title { font-family: var(--font-serif); font-size: 24px; color: #fff; margin-bottom: 4px; }
+.modal-sub { font-size: 13px; color: var(--muted2); }
+.modal-body { padding: 20px 28px 28px; }
+.modal-footer { padding: 0 28px 24px; display: flex; gap: 10px; }
+
+/* ─── CONTRATANTE DASHBOARD ─── */
+#page-dashboard { padding-top: 68px; background: var(--bg); }
+.dash-header { padding: 40px 0 32px; border-bottom: 1px solid var(--border); }
+.dash-company { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.dash-title { font-family: var(--font-serif); font-size: 32px; color: #fff; }
+.dash-grid { display: grid; grid-template-columns: 280px 1fr; gap: 28px; padding: 28px 0; }
+.dash-sidebar { display: flex; flex-direction: column; gap: 14px; }
+.dash-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 22px; }
+.dash-stat-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+.dash-stat-value { font-family: var(--font-serif); font-size: 32px; color: #fff; }
+.dash-stat-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.dash-main { display: flex; flex-direction: column; gap: 20px; }
+
+/* RISK TABLE */
+.risk-table { width: 100%; border-collapse: collapse; }
+.risk-table th { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.risk-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted2); }
+.risk-table tr:last-child td { border-bottom: none; }
+.risk-table tr:hover td { background: rgba(255,255,255,0.02); }
+.risk-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.risk-favoravel { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+.risk-intermediario { background: rgba(247,201,79,0.1); color: #f7c94f; border: 1px solid rgba(247,201,79,0.2); }
+.risk-risco { background: rgba(242,87,87,0.1); color: #f87171; border: 1px solid rgba(242,87,87,0.2); }
+
+/* ─── QUESTIONÁRIO PAGE ─── */
+#page-questionario { background: var(--bg); min-height: 100vh; padding: 0 0 60px; }
+.q-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 0; position: sticky; top: 0; z-index: 50; }
+.q-header-inner { display: flex; align-items: center; justify-content: space-between; max-width: 720px; margin: 0 auto; padding: 0 24px; }
+.q-logo { font-family: var(--font-serif); font-size: 18px; color: var(--text); }
+.q-progress-text { font-family: var(--font-mono); font-size: 12px; color: var(--muted2); }
+
+.q-body { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+.q-intro { padding: 48px 0 36px; text-align: center; }
+.q-intro-title { font-family: var(--font-serif); font-size: 34px; color: #fff; margin-bottom: 14px; line-height: 1.2; }
+.q-intro-desc { font-size: 15px; color: var(--muted2); line-height: 1.75; max-width: 520px; margin: 0 auto 28px; }
+.q-intro-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+
+/* DATA FORM */
+.q-section-title { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+
+/* QUESTIONNAIRE BLOCKS */
+.q-block { margin-bottom: 32px; }
+.q-block-header { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 14px 18px; display: flex; align-items: center; gap: 10px; }
+.q-block-num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); background: rgba(79,110,247,0.12); padding: 2px 8px; border-radius: 4px; }
+.q-block-cat { font-size: 11px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.06em; }
+.q-block-name { font-size: 14px; font-weight: 700; color: var(--text); margin-left: auto; }
+.q-questions { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--r-lg) var(--r-lg); overflow: hidden; }
+.q-item { padding: 18px; border-bottom: 1px solid var(--border); }
+.q-item:last-child { border-bottom: none; }
+.q-item-text { font-size: 14px; color: var(--text); margin-bottom: 14px; line-height: 1.5; }
+.q-item-qnum { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-right: 6px; }
+.q-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.q-option { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--muted2); transition: all 0.15s; user-select: none; }
+.q-option:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,110,247,0.06); }
+.q-option.selected { background: rgba(79,110,247,0.15); border-color: var(--accent); color: #a5b8ff; }
+.q-option.selected-red { background: rgba(242,87,87,0.12); border-color: rgba(242,87,87,0.4); color: #f87171; }
+
+/* SIM/NAO */
+.q-simnao { display: flex; gap: 10px; }
+.q-simnao label { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: var(--r); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted2); transition: all 0.15s; text-transform: none; letter-spacing: 0; margin: 0; }
+.q-simnao input[type=radio] { display: none; }
+.q-simnao label:has(input:checked) { border-color: var(--accent); color: var(--accent); background: rgba(79,110,247,0.1); }
+
+/* SUBMIT AREA */
+.q-submit-area { padding: 32px 0; text-align: center; }
+
+/* ─── RESULTADO PAGE ─── */
+#page-resultado { padding-top: 68px; background: var(--bg); }
+.res-header { padding: 40px 0 28px; border-bottom: 1px solid var(--border); }
+.res-hero { max-width: 880px; }
+.res-label { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.res-name { font-family: var(--font-serif); font-size: 30px; color: #fff; margin-bottom: 4px; }
+.res-meta { font-size: 13px; color: var(--muted2); }
+.res-body { padding: 32px 0; max-width: 880px; margin: 0 auto; }
+
+/* OBRIGADO */
+#page-obrigado { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg); padding: 40px; }
+.obrigado-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-xl); padding: 56px 48px; text-align: center; max-width: 520px; width: 100%; }
+.obrigado-icon { font-size: 56px; margin-bottom: 20px; }
+.obrigado-title { font-family: var(--font-serif); font-size: 32px; color: #fff; margin-bottom: 12px; }
+.obrigado-desc { font-size: 15px; color: var(--muted2); line-height: 1.75; }
+
+/* LGPD check */
+.lgpd-wrap { display: flex; align-items: flex-start; gap: 10px; padding: 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); }
+.lgpd-wrap input { flex-shrink: 0; width: 16px; height: 16px; margin-top: 2px; accent-color: var(--accent); }
+.lgpd-wrap span { font-size: 12px; color: var(--muted2); line-height: 1.6; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+/* GLOW EFFECTS */
+.glow-blue { box-shadow: 0 0 0 1px rgba(79,110,247,0.3), 0 4px 24px rgba(79,110,247,0.12); }
+.glow-teal { box-shadow: 0 0 0 1px rgba(45,212,160,0.3), 0 4px 24px rgba(45,212,160,0.12); }
+
+/* SPINNER */
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; display: inline-block; }
+
+/* SELECT */
+select.input { cursor: pointer; }
+
+/* LINK COPY BOX */
+.link-box { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; }
+.link-box-text { font-family: var(--font-mono); font-size: 12px; color: var(--accent2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-copy-btn { flex-shrink: 0; font-size: 11px; padding: 5px 10px; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.tab { font-size: 13px; font-weight: 600; color: var(--muted); padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab:hover:not(.active) { color: var(--muted2); }
+
+/* RESPONDENTE STATUS */
+.resp-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 12px; }
+.resp-row:last-child { border-bottom: none; }
+.resp-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--accent); flex-shrink: 0; font-family: var(--font-serif); }
+.resp-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.resp-meta { font-size: 12px; color: var(--muted); }
+.resp-status { margin-left: auto; }
+
+/* GRÁFICO BARRAS */
+.dim-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.dim-bar-label { font-size: 12px; color: var(--muted2); width: 180px; flex-shrink: 0; text-align: right; }
+.dim-bar-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 99px; overflow: hidden; position: relative; }
+.dim-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+.dim-bar-value { font-family: var(--font-mono); font-size: 11px; color: var(--muted2); width: 36px; text-align: right; }
+.dim-bar-badge { width: 80px; }
+
+/* TOOLTIP */
+.tooltip-wrap { position: relative; display: inline-flex; align-items: center; }
+.tooltip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1d30; border: 1px solid var(--border2); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--muted2); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 10; }
+.tooltip-wrap:hover .tooltip { opacity: 1; }
+
+/* PRINT */
+@media print {
+  .nav, .q-header, .btn, .no-print { display: none !important; }
+  body { background: white; color: black; }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+  .grid3 { grid-template-columns: 1fr; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .hero-h1 { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     NAVEGAÇÃO GLOBAL
+═══════════════════════════════════════════ -->
+<nav class="nav" id="main-nav">
+  <div class="container nav-inner">
+    <a href="#" class="nav-logo" onclick="showPage('landing')">
+      Perfilis
+      <span class="nav-logo-badge">NR-1</span>
+    </a>
+    <div class="nav-links" id="nav-links">
+      <button class="btn btn-ghost btn-sm" onclick="showPage('landing')">Início</button>
+      <button class="btn btn-primary btn-sm" onclick="openCheckout('starter')">Contratar</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: LANDING
+═══════════════════════════════════════════ -->
+<div id="page-landing" class="page">
+  <div class="container">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-left anim-up">
+        <div class="hero-eyebrow">Portaria MTE nº 1.419/2024</div>
+        <h1 class="hero-h1">Avalie os <em>riscos psicossociais</em> do seu time</h1>
+        <p class="hero-desc">Ferramenta baseada no COPSOQ II — padrão internacional de avaliação psicossocial — adaptada para atender a NR-1 e complementar o seu PGR com dados concretos de bem-estar organizacional.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-grad btn-lg" onclick="openCheckout('starter')">Contratar agora</button>
+          <button class="btn btn-outline btn-lg" onclick="document.getElementById('como-funciona').scrollIntoView({behavior:'smooth'})">Como funciona</button>
+        </div>
+      </div>
+      <div class="hero-right anim-up" style="animation-delay:0.15s">
+        <div class="hero-card">
+          <div class="hero-card-label">Dashboard — prévia de resultado</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Empresa fictícia — 24 respondentes</div>
+              <div style="font-size:14px;font-weight:700;color:var(--text)">Classificação geral: <span style="color:#f7c94f">Intermediário</span></div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <span class="badge badge-green">0 Risco</span>
+              <span class="badge badge-amber">19 Interm.</span>
+            </div>
+          </div>
+          <div class="hero-dims">
+            <div class="hero-dim">
+              <div class="hero-dim-cat">Exigências</div>
+              <div class="hero-dim-name">Carga de Trabalho</div>
+              <div class="hero-dim-bar"><div class="hero-dim-fill" style="width:56%;background:#f7c94f"></div></div>
+            </div>
+            <div class="hero-dim">
+              <div class="hero-dim-cat">Bem-Estar</div>
+              <div class="hero-dim-name">Burnout</div>
+              <div class="hero-dim-bar"><div class="hero-dim-fill" style="width:55%;background:#f7c94f"></div></div>
+            </div>
+            <div class="hero-dim">
+              <div class="hero-dim-cat">Liderança</div>
+              <div class="hero-dim-name">Qualidade da Liderança</div>
+              <div class="hero-dim-bar"><div class="hero-dim-fill" style="width:48%;background:#4ade80"></div></div>
+            </div>
+            <div class="hero-dim">
+              <div class="hero-dim-cat">Valores</div>
+              <div class="hero-dim-name">Justiça e Respeito</div>
+              <div class="hero-dim-bar"><div class="hero-dim-fill" style="width:55%;background:#4ade80"></div></div>
+            </div>
+          </div>
+          <div style="background:rgba(242,87,87,0.08);border:1px solid rgba(242,87,87,0.18);border-radius:8px;padding:10px 12px;font-size:12px;color:#f87171">
+            ⚠️ <strong>Atenção:</strong> Bullying com 83% de prevalência · Estresse em faixa intermediária alta
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <!-- FEATURES -->
+    <section class="section">
+      <div style="max-width:560px">
+        <div class="section-label">Por que o Perfilis NR-1</div>
+        <h2 class="section-title">Tudo que você precisa para o GRO</h2>
+        <p class="section-desc">A Portaria MTE 1.419/2024 tornou obrigatória a avaliação explícita de riscos psicossociais. Entregamos o diagnóstico completo — pronto para ser integrado ao PGR.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon" style="background:rgba(79,110,247,0.1)">🔬</div>
+          <div class="feature-title">COPSOQ II Internacional</div>
+          <div class="feature-desc">Instrumento validado mundialmente pelo NRCWE da Dinamarca. 23 dimensões, 40 perguntas — versão curta ideal para empresas.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:rgba(45,212,160,0.1)">📊</div>
+          <div class="feature-title">Relatório automático</div>
+          <div class="feature-desc">Dashboard com médias, classificação de risco por cor (favorável/intermediário/risco) e comparativo com benchmarks internacionais.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:rgba(247,201,79,0.1)">🔗</div>
+          <div class="feature-title">Link exclusivo por empresa</div>
+          <div class="feature-desc">Gere um link de aplicação para seus colaboradores. Os resultados ficam disponíveis em painel privado com acesso por token.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:rgba(242,87,87,0.1)">🛡️</div>
+          <div class="feature-title">LGPD compliant</div>
+          <div class="feature-desc">Aceite explícito dos respondentes. Dados anonimizados no relatório entregue ao contratante. Armazenamento seguro via Supabase.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:rgba(139,165,250,0.1)">📱</div>
+          <div class="feature-title">Responsivo e acessível</div>
+          <div class="feature-desc">Questionário otimizado para mobile. Respondentes completam em ~10 minutos pelo celular, sem cadastro necessário.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:rgba(168,85,247,0.1)">🎯</div>
+          <div class="feature-title">Integra ao DISC</div>
+          <div class="feature-desc">Parte do ecossistema Perfilis. Combine o diagnóstico psicossocial NR-1 com a análise de perfil DISC dos colaboradores.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" id="como-funciona">
+      <div class="section-label">Passo a passo</div>
+      <h2 class="section-title">Como funciona</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start">
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div>
+              <div class="step-title">Contrate o pacote</div>
+              <div class="step-desc">Escolha a quantidade de respondentes e finalize o pagamento. Você recebe imediatamente dois links: um para os colaboradores e outro privado com o painel de resultados.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div>
+              <div class="step-title">Envie o link aos colaboradores</div>
+              <div class="step-desc">Distribua o link de aplicação via WhatsApp, e-mail ou intranet. Os colaboradores respondem pelo celular em ~10 minutos. Sem cadastro, sem app.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div>
+              <div class="step-title">Acompanhe em tempo real</div>
+              <div class="step-desc">Seu painel privado atualiza conforme as respostas chegam. Veja quem já respondeu, o progresso e os primeiros indicadores de risco.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div>
+              <div class="step-title">Leve ao PGR</div>
+              <div class="step-desc">Com o relatório completo em mãos, seu profissional de SST integra os resultados ao Programa de Gerenciamento de Riscos conforme exige a NR-1.</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:28px">
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:18px">O que é avaliado</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px">
+              <span style="font-size:16px">⚡</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Exigências no Trabalho</div><div style="font-size:11px;color:var(--muted)">Carga quantitativa, ritmo, demandas emocionais</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px">
+              <span style="font-size:16px">🏢</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Organização e Conteúdo</div><div style="font-size:11px;color:var(--muted)">Autonomia, desenvolvimento, significado, compromisso</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px">
+              <span style="font-size:16px">🤝</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Relações e Liderança</div><div style="font-size:11px;color:var(--muted)">Previsibilidade, reconhecimento, clareza, apoio</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px">
+              <span style="font-size:16px">💚</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Saúde e Bem-Estar</div><div style="font-size:11px;color:var(--muted)">Satisfação, burnout, estresse, saúde geral</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface2);border-radius:8px">
+              <span style="font-size:16px">⚠️</span>
+              <div><div style="font-size:13px;font-weight:600;color:var(--text)">Comportamentos Ofensivos</div><div style="font-size:11px;color:var(--muted)">Assédio sexual, violência, bullying</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- PRICING -->
+    <section class="section" id="planos">
+      <div class="section-label">Planos</div>
+      <h2 class="section-title">Escolha o tamanho do seu time</h2>
+      <p class="section-desc">Pague uma vez, sem mensalidade. Acesso ao painel de resultados por 12 meses.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card" id="plan-starter">
+          <div class="pricing-name">Starter</div>
+          <div class="pricing-price">R$ 297<span></span></div>
+          <div class="pricing-period">pagamento único · até 30 colaboradores</div>
+          <ul class="pricing-features">
+            <li>Até 30 respondentes</li>
+            <li>Dashboard completo</li>
+            <li>23 dimensões COPSOQ II</li>
+            <li>Relatório por departamento</li>
+            <li>Acesso por 12 meses</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%" onclick="openCheckout('starter')">Contratar Starter</button>
+        </div>
+        <div class="pricing-card featured glow-blue" id="plan-pro">
+          <div class="pricing-badge">Mais popular</div>
+          <div class="pricing-name">Profissional</div>
+          <div class="pricing-price">R$ 497<span></span></div>
+          <div class="pricing-period">pagamento único · até 100 colaboradores</div>
+          <ul class="pricing-features">
+            <li>Até 100 respondentes</li>
+            <li>Dashboard completo</li>
+            <li>23 dimensões COPSOQ II</li>
+            <li>Relatório por departamento</li>
+            <li>Exportação PDF do relatório</li>
+            <li>Acesso por 12 meses</li>
+          </ul>
+          <button class="btn btn-grad" style="width:100%" onclick="openCheckout('pro')">Contratar Profissional</button>
+        </div>
+        <div class="pricing-card" id="plan-enterprise">
+          <div class="pricing-name">Enterprise</div>
+          <div class="pricing-price">R$ 897<span></span></div>
+          <div class="pricing-period">pagamento único · até 300 colaboradores</div>
+          <ul class="pricing-features">
+            <li>Até 300 respondentes</li>
+            <li>Dashboard completo</li>
+            <li>23 dimensões COPSOQ II</li>
+            <li>Relatório por departamento</li>
+            <li>Exportação PDF do relatório</li>
+            <li>Suporte prioritário</li>
+            <li>Acesso por 12 meses</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%" onclick="openCheckout('enterprise')">Contratar Enterprise</button>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:24px">Precisa de mais de 300 colaboradores? <a href="mailto:contato@perfilis.com" style="color:var(--accent);text-decoration:none">Entre em contato</a></p>
+    </section>
+
+    <!-- DISCLAIMER -->
+    <div class="card" style="margin-bottom:60px;background:rgba(247,201,79,0.04);border-color:rgba(247,201,79,0.2)">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <span style="font-size:20px;flex-shrink:0">⚖️</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#f7c94f;margin-bottom:6px">Nota importante</div>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.7">Esta ferramenta possui caráter diagnóstico e informativo. Os relatórios gerados são insumos para subsidiar o trabalho de profissionais habilitados em Saúde e Segurança do Trabalho na elaboração e revisão do PGR conforme a NR-1. O Perfilis NR-1 não substitui a assessoria técnica de médico do trabalho, engenheiro de segurança ou técnico de SST.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-copy">© 2025 Perfilis · Todos os direitos reservados</div>
+      <div class="footer-links">
+        <a href="#">Privacidade</a>
+        <a href="#">Termos</a>
+        <a href="mailto:contato@perfilis.com">Contato</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL CHECKOUT
+═══════════════════════════════════════════ -->
+<div id="modal-checkout" class="modal-overlay hidden">
+  <div class="modal anim-up">
+    <div class="modal-header">
+      <div class="modal-title">Contratar Perfilis NR-1</div>
+      <div class="modal-sub" id="checkout-subtitle">Preencha seus dados para gerar o acesso</div>
+    </div>
+    <div class="modal-body">
+      <div id="checkout-step-1">
+        <div class="alert alert-info" id="checkout-plan-info">Plano selecionado: <strong id="checkout-plan-label">—</strong></div>
+        <div class="grid2">
+          <div class="form-group">
+            <label>Nome completo *</label>
+            <input class="input" id="co-nome" placeholder="João Silva" type="text">
+          </div>
+          <div class="form-group">
+            <label>E-mail *</label>
+            <input class="input" id="co-email" placeholder="joao@empresa.com" type="email">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label>WhatsApp *</label>
+            <input class="input" id="co-whatsapp" placeholder="(11) 99999-9999" type="tel">
+          </div>
+          <div class="form-group">
+            <label>Empresa</label>
+            <input class="input" id="co-empresa" placeholder="Nome da empresa" type="text">
+          </div>
+        </div>
+        <div id="checkout-error" class="alert alert-danger hidden"></div>
+      </div>
+
+      <div id="checkout-step-2" class="hidden">
+        <div class="alert alert-success">✅ Dados cadastrados! Escolha a forma de pagamento:</div>
+        <div style="display:flex;gap:10px;margin-bottom:20px">
+          <button class="btn" id="btn-pix" onclick="selecionarPagamento('pix')" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted2)">
+            <span style="font-size:20px">💠</span> PIX
+          </button>
+          <button class="btn" id="btn-card" onclick="selecionarPagamento('card')" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted2)">
+            <span style="font-size:20px">💳</span> Cartão
+          </button>
+        </div>
+
+        <!-- PIX -->
+        <div id="pix-area" class="hidden">
+          <div style="text-align:center;padding:20px">
+            <div id="pix-qr" style="margin:0 auto 14px;width:200px;height:200px;background:var(--surface2);border-radius:12px;display:flex;align-items:center;justify-content:center">
+              <div class="spinner spin"></div>
+            </div>
+            <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">Ou copie o código Pix:</div>
+            <div class="link-box" style="margin-bottom:12px">
+              <span class="link-box-text" id="pix-code">Gerando...</span>
+              <button class="btn btn-ghost btn-sm link-copy-btn" onclick="copiarTexto('pix-code')">Copiar</button>
+            </div>
+            <div class="badge badge-amber pulse" id="pix-status-badge">Aguardando pagamento...</div>
+          </div>
+        </div>
+
+        <!-- CARD -->
+        <div id="card-area" class="hidden">
+          <div id="stripe-card-element" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px"></div>
+          <div id="card-error" class="alert alert-danger hidden"></div>
+        </div>
+
+        <div id="payment-error" class="alert alert-danger hidden"></div>
+      </div>
+
+      <!-- SUCESSO -->
+      <div id="checkout-step-3" class="hidden">
+        <div style="text-align:center;padding:20px 0">
+          <div style="font-size:48px;margin-bottom:14px">🎉</div>
+          <div style="font-family:var(--font-serif);font-size:22px;color:#fff;margin-bottom:10px">Pagamento confirmado!</div>
+          <p style="font-size:14px;color:var(--muted2);margin-bottom:24px">Seus links foram gerados. Guarde-os com segurança.</p>
+          <div style="margin-bottom:14px">
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">🔗 Link para os colaboradores</div>
+            <div class="link-box">
+              <span class="link-box-text" id="link-colaboradores">—</span>
+              <button class="btn btn-ghost btn-sm link-copy-btn" onclick="copiarTexto('link-colaboradores')">Copiar</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">📊 Seu painel de resultados (privado)</div>
+            <div class="link-box">
+              <span class="link-box-text" id="link-dashboard">—</span>
+              <button class="btn btn-ghost btn-sm link-copy-btn" onclick="copiarTexto('link-dashboard')">Copiar</button>
+            </div>
+          </div>
+          <div class="alert alert-info" style="margin-top:18px;text-align:left">
+            💡 Um e-mail com esses links também foi enviado para <strong id="email-confirmacao">—</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer" id="modal-footer-btns">
+      <button class="btn btn-ghost" onclick="closeCheckout()">Cancelar</button>
+      <button class="btn btn-grad" id="btn-checkout-next" onclick="checkoutNext()">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: QUESTIONÁRIO (colaborador)
+═══════════════════════════════════════════ -->
+<div id="page-questionario" class="page hidden">
+  <header class="q-header">
+    <div class="q-header-inner">
+      <div class="q-logo">Perfilis NR-1</div>
+      <div style="flex:1;max-width:320px;margin:0 16px">
+        <div class="progress-bar">
+          <div class="progress-fill" id="q-progress-bar" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="q-progress-text" id="q-progress-text">0 / 40</div>
+    </div>
+  </header>
+
+  <div class="q-body">
+    <!-- INTRO -->
+    <div id="q-intro" class="q-intro">
+      <div class="q-intro-title">Avaliação de Clima e Bem-Estar</div>
+      <p class="q-intro-desc">Este questionário avalia aspectos do seu ambiente de trabalho. Suas respostas são confidenciais e os resultados são apresentados de forma agrupada, sem identificação individual.</p>
+      <div class="q-intro-tags">
+        <span class="badge badge-blue">~10 minutos</span>
+        <span class="badge badge-teal">40 perguntas</span>
+        <span class="badge badge-gray">Anônimo</span>
+        <span class="badge badge-gray">LGPD</span>
+      </div>
+
+      <div class="card" style="text-align:left;max-width:500px;margin:0 auto 28px">
+        <div class="q-section-title">Dados do respondente</div>
+        <div class="grid2">
+          <div class="form-group">
+            <label>Departamento / Setor *</label>
+            <input class="input" id="r-departamento" placeholder="Ex: Financeiro" type="text">
+          </div>
+          <div class="form-group">
+            <label>Gênero *</label>
+            <select class="input" id="r-genero">
+              <option value="">Selecione</option>
+              <option>Masculino</option>
+              <option>Feminino</option>
+              <option>Não-binário</option>
+              <option>Prefiro não informar</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Faixa etária *</label>
+          <select class="input" id="r-faixa">
+            <option value="">Selecione</option>
+            <option>18-25</option>
+            <option>26-35</option>
+            <option>36-45</option>
+            <option>46-55</option>
+            <option>56+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tempo na empresa *</label>
+          <select class="input" id="r-tempo">
+            <option value="">Selecione</option>
+            <option>Menos de 1 ano</option>
+            <option>1 a 3 anos</option>
+            <option>3 a 5 anos</option>
+            <option>Mais de 5 anos</option>
+          </select>
+        </div>
+        <div class="lgpd-wrap">
+          <input type="checkbox" id="r-lgpd">
+          <span>Declaro que li e aceito que minhas respostas sejam processadas de forma confidencial, conforme a <strong>LGPD (Lei nº 13.709/2018)</strong>. Os resultados serão apresentados de forma agregada, sem identificação individual.</span>
+        </div>
+      </div>
+
+      <div id="q-intro-error" class="alert alert-danger hidden" style="max-width:500px;margin:0 auto 16px"></div>
+      <button class="btn btn-grad btn-lg" onclick="iniciarQuestionario()">Iniciar questionário →</button>
+    </div>
+
+    <!-- QUESTIONÁRIO -->
+    <div id="q-form" class="hidden" style="padding:28px 0">
+      <div id="q-blocks"></div>
+      <div class="q-submit-area" id="q-submit-area" style="display:none">
+        <div id="q-submit-error" class="alert alert-danger hidden" style="max-width:500px;margin:0 auto 16px"></div>
+        <button class="btn btn-grad btn-lg" id="btn-enviar" onclick="enviarRespostas()">Enviar respostas →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: OBRIGADO
+═══════════════════════════════════════════ -->
+<div id="page-obrigado" class="page hidden">
+  <div class="obrigado-card">
+    <div class="obrigado-icon">✅</div>
+    <div class="obrigado-title">Obrigado!</div>
+    <p class="obrigado-desc">Suas respostas foram registradas com sucesso. Os resultados serão analisados pelo responsável de SST da sua empresa para elaboração do relatório de riscos psicossociais.</p>
+    <div class="alert alert-info" style="margin-top:24px;text-align:left">
+      🔒 Suas respostas são confidenciais e apresentadas apenas de forma agregada, sem identificação individual.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: DASHBOARD CONTRATANTE
+═══════════════════════════════════════════ -->
+<div id="page-dashboard" class="page hidden">
+  <div class="container">
+    <div class="dash-header">
+      <div class="dash-company" id="dash-empresa-label">Empresa</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="dash-title">Painel de Resultados — COPSOQ II</div>
+        <div style="display:flex;gap:8px">
+          <span class="badge badge-gray" id="dash-plano-badge">—</span>
+          <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Imprimir</button>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--muted2)" id="dash-periodo">—</div>
+    </div>
+
+    <div class="dash-grid" id="dash-content">
+      <!-- SIDEBAR -->
+      <div class="dash-sidebar">
+        <div class="dash-stat">
+          <div class="dash-stat-label">Respondentes</div>
+          <div class="dash-stat-value" id="stat-respondentes">—</div>
+          <div class="dash-stat-sub" id="stat-respondentes-sub">de <span id="stat-total">—</span> convidados</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-label">Dimensões</div>
+          <div class="dash-stat-value">23</div>
+          <div class="dash-stat-sub">COPSOQ II versão curta</div>
+        </div>
+        <div class="card card-sm">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">Classificação Geral</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;color:#4ade80">🟢 Favorável</span>
+              <span class="badge badge-green" id="count-favoravel">0</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;color:#f7c94f">🟡 Intermediário</span>
+              <span class="badge badge-amber" id="count-intermediario">0</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;color:#f87171">🔴 Risco</span>
+              <span class="badge badge-red" id="count-risco">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="card card-sm">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">Respondentes por gênero</div>
+          <div id="genero-breakdown" style="font-size:13px;color:var(--muted2)">—</div>
+        </div>
+        <div class="card card-sm" style="border-color:rgba(242,87,87,0.25)">
+          <div style="font-size:11px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">⚠️ Comportamentos Ofensivos</div>
+          <div id="ofensivos-breakdown" style="font-size:13px;color:var(--muted2)">—</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Seu link de aplicação</div>
+          <div class="link-box">
+            <span class="link-box-text" id="dash-link-form">—</span>
+            <button class="btn btn-ghost btn-sm link-copy-btn" onclick="copiarTexto('dash-link-form')">Copiar</button>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--muted)">Compartilhe com os colaboradores</div>
+        </div>
+        <div class="alert alert-info" style="font-size:12px">
+          💡 <strong>Próximo passo:</strong> Leve este relatório ao seu profissional de SST para integração ao PGR conforme NR-1.
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="dash-main">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('dimensoes', this)">Dimensões</div>
+          <div class="tab" onclick="switchTab('respondentes', this)">Respondentes</div>
+          <div class="tab" onclick="switchTab('departamentos', this)">Por Departamento</div>
+        </div>
+
+        <!-- TAB: DIMENSÕES -->
+        <div id="tab-dimensoes">
+          <div class="card" style="margin-bottom:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:18px">Resultados por Dimensão</div>
+            <div id="dim-bars"></div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px">Detalhamento completo</div>
+            <table class="risk-table" id="dim-table">
+              <thead>
+                <tr>
+                  <th>Dimensão</th>
+                  <th>Categoria</th>
+                  <th>Média</th>
+                  <th>% Escala</th>
+                  <th>Classificação</th>
+                </tr>
+              </thead>
+              <tbody id="dim-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: RESPONDENTES -->
+        <div id="tab-respondentes" class="hidden">
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Lista de respondentes</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Identificação preservada internamente. Relatório apresenta dados agregados.</div>
+            <div id="resp-list"></div>
+          </div>
+        </div>
+
+        <!-- TAB: DEPARTAMENTOS -->
+        <div id="tab-departamentos" class="hidden">
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px">Comparativo por departamento</div>
+            <div id="dept-table"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════
+// CONFIG
+// ═══════════════════════════════
+const API = '';  // same origin, ajuste para URL absoluta se necessário
+
+// ═══════════════════════════════
+// ROUTING / PAGE MANAGEMENT
+// ═══════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  document.getElementById('page-' + name)?.classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+function showNav(show) {
+  document.getElementById('main-nav').style.display = show ? '' : 'none';
+}
+
+// Route on load
+(function route() {
+  const path = window.location.pathname;
+  const hash = window.location.hash;
+
+  if (path.startsWith('/q/') || hash.startsWith('#q/')) {
+    const token = (path.split('/q/')[1] || hash.split('#q/')[1] || '').split('?')[0];
+    if (token) { initQuestionario(token); return; }
+  }
+  if (path.startsWith('/r/') || hash.startsWith('#r/')) {
+    const token = (path.split('/r/')[1] || hash.split('#r/')[1] || '').split('?')[0];
+    if (token) { initDashboard(token); return; }
+  }
+  showPage('landing');
+  showNav(true);
+})();
+
+// ═══════════════════════════════
+// UTILS
+// ═══════════════════════════════
+function copiarTexto(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+    const orig = el.textContent;
+    el.textContent = '✓ Copiado!';
+    setTimeout(() => el.textContent = orig, 1500);
+  });
+}
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.erro || 'Erro na requisição');
+  return data;
+}
+
+// ═══════════════════════════════
+// CHECKOUT FLOW
+// ═══════════════════════════════
+const PLANOS = {
+  starter:    { nome: 'Starter', valor: 297, quantidade: 30 },
+  pro:        { nome: 'Profissional', valor: 497, quantidade: 100 },
+  enterprise: { nome: 'Enterprise', valor: 897, quantidade: 300 },
+};
+let checkoutPlano = 'pro';
+let checkoutContratanteId = null;
+let checkoutPacoteId = null;
+let checkoutToken = null;
+let checkoutTokenRanking = null;
+let stripeInstance = null;
+let stripeElements = null;
+let stripeCardElement = null;
+let pixPolling = null;
+
+function openCheckout(plano) {
+  checkoutPlano = plano || 'pro';
+  const p = PLANOS[checkoutPlano];
+  document.getElementById('checkout-plan-label').textContent = `${p.nome} — R$ ${p.valor} (até ${p.quantidade} respondentes)`;
+  document.getElementById('checkout-step-1').classList.remove('hidden');
+  document.getElementById('checkout-step-2').classList.add('hidden');
+  document.getElementById('checkout-step-3').classList.add('hidden');
+  document.getElementById('modal-footer-btns').classList.remove('hidden');
+  document.getElementById('btn-checkout-next').textContent = 'Continuar →';
+  document.getElementById('checkout-error').classList.add('hidden');
+  document.getElementById('modal-checkout').classList.remove('hidden');
+}
+
+function closeCheckout() {
+  document.getElementById('modal-checkout').classList.add('hidden');
+  if (pixPolling) { clearInterval(pixPolling); pixPolling = null; }
+}
+
+let checkoutStep = 1;
+async function checkoutNext() {
+  const btn = document.getElementById('btn-checkout-next');
+
+  if (checkoutStep === 1) {
+    const nome = document.getElementById('co-nome').value.trim();
+    const email = document.getElementById('co-email').value.trim();
+    const wpp = document.getElementById('co-whatsapp').value.trim();
+    const empresa = document.getElementById('co-empresa').value.trim();
+    const errEl = document.getElementById('checkout-error');
+    if (!nome || !email || !wpp) { errEl.textContent = 'Preencha nome, e-mail e WhatsApp.'; errEl.classList.remove('hidden'); return; }
+    errEl.classList.add('hidden');
+    btn.disabled = true; btn.textContent = 'Cadastrando...';
+    try {
+      const res = await api('POST', '/api/nr1/contratantes', { nome, email, whatsapp: wpp, empresa });
+      checkoutContratanteId = res.contratante_id;
+      const plano = PLANOS[checkoutPlano];
+      const pacRes = await api('POST', '/api/nr1/pacotes', {
+        contratante_id: checkoutContratanteId,
+        quantidade: plano.quantidade,
+        plano: checkoutPlano
+      });
+      checkoutPacoteId = pacRes.pacote_id;
+      checkoutToken = pacRes.token;
+      checkoutTokenRanking = pacRes.token_ranking;
+      document.getElementById('checkout-step-1').classList.add('hidden');
+      document.getElementById('checkout-step-2').classList.remove('hidden');
+      btn.disabled = false; btn.textContent = 'Confirmar pagamento →';
+      checkoutStep = 2;
+    } catch(e) {
+      errEl.textContent = e.message; errEl.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = 'Continuar →';
+    }
+    return;
+  }
+
+  if (checkoutStep === 2) {
+    // O pagamento é confirmado via polling PIX ou Stripe Elements
+    const errEl = document.getElementById('payment-error');
+    if (document.getElementById('card-area') && !document.getElementById('card-area').classList.contains('hidden')) {
+      btn.disabled = true; btn.textContent = 'Processando...';
+      try {
+        const result = await stripeInstance.confirmCardPayment(window._clientSecret, {
+          payment_method: { card: stripeCardElement }
+        });
+        if (result.error) throw new Error(result.error.message);
+        confirmarPagamento();
+      } catch(e) {
+        errEl.textContent = e.message; errEl.classList.remove('hidden');
+        btn.disabled = false; btn.textContent = 'Pagar →';
+      }
+    }
+  }
+}
+
+function selecionarPagamento(metodo) {
+  document.getElementById('pix-area').classList.add('hidden');
+  document.getElementById('card-area').classList.add('hidden');
+  document.getElementById('btn-pix').style.borderColor = '';
+  document.getElementById('btn-card').style.borderColor = '';
+  document.getElementById('payment-error').classList.add('hidden');
+  const plano = PLANOS[checkoutPlano];
+  const email = document.getElementById('co-email').value.trim();
+  const nome = document.getElementById('co-nome').value.trim();
+
+  if (metodo === 'pix') {
+    document.getElementById('btn-pix').style.borderColor = 'var(--accent)';
+    document.getElementById('pix-area').classList.remove('hidden');
+    document.getElementById('btn-checkout-next').classList.add('hidden');
+    gerarPix(plano.valor, nome, email);
+  } else {
+    document.getElementById('btn-card').style.borderColor = 'var(--accent)';
+    document.getElementById('card-area').classList.remove('hidden');
+    document.getElementById('btn-checkout-next').classList.remove('hidden');
+    document.getElementById('btn-checkout-next').textContent = 'Pagar →';
+    iniciarStripeCard(plano.valor, nome, email);
+  }
+}
+
+async function gerarPix(valor, nome, email) {
+  const qrEl = document.getElementById('pix-qr');
+  const codeEl = document.getElementById('pix-code');
+  qrEl.innerHTML = '<div class="spinner spin"></div>';
+  try {
+    const res = await api('POST', '/api/nr1/pagamento', {
+      valor, metodo: 'pix', nome, email,
+      descricao: `Perfilis NR-1 — Plano ${checkoutPlano}`
+    });
+    if (res.pix_qr_code) {
+      qrEl.innerHTML = `<img src="${res.pix_qr_code}" style="width:180px;height:180px;border-radius:8px">`;
+    } else {
+      qrEl.innerHTML = '<div style="font-size:12px;color:var(--muted)">QR Code via Stripe</div>';
+    }
+    codeEl.textContent = res.pix_copia_cola || 'Disponível após aprovação';
+    iniciarPollingPix(res.payment_id);
+  } catch(e) {
+    qrEl.innerHTML = '<div style="font-size:12px;color:#f87171">Erro ao gerar PIX</div>';
+    document.getElementById('payment-error').textContent = e.message;
+    document.getElementById('payment-error').classList.remove('hidden');
+  }
+}
+
+function iniciarPollingPix(paymentId) {
+  document.getElementById('pix-status-badge').textContent = 'Aguardando pagamento...';
+  pixPolling = setInterval(async () => {
+    try {
+      const r = await api('GET', `/api/nr1/pagamento/status/${paymentId}`);
+      if (r.status === 'approved') {
+        clearInterval(pixPolling);
+        document.getElementById('pix-status-badge').textContent = '✓ Pago!';
+        confirmarPagamento();
+      }
+    } catch {}
+  }, 3000);
+}
+
+async function iniciarStripeCard(valor, nome, email) {
+  if (!stripeInstance) {
+    stripeInstance = Stripe(window.STRIPE_KEY || 'pk_test_placeholder');
+  }
+  try {
+    const res = await api('POST', '/api/nr1/pagamento', {
+      valor, metodo: 'card', nome, email,
+      descricao: `Perfilis NR-1 — Plano ${checkoutPlano}`
+    });
+    window._clientSecret = res.client_secret;
+    if (!stripeElements) {
+      stripeElements = stripeInstance.elements();
+      stripeCardElement = stripeElements.create('card', {
+        style: { base: { color: '#e9eaf5', fontFamily: 'Instrument Sans, sans-serif', fontSize: '14px', '::placeholder': { color: '#5e6180' } } }
+      });
+      stripeCardElement.mount('#stripe-card-element');
+    }
+  } catch(e) {
+    document.getElementById('payment-error').textContent = e.message;
+    document.getElementById('payment-error').classList.remove('hidden');
+  }
+}
+
+function confirmarPagamento() {
+  // Ativar pacote e mostrar links
+  api('POST', `/api/nr1/pacotes/${checkoutPacoteId}/ativar`, {}).catch(()=>{});
+  document.getElementById('checkout-step-2').classList.add('hidden');
+  document.getElementById('checkout-step-3').classList.remove('hidden');
+  document.getElementById('modal-footer-btns').classList.add('hidden');
+
+  const base = window.location.origin;
+  const linkForm = `${base}/q/${checkoutToken}`;
+  const linkDash = `${base}/r/${checkoutTokenRanking}`;
+  document.getElementById('link-colaboradores').textContent = linkForm;
+  document.getElementById('link-dashboard').textContent = linkDash;
+  document.getElementById('email-confirmacao').textContent = document.getElementById('co-email').value;
+  checkoutStep = 1;
+}
+
+// ═══════════════════════════════
+// QUESTIONÁRIO COPSOQ II
+// ═══════════════════════════════
+const ESCALAS = {
+  freq5: ['Sempre', 'Frequentemente', 'Às vezes', 'Raramente', 'Nunca'],
+  medida5: ['Muito grande medida', 'Grande medida', 'Em parte', 'Pequena medida', 'Muito pequena medida'],
+  tempo5: ['O tempo todo', 'Grande parte do tempo', 'Parte do tempo', 'Pequena parte do tempo', 'Nenhum momento'],
+  satisf: ['Muito satisfeito(a)', 'Satisfeito(a)', 'Insatisfeito(a)', 'Muito insatisfeito(a)'],
+  saude: ['Excelente', 'Muito boa', 'Boa', 'Razoável', 'Ruim'],
+  conflito: ['Sim, certamente', 'Sim, em certo grau', 'Sim, mas muito pouco', 'Não, de forma alguma'],
+  simnao: ['Sim', 'Não'],
+};
+
+const BLOCOS = [
+  { cat: 'Exigências no Trabalho', dim: 'Exigências Quantitativas', tipo: 'demanda', escala: 'freq5',
+    perguntas: ['Você fica atrasado(a) com o seu trabalho?', 'Você tem tempo suficiente para suas tarefas de trabalho?'] },
+  { cat: 'Exigências no Trabalho', dim: 'Ritmo de Trabalho', tipo: 'demanda', escala: 'medida5',
+    perguntas: ['Você trabalha em ritmo acelerado durante todo o dia?', 'É necessário manter um ritmo de trabalho acelerado?'] },
+  { cat: 'Exigências no Trabalho', dim: 'Exigências Emocionais', tipo: 'demanda', escala: 'freq5',
+    perguntas: ['O seu trabalho coloca você em situações emocionalmente perturbadoras?', 'Você precisa lidar com os problemas pessoais de outras pessoas como parte do seu trabalho?'] },
+  { cat: 'Organização do Trabalho e Conteúdo', dim: 'Influência no Trabalho', tipo: 'recurso', escala: 'freq5',
+    perguntas: ['Você tem um grande grau de influência sobre o seu trabalho?', 'Você pode influenciar a quantidade de trabalho que lhe é atribuída?'] },
+  { cat: 'Organização do Trabalho e Conteúdo', dim: 'Possibilidades de Desenvolvimento', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['O seu trabalho exige que você tome iniciativa?', 'Você tem a possibilidade de aprender coisas novas através do seu trabalho?'] },
+  { cat: 'Organização do Trabalho e Conteúdo', dim: 'Significado do Trabalho', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['O seu trabalho é significativo?', 'Você sente que o trabalho que faz é importante?'] },
+  { cat: 'Organização do Trabalho e Conteúdo', dim: 'Compromisso com o Local de Trabalho', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['Você sente que seu local de trabalho é de grande importância para você?', 'Você recomendaria a um bom amigo que se candidatasse a um cargo no seu local de trabalho?'] },
+  { cat: 'Relações Interpessoais e Liderança', dim: 'Previsibilidade', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['No seu local de trabalho, você é informado(a) com antecedência sobre decisões importantes?', 'Você recebe toda a informação de que precisa para fazer bem o seu trabalho?'] },
+  { cat: 'Relações Interpessoais e Liderança', dim: 'Recompensas / Reconhecimento', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['O seu trabalho é reconhecido e valorizado pela gestão?', 'Você é tratado(a) de forma justa no seu local de trabalho?'] },
+  { cat: 'Relações Interpessoais e Liderança', dim: 'Clareza de Papel', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['O seu trabalho tem objetivos claros?', 'Você sabe exatamente o que é esperado de você no trabalho?'] },
+  { cat: 'Relações Interpessoais e Liderança', dim: 'Qualidade da Liderança', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['Em que medida o seu superior imediato dá alta prioridade à satisfação no trabalho?', 'Em que medida o seu superior imediato é bom no planejamento do trabalho?'] },
+  { cat: 'Relações Interpessoais e Liderança', dim: 'Apoio Social dos Superiores', tipo: 'recurso', escala: 'freq5',
+    perguntas: ['Com que frequência o seu superior está disposto a ouvir os seus problemas no trabalho?', 'Com que frequência você recebe ajuda e apoio do seu superior mais próximo?'] },
+  { cat: 'Saúde e Bem-Estar', dim: 'Satisfação com o Trabalho', tipo: 'recurso', escala: 'satisf',
+    perguntas: ['Em relação ao seu trabalho em geral, quão satisfeito(a) você está?'] },
+  { cat: 'Interface Trabalho-Indivíduo', dim: 'Conflito Trabalho-Família', tipo: 'demanda', escala: 'conflito',
+    perguntas: ['Você sente que o seu trabalho consome tanta energia que tem efeito negativo na sua vida privada?', 'Você sente que o seu trabalho toma tanto do seu tempo que tem efeito negativo na sua vida privada?'] },
+  { cat: 'Valores no Local de Trabalho', dim: 'Confiança Vertical', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['A gestão confia nos empregados para fazerem bem o seu trabalho?', 'Você pode confiar na informação que vem da gestão?'] },
+  { cat: 'Valores no Local de Trabalho', dim: 'Justiça e Respeito', tipo: 'recurso', escala: 'medida5',
+    perguntas: ['Os conflitos são resolvidos de forma justa?', 'O trabalho é distribuído de forma justa?'] },
+  { cat: 'Saúde e Bem-Estar', dim: 'Saúde Geral Autoavaliada', tipo: 'recurso', escala: 'saude',
+    perguntas: ['Em geral, você diria que a sua saúde é:'] },
+  { cat: 'Saúde e Bem-Estar', dim: 'Burnout (Esgotamento)', tipo: 'demanda', escala: 'tempo5',
+    perguntas: ['Com que frequência você se sentiu esgotado(a)?', 'Com que frequência você se sentiu emocionalmente exausto(a)?'] },
+  { cat: 'Saúde e Bem-Estar', dim: 'Estresse', tipo: 'demanda', escala: 'tempo5',
+    perguntas: ['Com que frequência você se sentiu irritado(a)?', 'Com que frequência você se sentiu estressado(a)?'] },
+  { cat: 'Comportamentos Ofensivos', dim: 'Assédio Sexual', tipo: 'ofensivo', escala: 'simnao',
+    perguntas: ['Você foi exposto(a) a assédio sexual no último ano?'] },
+  { cat: 'Comportamentos Ofensivos', dim: 'Ameaças de Violência', tipo: 'ofensivo', escala: 'simnao',
+    perguntas: ['Você foi exposto(a) a ameaças de violência no último ano?'] },
+  { cat: 'Comportamentos Ofensivos', dim: 'Violência Física', tipo: 'ofensivo', escala: 'simnao',
+    perguntas: ['Você foi exposto(a) a violência física no último ano?'] },
+  { cat: 'Comportamentos Ofensivos', dim: 'Bullying (Assédio Moral)', tipo: 'ofensivo', escala: 'simnao',
+    perguntas: ['Você foi exposto(a) a bullying (assédio moral) no último ano?'] },
+];
+
+// Score map: escala -> lista de pontos (0=mais favorável para recursos, maiores = mais desfavorável para demandas)
+const SCORE_MAP = {
+  freq5:  [4,3,2,1,0],
+  medida5:[4,3,2,1,0],
+  tempo5: [4,3,2,1,0],
+  satisf: [3,2,1,0],
+  saude:  [4,3,2,1,0],
+  conflito:[3,2,1,0],
+  simnao: [1,0],
+};
+
+const FAIXA_MAX = { freq5:8, medida5:8, tempo5:8, satisf:3, saude:4, conflito:6, simnao:1 };
+
+let qRespostas = {}; // { "bloco-pergunta": scoreIndex }
+let qToken = null;
+let qTotalPerguntas = 0;
+
+function initQuestionario(token) {
+  qToken = token;
+  showPage('questionario');
+  showNav(false);
+  // Validar token
+  api('GET', `/api/nr1/questionario/${token}`).then(d => {
+    if (d.empresa) {
+      // opcional: mostrar nome empresa
+    }
+  }).catch(e => {
+    showPage('landing');
+    showNav(true);
+    alert('Link inválido ou expirado.');
+  });
+}
+
+function iniciarQuestionario() {
+  const dept = document.getElementById('r-departamento').value.trim();
+  const gen = document.getElementById('r-genero').value;
+  const faixa = document.getElementById('r-faixa').value;
+  const tempo = document.getElementById('r-tempo').value;
+  const lgpd = document.getElementById('r-lgpd').checked;
+  const errEl = document.getElementById('q-intro-error');
+  if (!dept || !gen || !faixa || !tempo) { errEl.textContent = 'Preencha todos os campos.'; errEl.classList.remove('hidden'); return; }
+  if (!lgpd) { errEl.textContent = 'Você precisa aceitar os termos da LGPD para continuar.'; errEl.classList.remove('hidden'); return; }
+  errEl.classList.add('hidden');
+  document.getElementById('q-intro').classList.add('hidden');
+  document.getElementById('q-form').classList.remove('hidden');
+  renderBlocos();
+}
+
+function renderBlocos() {
+  const container = document.getElementById('q-blocks');
+  container.innerHTML = '';
+  let qNum = 0;
+  qTotalPerguntas = BLOCOS.reduce((s, b) => s + b.perguntas.length, 0);
+
+  BLOCOS.forEach((bloco, bi) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'q-block';
+    wrap.innerHTML = `
+      <div class="q-block-header">
+        <span class="q-block-num">D${bi+1}</span>
+        <span class="q-block-cat">${bloco.cat}</span>
+        <span class="q-block-name">${bloco.dim}</span>
+      </div>
+      <div class="q-questions" id="bloco-${bi}"></div>
+    `;
+    container.appendChild(wrap);
+    const qContainer = document.getElementById(`bloco-${bi}`);
+
+    bloco.perguntas.forEach((pergunta, pi) => {
+      qNum++;
+      const qid = `${bi}-${pi}`;
+      const opcoes = ESCALAS[bloco.escala];
+      const item = document.createElement('div');
+      item.className = 'q-item';
+      item.setAttribute('data-qid', qid);
+
+      if (bloco.escala === 'simnao') {
+        item.innerHTML = `
+          <div class="q-item-text"><span class="q-item-qnum">Q${qNum}</span>${pergunta}</div>
+          <div class="q-simnao">
+            <label><input type="radio" name="q-${qid}" value="0"> Sim</label>
+            <label><input type="radio" name="q-${qid}" value="1"> Não</label>
+          </div>
+        `;
+        item.querySelectorAll('input').forEach(inp => {
+          inp.addEventListener('change', () => { qRespostas[qid] = parseInt(inp.value); atualizarProgresso(); });
+        });
+      } else {
+        const optsHtml = opcoes.map((op, oi) => `<span class="q-option" data-score="${oi}" onclick="selecionarOpcao('${qid}', ${oi}, this)">${op}</span>`).join('');
+        item.innerHTML = `
+          <div class="q-item-text"><span class="q-item-qnum">Q${qNum}</span>${pergunta}</div>
+          <div class="q-options">${optsHtml}</div>
+        `;
+      }
+      qContainer.appendChild(item);
+    });
+  });
+  document.getElementById('q-submit-area').style.display = 'block';
+  atualizarProgresso();
+}
+
+function selecionarOpcao(qid, scoreIdx, el) {
+  const item = el.closest('.q-item');
+  item.querySelectorAll('.q-option').forEach(o => o.classList.remove('selected', 'selected-red'));
+  el.classList.add('selected');
+  qRespostas[qid] = scoreIdx;
+  atualizarProgresso();
+}
+
+function atualizarProgresso() {
+  const respondidas = Object.keys(qRespostas).length;
+  const pct = Math.round((respondidas / qTotalPerguntas) * 100);
+  document.getElementById('q-progress-bar').style.width = pct + '%';
+  document.getElementById('q-progress-text').textContent = `${respondidas} / ${qTotalPerguntas}`;
+}
+
+async function enviarRespostas() {
+  const respondidas = Object.keys(qRespostas).length;
+  const errEl = document.getElementById('q-submit-error');
+  if (respondidas < qTotalPerguntas) {
+    errEl.textContent = `Você respondeu ${respondidas} de ${qTotalPerguntas} perguntas. Por favor, responda todas antes de enviar.`;
+    errEl.classList.remove('hidden');
+    // Destacar não respondidas
+    document.querySelectorAll('.q-item').forEach(item => {
+      const qid = item.getAttribute('data-qid');
+      if (qid && qRespostas[qid] === undefined) {
+        item.style.background = 'rgba(242,87,87,0.05)';
+        item.style.borderLeft = '3px solid rgba(242,87,87,0.4)';
+      }
+    });
+    return;
+  }
+  errEl.classList.add('hidden');
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+
+  const dados = {
+    departamento: document.getElementById('r-departamento').value.trim(),
+    genero: document.getElementById('r-genero').value,
+    faixa_etaria: document.getElementById('r-faixa').value,
+    tempo_empresa: document.getElementById('r-tempo').value,
+    lgpd_aceite: true,
+    respostas: {}
+  };
+
+  // Converter para estrutura por bloco
+  BLOCOS.forEach((bloco, bi) => {
+    bloco.perguntas.forEach((_, pi) => {
+      const qid = `${bi}-${pi}`;
+      const scoreIdx = qRespostas[qid];
+      const pontos = SCORE_MAP[bloco.escala][scoreIdx];
+      dados.respostas[qid] = { scoreIdx, pontos };
+    });
+  });
+
+  try {
+    await api('POST', `/api/nr1/questionario/${qToken}`, dados);
+    showPage('obrigado');
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Enviar respostas →';
+  }
+}
+
+// ═══════════════════════════════
+// DASHBOARD CONTRATANTE
+// ═══════════════════════════════
+async function initDashboard(tokenRanking) {
+  showPage('dashboard');
+  showNav(true);
+  document.getElementById('nav-links').innerHTML = `
+    <span style="font-size:13px;color:var(--muted2)">Painel privado</span>
+  `;
+
+  try {
+    const data = await api('GET', `/api/nr1/dashboard/${tokenRanking}`);
+    renderDashboard(data);
+  } catch(e) {
+    document.getElementById('dash-content').innerHTML = `<div class="alert alert-danger" style="grid-column:1/-1">${e.message}</div>`;
+  }
+}
+
+function renderDashboard(data) {
+  const { pacote, stats, dimensoes, respondentes, departamentos } = data;
+
+  // Header
+  document.getElementById('dash-empresa-label').textContent = pacote.empresa || 'Empresa';
+  document.getElementById('dash-plano-badge').textContent = `Plano ${pacote.plano || 'Starter'}`;
+  document.getElementById('dash-periodo').textContent = `Avaliação iniciada em ${new Date(pacote.created_at).toLocaleDateString('pt-BR')} · Token: ${pacote.token_ranking}`;
+
+  // Stats
+  document.getElementById('stat-respondentes').textContent = stats.respondentes;
+  document.getElementById('stat-total').textContent = pacote.quantidade;
+
+  // Classificação geral
+  let fav = 0, inter = 0, risco = 0;
+  dimensoes.filter(d => d.tipo !== 'ofensivo').forEach(d => {
+    if (d.classificacao === 'Favorável') fav++;
+    else if (d.classificacao === 'Risco') risco++;
+    else inter++;
+  });
+  document.getElementById('count-favoravel').textContent = fav;
+  document.getElementById('count-intermediario').textContent = inter;
+  document.getElementById('count-risco').textContent = risco;
+
+  // Gênero
+  if (stats.genero) {
+    document.getElementById('genero-breakdown').innerHTML = Object.entries(stats.genero)
+      .map(([k,v]) => `<div style="margin-bottom:4px">${k}: <strong style="color:var(--text)">${v}</strong></div>`).join('');
+  }
+
+  // Ofensivos
+  const ofensivosHtml = dimensoes.filter(d => d.tipo === 'ofensivo')
+    .map(d => `<div style="margin-bottom:6px">${d.dim}: <strong style="color:${d.media_pct > 20 ? '#f87171':'#4ade80'}">${d.media_pct.toFixed(0)}%</strong> <span style="font-size:11px;color:var(--muted)">sim</span></div>`).join('');
+  document.getElementById('ofensivos-breakdown').innerHTML = ofensivosHtml || 'Nenhum dado';
+
+  // Link
+  const base = window.location.origin;
+  document.getElementById('dash-link-form').textContent = `${base}/q/${pacote.token}`;
+
+  // Barras por dimensão
+  renderDimBars(dimensoes);
+  renderDimTable(dimensoes);
+  renderRespondentes(respondentes);
+  renderDepartamentos(departamentos, dimensoes);
+}
+
+function classificarCor(classificacao) {
+  if (classificacao === 'Favorável') return '#4ade80';
+  if (classificacao === 'Risco') return '#f87171';
+  return '#f7c94f';
+}
+
+function classificarClass(classificacao) {
+  if (classificacao === 'Favorável') return 'risk-favoravel';
+  if (classificacao === 'Risco') return 'risk-risco';
+  return 'risk-intermediario';
+}
+
+function renderDimBars(dimensoes) {
+  const container = document.getElementById('dim-bars');
+  container.innerHTML = '';
+  dimensoes.filter(d => d.tipo !== 'ofensivo').forEach(d => {
+    const cor = classificarCor(d.classificacao);
+    const row = document.createElement('div');
+    row.className = 'dim-bar-row';
+    row.innerHTML = `
+      <div class="dim-bar-label">${d.dim}</div>
+      <div class="dim-bar-track">
+        <div class="dim-bar-fill" style="width:${Math.min(d.media_pct,100)}%;background:${cor}"></div>
+      </div>
+      <div class="dim-bar-value">${d.media_pct.toFixed(0)}%</div>
+      <div class="dim-bar-badge"><span class="risk-badge ${classificarClass(d.classificacao)}">${d.classificacao}</span></div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderDimTable(dimensoes) {
+  const tbody = document.getElementById('dim-table-body');
+  tbody.innerHTML = '';
+  dimensoes.forEach(d => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text);font-weight:500">${d.dim}</td>
+      <td>${d.cat}</td>
+      <td style="font-family:var(--font-mono)">${typeof d.media === 'number' ? d.media.toFixed(2) : d.media}</td>
+      <td style="font-family:var(--font-mono)">${d.media_pct.toFixed(1)}%</td>
+      <td><span class="risk-badge ${classificarClass(d.classificacao)}">${d.classificacao}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderRespondentes(respondentes) {
+  const container = document.getElementById('resp-list');
+  if (!respondentes || respondentes.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Nenhum respondente ainda</div>';
+    return;
+  }
+  container.innerHTML = respondentes.map((r, i) => `
+    <div class="resp-row">
+      <div class="resp-avatar">${(i+1)}</div>
+      <div>
+        <div class="resp-name">${r.departamento} · ${r.genero}</div>
+        <div class="resp-meta">${r.faixa_etaria} · ${r.tempo_empresa} · ${new Date(r.created_at).toLocaleDateString('pt-BR')}</div>
+      </div>
+      <div class="resp-status"><span class="badge badge-teal">Completo</span></div>
+    </div>
+  `).join('');
+}
+
+function renderDepartamentos(departamentos, dimensoes) {
+  const container = document.getElementById('dept-table');
+  if (!departamentos || Object.keys(departamentos).length === 0) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:13px">Dados insuficientes para comparativo por departamento.</div>';
+    return;
+  }
+  const depts = Object.keys(departamentos);
+  const dimsPrincipais = dimensoes.filter(d => d.tipo !== 'ofensivo').slice(0, 8);
+
+  let html = `<table class="risk-table"><thead><tr><th>Dimensão</th>${depts.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>`;
+  dimsPrincipais.forEach(dim => {
+    html += `<tr><td style="color:var(--text);font-weight:500">${dim.dim}</td>`;
+    depts.forEach(dept => {
+      const val = departamentos[dept]?.[dim.dim];
+      html += `<td style="font-family:var(--font-mono)">${val !== undefined ? val.toFixed(1)+'%' : '—'}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function switchTab(name, el) {
+  ['dimensoes','respondentes','departamentos'].forEach(t => {
+    document.getElementById(`tab-${t}`)?.classList.add('hidden');
+  });
+  document.getElementById(`tab-${name}`)?.classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el?.classList.add('active');
+}
+</script>
+</body>
+</html>

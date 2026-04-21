@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Perfilis NR-1 — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #05060f;
+      --surface: #0c0e1a;
+      --surface2: #111426;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --accent: #4f6ef7;
+      --accent2: #2dd4a0;
+      --danger: #f25757;
+      --amber: #f7c94f;
+      --text: #e9eaf5;
+      --muted: #5e6180;
+      --muted2: #9395b0;
+      --font: 'Instrument Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+      --r: 10px; --r-lg: 14px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    .hidden { display: none !important; }
+
+    /* LOGIN */
+    #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; position: relative; overflow: hidden; }
+    #login-screen::before { content: ''; position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(79,110,247,0.1) 0%, transparent 70%); top: -100px; left: -100px; pointer-events: none; }
+    .login-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 48px 44px; width: 400px; position: relative; z-index: 1; }
+    .login-logo { font-family: var(--font); font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .login-logo span { color: var(--accent); }
+    .login-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 36px; }
+    .login-field { margin-bottom: 18px; }
+    .login-field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px; }
+    .login-field input { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--r); padding: 12px 14px; color: var(--text); font-family: var(--font); font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .login-field input:focus { border-color: var(--accent); }
+    #login-error { color: var(--danger); font-size: 13px; margin-bottom: 14px; display: none; }
+    .btn-login { width: 100%; padding: 13px; background: var(--accent); border: none; border-radius: var(--r); color: white; font-family: var(--font); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-login:hover { background: #3d5ce8; }
+
+    /* ADMIN LAYOUT */
+    #admin-screen { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 22px 20px 18px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 700; }
+    .sidebar-logo span { color: var(--accent); }
+    .sidebar-logo small { display: block; font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.08em; }
+    .sidebar-nav { flex: 1; padding: 14px 10px; display: flex; flex-direction: column; gap: 3px; }
+    .nav-item { padding: 9px 12px; border-radius: var(--r); font-size: 13px; font-weight: 500; color: var(--muted2); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(79,110,247,0.12); color: var(--accent); }
+    .sidebar-footer { padding: 14px; border-top: 1px solid var(--border); }
+    .btn-sair { width: 100%; padding: 8px; background: transparent; border: 1px solid var(--border); border-radius: var(--r); color: var(--muted); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn-sair:hover { border-color: var(--danger); color: var(--danger); }
+
+    .main { overflow-y: auto; }
+    .main-header { padding: 22px 28px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .main-title { font-size: 18px; font-weight: 700; }
+    .main-content { padding: 24px 28px; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 20px; }
+    .stat-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text); font-family: var(--mono); }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* TABLE */
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+    .table-top { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .table-search { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-family: var(--font); font-size: 13px; outline: none; width: 240px; }
+    .table-search::placeholder { color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; }
+    th { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted2); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.015); }
+    .td-name { color: var(--text); font-weight: 600; }
+
+    /* BADGE */
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .badge-blue { background: rgba(79,110,247,0.12); color: #8ba5fa; }
+    .badge-teal { background: rgba(45,212,160,0.1); color: #2dd4a0; }
+    .badge-amber { background: rgba(247,201,79,0.1); color: #f7c94f; }
+    .badge-red { background: rgba(242,87,87,0.1); color: #f87171; }
+    .badge-gray { background: var(--surface2); color: var(--muted2); }
+
+    /* BTN */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--r); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #3d5ce8; }
+    .btn-ghost { background: transparent; color: var(--muted2); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+    .btn-danger-sm { background: rgba(242,87,87,0.08); color: var(--danger); border: 1px solid rgba(242,87,87,0.2); padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; font-family: var(--font); font-weight: 600; }
+    .btn-danger-sm:hover { background: rgba(242,87,87,0.16); }
+
+    /* LINK BOX */
+    .link-cell { font-family: var(--mono); font-size: 11px; color: var(--accent2); display: flex; align-items: center; gap: 6px; }
+    .copy-btn { font-size: 10px; background: rgba(45,212,160,0.08); border: 1px solid rgba(45,212,160,0.2); color: #2dd4a0; padding: 2px 7px; border-radius: 4px; cursor: pointer; font-family: var(--font); transition: all 0.15s; }
+    .copy-btn:hover { background: rgba(45,212,160,0.15); }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(5,6,15,0.88); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; width: 560px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { padding: 22px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px; }
+    .modal-body { padding: 20px 24px 24px; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+    .field input, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 12px; color: var(--text); font-family: var(--font); font-size: 13px; outline: none; }
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+    .alert-danger { background: rgba(242,87,87,0.08); border: 1px solid rgba(242,87,87,0.2); color: #f87171; }
+    .alert-success { background: rgba(45,212,160,0.08); border: 1px solid rgba(45,212,160,0.2); color: #2dd4a0; }
+    .alert-info { background: rgba(79,110,247,0.08); border: 1px solid rgba(79,110,247,0.2); color: #8ba5fa; }
+
+    /* RISK BADGES */
+    .risk-f { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); display:inline-flex;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600; }
+    .risk-i { background: rgba(247,201,79,0.1); color: #f7c94f; border: 1px solid rgba(247,201,79,0.2); display:inline-flex;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600; }
+    .risk-r { background: rgba(242,87,87,0.1); color: #f87171; border: 1px solid rgba(242,87,87,0.2); display:inline-flex;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600; }
+
+    /* TABS */
+    .detail-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .dtab { font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; }
+    .dtab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .fade-in { animation: fadeIn 0.3s ease; }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Perfilis <span>NR-1</span></div>
+    <div class="login-sub">Painel Administrativo</div>
+    <div class="login-field">
+      <label>E-mail</label>
+      <input type="email" id="l-email" placeholder="admin@perfilis.com" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="l-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-error"></div>
+    <button class="btn-login" onclick="doLogin()" id="btn-login">Entrar</button>
+  </div>
+</div>
+
+<!-- ── ADMIN ── -->
+<div id="admin-screen" class="hidden">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      Perfilis <span>NR-1</span>
+      <small>ADMIN CONSOLE</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="activateTab('visao-geral',this)">📊 Visão Geral</div>
+      <div class="nav-item" onclick="activateTab('contratantes',this)">🏢 Contratantes</div>
+      <div class="nav-item" onclick="activateTab('pacotes',this)">📦 Pacotes</div>
+      <div class="nav-item" onclick="activateTab('respondentes',this)">👤 Respondentes</div>
+      <div class="nav-item" onclick="activateTab('novo-pacote',this)">➕ Novo Pacote</div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- VISÃO GERAL -->
+    <div id="tab-visao-geral" class="fade-in">
+      <div class="main-header">
+        <div class="main-title">Visão Geral</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">↻ Atualizar</button>
+      </div>
+      <div class="main-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Contratantes</div>
+            <div class="stat-value" id="s-contratantes">—</div>
+            <div class="stat-sub">empresas cadastradas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pacotes ativos</div>
+            <div class="stat-value" id="s-pacotes-ativos">—</div>
+            <div class="stat-sub">com slots disponíveis</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total respondentes</div>
+            <div class="stat-value" id="s-respondentes">—</div>
+            <div class="stat-sub">questionários enviados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Receita estimada</div>
+            <div class="stat-value" id="s-receita">—</div>
+            <div class="stat-sub">baseado nos planos</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-top"><span style="font-size:13px;font-weight:600">Últimos pacotes criados</span></div>
+          <table>
+            <thead><tr>
+              <th>Empresa</th><th>Plano</th><th>Respondentes</th><th>Status</th><th>Criado em</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbl-recentes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTRATANTES -->
+    <div id="tab-contratantes" class="hidden fade-in">
+      <div class="main-header">
+        <div class="main-title">Contratantes</div>
+      </div>
+      <div class="main-content">
+        <div class="table-wrap">
+          <div class="table-top">
+            <span style="font-size:13px;font-weight:600">Todas as empresas</span>
+            <input class="table-search" placeholder="Buscar empresa..." oninput="filtrarTabela('tbl-contratantes',this.value)">
+          </div>
+          <table>
+            <thead><tr>
+              <th>Nome / Empresa</th><th>E-mail</th><th>WhatsApp</th><th>Pacotes</th><th>Respondentes</th><th>Cadastro</th>
+            </tr></thead>
+            <tbody id="tbl-contratantes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACOTES -->
+    <div id="tab-pacotes" class="hidden fade-in">
+      <div class="main-header">
+        <div class="main-title">Pacotes</div>
+      </div>
+      <div class="main-content">
+        <div class="table-wrap">
+          <div class="table-top">
+            <span style="font-size:13px;font-weight:600">Todos os pacotes</span>
+            <input class="table-search" placeholder="Buscar..." oninput="filtrarTabela('tbl-pacotes',this.value)">
+          </div>
+          <table>
+            <thead><tr>
+              <th>Empresa</th><th>Plano</th><th>Slots</th><th>Respondentes</th><th>Link Colaboradores</th><th>Link Dashboard</th><th>Status</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbl-pacotes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESPONDENTES -->
+    <div id="tab-respondentes" class="hidden fade-in">
+      <div class="main-header">
+        <div class="main-title">Respondentes</div>
+      </div>
+      <div class="main-content">
+        <div class="table-wrap">
+          <div class="table-top">
+            <span style="font-size:13px;font-weight:600">Todos os respondentes</span>
+            <input class="table-search" placeholder="Buscar depto..." oninput="filtrarTabela('tbl-respondentes',this.value)">
+          </div>
+          <table>
+            <thead><tr>
+              <th>#</th><th>Empresa</th><th>Departamento</th><th>Gênero</th><th>Faixa Etária</th><th>Tempo Empresa</th><th>Respondido em</th>
+            </tr></thead>
+            <tbody id="tbl-respondentes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOVO PACOTE MANUAL -->
+    <div id="tab-novo-pacote" class="hidden fade-in">
+      <div class="main-header">
+        <div class="main-title">Criar Pacote Manual</div>
+      </div>
+      <div class="main-content">
+        <div style="max-width:540px">
+          <div class="table-wrap" style="padding:24px">
+            <p style="font-size:13px;color:var(--muted2);margin-bottom:20px">Use este formulário para criar um pacote manualmente (ex: após pagamento offline ou para demonstração).</p>
+            <div class="field">
+              <label>Nome do contratante *</label>
+              <input type="text" id="np-nome" placeholder="João Silva">
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label>E-mail *</label>
+                <input type="email" id="np-email" placeholder="joao@empresa.com">
+              </div>
+              <div class="field">
+                <label>WhatsApp *</label>
+                <input type="tel" id="np-wpp" placeholder="(11) 99999-9999">
+              </div>
+            </div>
+            <div class="field">
+              <label>Empresa</label>
+              <input type="text" id="np-empresa" placeholder="Nome da empresa">
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label>Plano *</label>
+                <select id="np-plano">
+                  <option value="starter">Starter — 30 respondentes</option>
+                  <option value="pro" selected>Profissional — 100 respondentes</option>
+                  <option value="enterprise">Enterprise — 300 respondentes</option>
+                  <option value="demo">Demo — 5 respondentes</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Slots personalizados</label>
+                <input type="number" id="np-qtd" placeholder="Deixe vazio para usar o plano" min="1" max="1000">
+              </div>
+            </div>
+            <div id="np-error" class="alert alert-danger hidden"></div>
+            <div id="np-success" class="hidden">
+              <div class="alert alert-success">✅ Pacote criado com sucesso!</div>
+              <div style="margin-bottom:10px">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Link colaboradores</div>
+                <div class="link-cell">
+                  <span id="np-link-form" style="word-break:break-all"></span>
+                  <button class="copy-btn" onclick="copiar('np-link-form')">copiar</button>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px">Link dashboard</div>
+                <div class="link-cell">
+                  <span id="np-link-dash" style="word-break:break-all"></span>
+                  <button class="copy-btn" onclick="copiar('np-link-dash')">copiar</button>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="criarPacoteManual()" id="btn-criar-pacote">Criar Pacote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL DETAIL -->
+<div id="modal-detail" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-detail-title">Detalhes</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-detail-body"></div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let adminToken = null;
+let allData = { contratantes: [], pacotes: [], respondentes: [] };
+
+// ── AUTH ──
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const senha = document.getElementById('l-senha').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    const r = await fetch(API + '/admin/nr1/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.erro || 'Credenciais inválidas');
+    adminToken = d.token;
+    localStorage.setItem('nr1_admin_token', adminToken);
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-screen').classList.remove('hidden');
+    loadAll();
+  } catch(e) {
+    errEl.textContent = e.message; errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+function sair() {
+  adminToken = null;
+  localStorage.removeItem('nr1_admin_token');
+  document.getElementById('admin-screen').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+}
+
+// Check stored token
+(function() {
+  const t = localStorage.getItem('nr1_admin_token');
+  if (t) {
+    adminToken = t;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-screen').classList.remove('hidden');
+    loadAll();
+  }
+})();
+
+async function req(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  if (r.status === 403) { sair(); throw new Error('Sessão expirada'); }
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.erro || 'Erro');
+  return d;
+}
+
+async function loadAll() {
+  try {
+    const [c, p, r] = await Promise.all([
+      req('GET', '/admin/nr1/contratantes'),
+      req('GET', '/admin/nr1/pacotes'),
+      req('GET', '/admin/nr1/respondentes'),
+    ]);
+    allData.contratantes = c.contratantes || [];
+    allData.pacotes = p.pacotes || [];
+    allData.respondentes = r.respondentes || [];
+    renderStats();
+    renderContratantes();
+    renderPacotes();
+    renderRespondentes();
+    renderRecentes();
+  } catch(e) { console.error(e); }
+}
+
+// ── STATS ──
+const PLANO_VALOR = { starter: 297, pro: 497, enterprise: 897, demo: 0 };
+function renderStats() {
+  const { contratantes, pacotes, respondentes } = allData;
+  document.getElementById('s-contratantes').textContent = contratantes.length;
+  document.getElementById('s-pacotes-ativos').textContent = pacotes.filter(p => p.ativo).length;
+  document.getElementById('s-respondentes').textContent = respondentes.length;
+  const receita = pacotes.reduce((s, p) => s + (PLANO_VALOR[p.plano] || 0), 0);
+  document.getElementById('s-receita').textContent = `R$ ${receita.toLocaleString('pt-BR')}`;
+}
+
+// ── RECENTES ──
+function renderRecentes() {
+  const tbody = document.getElementById('tbl-recentes');
+  const recentes = [...allData.pacotes].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 8);
+  tbody.innerHTML = recentes.map(p => `
+    <tr>
+      <td class="td-name">${p.empresa || p.contratante_nome || '—'}</td>
+      <td><span class="badge badge-blue">${p.plano || '—'}</span></td>
+      <td>${p.usados || 0} / ${p.quantidade}</td>
+      <td>${p.ativo ? '<span class="badge badge-teal">Ativo</span>' : '<span class="badge badge-gray">Inativo</span>'}</td>
+      <td>${new Date(p.created_at).toLocaleDateString('pt-BR')}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="verDashboard('${p.token_ranking}')">Ver painel</button>
+        ${!p.ativo ? `<button class="btn-danger-sm" style="margin-left:4px" onclick="excluirPacote('${p.id}')">Excluir</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── CONTRATANTES ──
+function renderContratantes() {
+  const tbody = document.getElementById('tbl-contratantes');
+  tbody.innerHTML = allData.contratantes.map(c => {
+    const pkgs = allData.pacotes.filter(p => p.contratante_id === c.id);
+    const totalResp = allData.respondentes.filter(r => pkgs.some(p => p.id === r.pacote_id)).length;
+    return `
+      <tr>
+        <td><div class="td-name">${c.nome}</div><div style="font-size:11px;color:var(--muted)">${c.empresa || '—'}</div></td>
+        <td>${c.email}</td>
+        <td style="font-family:var(--mono);font-size:12px">${c.whatsapp || '—'}</td>
+        <td>${pkgs.length}</td>
+        <td>${totalResp}</td>
+        <td style="font-size:12px">${new Date(c.created_at).toLocaleDateString('pt-BR')}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ── PACOTES ──
+function renderPacotes() {
+  const base = window.location.origin;
+  const tbody = document.getElementById('tbl-pacotes');
+  tbody.innerHTML = allData.pacotes.map(p => `
+    <tr>
+      <td class="td-name">${p.empresa || p.contratante_nome || '—'}</td>
+      <td><span class="badge badge-blue">${p.plano || '—'}</span></td>
+      <td>${p.quantidade}</td>
+      <td>${p.usados || 0}</td>
+      <td>
+        <div class="link-cell">
+          <span id="lf-${p.id}" title="${base}/q/${p.token}">/q/${p.token?.slice(0,8)}…</span>
+          <button class="copy-btn" onclick="copiarTexto('${base}/q/${p.token}')">copiar</button>
+        </div>
+      </td>
+      <td>
+        <div class="link-cell">
+          <span id="lr-${p.id}" title="${base}/r/${p.token_ranking}">/r/${p.token_ranking?.slice(0,8)}…</span>
+          <button class="copy-btn" onclick="copiarTexto('${base}/r/${p.token_ranking}')">copiar</button>
+        </div>
+      </td>
+      <td>${p.ativo ? '<span class="badge badge-teal">Ativo</span>' : '<span class="badge badge-gray">Inativo</span>'}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="verDashboard('${p.token_ranking}')">Painel</button>
+        <button class="btn-danger-sm" onclick="excluirPacote('${p.id}')">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── RESPONDENTES ──
+function renderRespondentes() {
+  const tbody = document.getElementById('tbl-respondentes');
+  tbody.innerHTML = allData.respondentes.map((r, i) => {
+    const pacote = allData.pacotes.find(p => p.id === r.pacote_id);
+    return `
+      <tr>
+        <td style="font-family:var(--mono);font-size:12px">${i+1}</td>
+        <td>${pacote?.empresa || pacote?.contratante_nome || '—'}</td>
+        <td class="td-name">${r.departamento || '—'}</td>
+        <td>${r.genero || '—'}</td>
+        <td>${r.faixa_etaria || '—'}</td>
+        <td>${r.tempo_empresa || '—'}</td>
+        <td style="font-size:12px">${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ── CRIAR PACOTE MANUAL ──
+const PLANO_QTD = { starter: 30, pro: 100, enterprise: 300, demo: 5 };
+async function criarPacoteManual() {
+  const nome = document.getElementById('np-nome').value.trim();
+  const email = document.getElementById('np-email').value.trim();
+  const wpp = document.getElementById('np-wpp').value.trim();
+  const empresa = document.getElementById('np-empresa').value.trim();
+  const plano = document.getElementById('np-plano').value;
+  const qtdCustom = parseInt(document.getElementById('np-qtd').value);
+  const quantidade = qtdCustom > 0 ? qtdCustom : PLANO_QTD[plano];
+  const errEl = document.getElementById('np-error');
+  const btn = document.getElementById('btn-criar-pacote');
+  if (!nome || !email || !wpp) { errEl.textContent = 'Nome, e-mail e WhatsApp são obrigatórios.'; errEl.classList.remove('hidden'); return; }
+  errEl.classList.add('hidden');
+  btn.disabled = true; btn.textContent = 'Criando...';
+  try {
+    // Criar contratante
+    const cr = await req('POST', '/api/nr1/contratantes', { nome, email, whatsapp: wpp, empresa });
+    // Criar pacote
+    const pr = await req('POST', '/api/nr1/pacotes', {
+      contratante_id: cr.contratante_id, quantidade, plano,
+      pago: true
+    });
+    // Ativar
+    await req('POST', `/api/nr1/pacotes/${pr.pacote_id}/ativar`, {}).catch(()=>{});
+    const base = window.location.origin;
+    document.getElementById('np-link-form').textContent = `${base}/q/${pr.token}`;
+    document.getElementById('np-link-dash').textContent = `${base}/r/${pr.token_ranking}`;
+    document.getElementById('np-success').classList.remove('hidden');
+    loadAll();
+  } catch(e) {
+    errEl.textContent = e.message; errEl.classList.remove('hidden');
+  }
+  btn.disabled = false; btn.textContent = 'Criar Pacote';
+}
+
+// ── EXCLUIR PACOTE ──
+async function excluirPacote(id) {
+  if (!confirm('Tem certeza que deseja excluir este pacote? Todas as respostas serão perdidas.')) return;
+  try {
+    await req('DELETE', `/admin/nr1/pacote/${id}`);
+    loadAll();
+  } catch(e) { alert(e.message); }
+}
+
+// ── VER DASHBOARD ──
+function verDashboard(tokenRanking) {
+  if (tokenRanking) window.open(`/r/${tokenRanking}`, '_blank');
+}
+
+// ── UTILS ──
+function copiar(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent.trim());
+  const orig = el.textContent;
+  el.textContent = '✓ Copiado';
+  setTimeout(() => el.textContent = orig, 1200);
+}
+function copiarTexto(text) {
+  navigator.clipboard.writeText(text);
+}
+
+function filtrarTabela(tbodyId, query) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  const q = query.toLowerCase();
+  tbody.querySelectorAll('tr').forEach(tr => {
+    tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function activateTab(name, el) {
+  document.querySelectorAll('.main > div').forEach(d => d.classList.add('hidden'));
+  document.getElementById(`tab-${name}`)?.classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el?.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-detail').classList.add('hidden');
+}
+</script>
+</body>
+</html>
