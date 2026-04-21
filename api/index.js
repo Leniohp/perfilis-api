@@ -130,7 +130,14 @@ app.post('/api/formulario/:token', async (req, res) => {
     resp_feedback: body.resp_feedback || null,
     lgpd_aceite: true,
     lgpd_aceite_at: new Date().toISOString(),
-    pool_global: body.pool_global === true
+    pool_global: body.pool_global === true,
+    // Respostas individuais DISC (q01-q26, alternativas a-d, valores 1-4)
+    ...Object.fromEntries(
+      Array.from({length:26}, (_,i) => {
+        const q = String(i+1).padStart(2,'0');
+        return ['a','b','c','d'].map(l => [`disc_q${q}_${l}`, parseInt(body[`disc_q${q}_${l}`])||null]);
+      }).flat().filter(([,v]) => v != null)
+    )
   }).select().single();
 
   if (error) return res.status(500).json({ erro: error.message });
