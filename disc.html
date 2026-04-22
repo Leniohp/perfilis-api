@@ -1028,10 +1028,10 @@ footer a { color: var(--accent2); text-decoration: none; }
 // ══════════════════════════════════════
 
 const DISC_MAP = [
-  ['D','I','S','C'],['D','I','S','C'],['D','S','I','C'],['S','I','D','C'],['S','D','I','C'],
-  ['D','I','S','C'],['S','I','D','C'],['C','I','D','S'],['S','I','D','C'],['C','I','D','S'],
+  ['D','I','S','C'],['C','I','S','D'],['D','S','I','C'],['S','I','D','C'],['I','D','S','C'],
+  ['D','I','S','C'],['S','I','D','C'],['D','I','C','S'],['S','I','D','C'],['C','I','D','S'],
   ['C','D','S','I'],['D','S','I','C'],['C','I','D','S'],['D','I','S','C'],['C','D','S','I'],
-  ['S','D','I','C'],['C','S','I','D'],['S','I','C','D'],['D','C','S','I'],['D','C','S','I'],
+  ['S','D','I','C'],['C','S','I','D'],['C','I','S','D'],['D','C','S','I'],['D','C','S','I'],
   ['C','I','S','D'],['D','I','C','S'],['I','D','S','C'],['S','I','D','C'],['C','I','S','D'],
   ['S','I','D','C']
 ];
@@ -1079,12 +1079,8 @@ function calcularDISC(row) {
       sc[p] += parseInt(row[base+j])||0;
     }
   }
-  // Normalizar para ~51-75 range
-  const vals = Object.values(sc);
-  const min = Math.min(...vals), max = Math.max(...vals), range = max-min||1;
-  const norm = {};
-  for(const k of ['D','I','S','C']) norm[k] = Math.round(((sc[k]-min)/range)*24+51);
-  return {raw:sc, norm};
+  // Soma bruta, igual à planilha (sem normalização)
+  return {raw:sc, norm:{...sc}};
 }
 
 function calcularEgo(row) {
