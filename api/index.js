@@ -651,3 +651,114 @@ app.post('/admin/links-promocionais', adminAuth, async (req, res) => {
     res.status(500).json({ erro: e.message });
   }
 });
+// ══════════════════════════════════════
+// CONTADOR DE VISITAS
+// ══════════════════════════════════════
+
+// Registrar uma visita (sem auth — qualquer página do site chama)
+app.post('/api/track', async (req, res) => {
+  try {
+    const { path, visitor_id } = req.body;
+    if (!path || !visitor_id) return res.json({ ok: false });
+
+    // Normalizar path (agrupa tokens: /f/ABC123 -> /f/:token)
+    let pathNorm = path;
+    if (/^\/f\/[A-Z0-9_-]+/i.test(path)) pathNorm = '/f/:token';
+    else if (/^\/r\/[A-Z0-9_-]+/i.test(path)) pathNorm = '/r/:token';
+    else if (/^\/q\/[A-Z0-9_-]+/i.test(path)) pathNorm = '/q/:token';
+
+    // Limitar tamanho de user_agent e referrer
+    const ua = (req.headers['user-agent'] || '').slice(0, 255);
+    const ref = (req.body.referrer || '').slice(0, 255);
+
+    await supabase.from('visitas').insert({
+      path: pathNorm,
+      visitor_id: String(visitor_id).slice(0, 64),
+      user_agent: ua,
+      referrer: ref
+    });
+
+    res.json({ ok: true });
+  } catch (e) {
+    // Nunca falhar publicamente — tracking não pode quebrar a navegação
+    res.json({ ok: false });
+  }
+});
+
+// Admin: estatísticas de visitas
+app.get('/admin/visitas', adminAuth, async (req, res) => {
+  try {
+    // Janela de dias (padrão 30)
+    const dias = Math.min(parseInt(req.query.dias) || 30, 365);
+    const desde = new Date();
+    desde.setDate(desde.getDate() - dias);
+
+    // Busca visitas da janela
+    const { data: visitas, error } = await supabase
+      .from('visitas')
+      .select('path, visitor_id, created_at')
+      .gte('created_at', desde.toISOString())
+      .order('created_at', { ascending: true });
+
+    if (error) return res.status(500).json({ erro: error.message });
+    const lista = visitas || [];
+
+    // Totais globais
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const semana = new Date(hoje); semana.setDate(semana.getDate() - 7);
+    const mes = new Date(hoje); mes.setDate(mes.getDate() - 30);
+
+    const stats = {
+      total:      { views: lista.length, unicos: new Set(lista.map(v => v.visitor_id)).size },
+      hoje:       { views: 0, unicos: new Set() },
+      semana:     { views: 0, unicos: new Set() },
+      mes:        { views: 0, unicos: new Set() }
+    };
+    for (const v of lista) {
+      const d = new Date(v.created_at);
+      if (d >= mes)    { stats.mes.views++;    stats.mes.unicos.add(v.visitor_id); }
+      if (d >= semana) { stats.semana.views++; stats.semana.unicos.add(v.visitor_id); }
+      if (d >= hoje)   { stats.hoje.views++;   stats.hoje.unicos.add(v.visitor_id); }
+    }
+    stats.hoje.unicos   = stats.hoje.unicos.size;
+    stats.semana.unicos = stats.semana.unicos.size;
+    stats.mes.unicos    = stats.mes.unicos.size;
+
+    // Breakdown por página (views e únicos)
+    const porPagina = {};
+    for (const v of lista) {
+      if (!porPagina[v.path]) porPagina[v.path] = { views: 0, unicos: new Set() };
+      porPagina[v.path].views++;
+      porPagina[v.path].unicos.add(v.visitor_id);
+    }
+    const paginas = Object.entries(porPagina).map(([path, d]) => ({
+      path, views: d.views, unicos: d.unicos.size
+    })).sort((a, b) => b.views - a.views);
+
+    // Série diária (para gráfico)
+    const diariaMap = {};
+    for (const v of lista) {
+      const d = new Date(v.created_at);
+      const key = d.toISOString().slice(0, 10);  // YYYY-MM-DD
+      if (!diariaMap[key]) diariaMap[key] = { views: 0, unicos: new Set() };
+      diariaMap[key].views++;
+      diariaMap[key].unicos.add(v.visitor_id);
+    }
+    // Preencher todos os dias da janela (mesmo dias com zero)
+    const serie = [];
+    for (let i = dias - 1; i >= 0; i--) {
+      const d = new Date(hoje);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      serie.push({
+        data: key,
+        views: diariaMap[key]?.views || 0,
+        unicos: diariaMap[key]?.unicos.size || 0
+      });
+    }
+
+    res.json({ dias, stats, paginas, serie });
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
