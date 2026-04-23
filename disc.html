@@ -1829,12 +1829,13 @@ window.formEtapa=function(n){
         setTimeout(function(){ lateral.style.display = 'none'; lateral.classList.remove('saindo'); }, 400);
       }
     }
-  }[1,2,3,4].forEach(function(i){var e=document.getElementById('form-etapa-'+i);if(e)e.classList.add('hidden');});var s=document.getElementById('form-sucesso');if(s)s.classList.add('hidden');var e=document.getElementById('form-etapa-'+n);if(e)e.classList.remove('hidden');var p=[0,0,25,50,75];var l=['','Etapa 1 de 4 — Dados pessoais','Etapa 2 de 4 — Questionário DISC','Etapa 3 de 4 — Egograma','Etapa 4 de 4 — Roda das Virtudes'];var pg=document.getElementById('form-progress');if(pg)pg.style.width=(p[n]||0)+'%';var lb=document.getElementById('form-etapa-label');if(lb)lb.textContent=l[n]||'';var pt=document.getElementById('form-pct');if(pt)pt.textContent=(p[n]||0)+'%';window.scrollTo(0,0);};
-window.formProxima=function(n){if(n===2){var a=document.getElementById('f-nome').value.trim(),b=document.getElementById('f-email').value.trim(),c=document.getElementById('f-whatsapp').value.trim(),d=document.getElementById('f-lgpd').checked;if(!a||!b||!c){showToast('Preencha nome, email e WhatsApp','⚠️');return;}if(!d){showToast('Aceite a política de privacidade','⚠️');return;}renderDiscQ();}if(n===3)renderEgoQ();if(n===4)renderVirtQ();window.formEtapa(n);};
+  }[1,2,3,4,5].forEach(function(i){var e=document.getElementById('form-etapa-'+i);if(e)e.classList.add('hidden');});var s=document.getElementById('form-sucesso');if(s)s.classList.add('hidden');var e=document.getElementById('form-etapa-'+n);if(e)e.classList.remove('hidden');var p=[0,0,20,40,60,80];var l=['','Etapa 1 de 5 — Dados pessoais','Etapa 2 de 5 — Questionário DISC','Etapa 3 de 5 — Egograma','Etapa 4 de 5 — Quadrantes','Etapa 5 de 5 — Roda das Virtudes'];var pg=document.getElementById('form-progress');if(pg)pg.style.width=(p[n]||0)+'%';var lb=document.getElementById('form-etapa-label');if(lb)lb.textContent=l[n]||'';var pt=document.getElementById('form-pct');if(pt)pt.textContent=(p[n]||0)+'%';window.scrollTo(0,0);};
+window.formProxima=function(n){if(n===2){var a=document.getElementById('f-nome').value.trim(),b=document.getElementById('f-email').value.trim(),c=document.getElementById('f-whatsapp').value.trim(),d=document.getElementById('f-lgpd').checked;if(!a||!b||!c){showToast('Preencha nome, email e WhatsApp','⚠️');return;}if(!d){showToast('Aceite a política de privacidade','⚠️');return;}renderDiscQ();}if(n===3)renderEgoQ();if(n===4)renderQuadQ();if(n===5)renderVirtQ();window.formEtapa(n);};
 window.formVoltar=function(n){window.formEtapa(n);};
-window.fDR={};window.fEV={};window.fVV={};
+window.fDR={};window.fEV={};window.fQR={};window.fVV={};
 window.setDiscRank=function(q,o,v){discClick(q,o,parseInt(v)||0);};
 window.setEgo=function(i,v,b){window.fEV[i]=v;b.parentElement.querySelectorAll('button').forEach(function(x){x.style.background='var(--surface2)';x.style.color='var(--muted2)';});b.style.background='var(--accent)';b.style.color='white';};
+window.setQuad=function(i,v,b){window.fQR[i]=v;b.parentElement.querySelectorAll('button').forEach(function(x){x.style.background='var(--surface2)';x.style.color='var(--muted2)';});b.style.background='#22c55e';b.style.color='white';};
 window.setVirt=function(i,v){window.fVV[i]=parseInt(v);};
 var DQ=[
 {q:'Em um restaurante. Estou esperando uma mesa e o garçom me diz que em 10 minutos terei uma mesa, porém passam 20 minutos:',o:['Me aborreço e digo ao garçom que já se passou o dobro do tempo, e lhe informo que se demorar muito irei embora e eles perderão um cliente','Não me dou conta pois estou envolvido em uma conversa.','Não me fixo ao tempo, ainda que eu saiba do atraso, não falo nada.','Informo ao Garçom exatamente a hora que cheguei e exatamente o tempo que passou e peço que por favor me diga com exatidão quanto tempo ainda falta para que eu possa tomar uma decisão.']},
@@ -1866,11 +1867,13 @@ var DQ=[
 ];
 var DP=[[1,4,3,2],[4,2,3,1],[1,4,2,3],[4,3,1,2],[4,1,2,3],[1,2,3,4],[1,2,3,4],[4,1,2,3],[1,3,2,4],[4,3,2,1],[4,2,3,1],[4,3,2,1],[1,4,2,3],[4,1,3,2],[2,3,4,1],[4,1,2,3],[4,1,2,3],[1,4,2,3],[1,4,2,3],[1,4,3,2],[4,3,2,1],[3,4,2,1],[1,2,3,4],[3,4,1,2],[4,3,2,1],[4,3,2,1]];
 var EQ=['Tem movimentos firmes e ativos?','É espontâneo e livre?','Despreza os outros?','Harmoniza-se com quem o cerca?','Valoriza as tradições?','Percebe qualidades alheias?','Interessa-se pelas conversas alheias?','Analisa a realidade e decide?','Expressa logo os sentimentos?','É crítico às coisas e fatos?','É cerimonioso e retraído?','É extremamente atencioso?','Protela decisões desagradáveis?','Valoriza responsabilidade?','Conversa encarando o interlocutor?','Vive se queixando?','Gosta de ajudar os outros?','Examina a reação alheia?','Pergunta Por quê? Como?','É moralista?','Julga corretamente os fatos?','Manifesta espanto: Não diga!?','É rigoroso com fracassos alheios?','Limpa e organiza por iniciativa?','Consegue dizer o que pensa?','Arranja boas desculpas?','Expressa-se dizendo Deve fazer?','Tem dificuldade em ficar quieto?','Cumpre rigorosamente regulamentos?','Sabe lidar bem com pessoas?','Esforça-se para contentar os outros?','Fala sem cerimônia o que pensa?','Colhe informações e analisa?','É egoísta?','Diz Desculpe-me, Sinto muito?','Julga fatos sem opinião pessoal?','É extremamente curioso?','É indiferente a assuntos alheios?','Age em busca do ideal?','Planeja antes de agir?','Não se torna emotivo?','Consola pessoas em dificuldades?','Assume liderança coletiva?','Expressa com clareza sua opinião?','Decide pela intuição?','É maleável?','É obstinado em seus desejos?','Perdoa com sinceridade?','Dialoga facilmente com todos?','Não consegue recusar pedidos?'];
+var QQ=[['Penso muito antes de agir','A'],['Gosto de agir com regras bem definidas','B'],['Gosto de agir acompanhando','C'],['Gosto de fazer para ver como fica','D'],['Só faço se tenho certeza','A'],['Costumo ouvir os outros antes de agir','B'],['Gosto de refletir antes de responder','A'],['Procuro ser pontual','B'],['Gosto de mudar e de inovar','D'],['Gosto de testar novas maneiras de fazer','D'],['Sou extrovertido, comunicativo','C'],['Gosto de agir sempre da mesma forma','B'],['Procuro fazer como deve ser feito','B'],['Gosto de analisar antes de agir','A'],['Procuro entender os outros','C'],['Sou criativo e inovador','A'],['Gosto de agradar as pessoas','C'],['Procuro uma forma mais segura de agir','B'],['Imagino o que pode ser melhorado','D'],['Gosto de seguir regras definidas','B'],['Gosto de testar minha capacidade','D'],['Sou racional nas minhas decisões','A'],['Imagino soluções que outros não enxergam','D'],['Valorizo o espírito de equipe','C'],['Gosto de experimentar novas maneiras de fazer','D'],['Sou exigente comigo e verifico tudo que faço','A'],['Gosto de ajudar meus colegas','C'],['Gosto de agir com regras bem definidas','B']];
 var VQ=['Criatividade','Descobridor','Mente aberta','Amor ao aprendizado','Perspectiva','Perseverança','Integridade','Entusiasmo','Amor','Compaixão','Inteligência social','Cidadania','Igualdade','Liderança','Perdoar','Humildade','Prudência','Controle','Espiritualidade','Humor','Esperança','Otimismo','Gratidão','Apreciação de beleza'];
 
 function renderEgoQ(){var c=document.getElementById('ego-questions');if(!c||c.children.length>0)return;EQ.forEach(function(q,i){var d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';var btns=[3,2,1,0].map(function(v){return'<button onclick="setEgo('+i+','+v+',this)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted2);cursor:pointer;font-size:13px">'+v+'</button>';}).join('');d.innerHTML='<span style="font-size:13px;flex:1;line-height:1.4">'+(i+1)+'. '+q+'</span><div style="display:flex;gap:5px">'+btns+'</div>';c.appendChild(d);});}
+function renderQuadQ(){var c=document.getElementById('quad-questions');if(!c||c.children.length>0)return;QQ.forEach(function(item,i){var q=item[0];var d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';var btns=[3,2,1,0].map(function(v){return'<button onclick="setQuad('+i+','+v+',this)" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted2);cursor:pointer;font-size:13px">'+v+'</button>';}).join('');d.innerHTML='<span style="font-size:13px;flex:1;line-height:1.4">'+(i+1)+'. '+q+'</span><div style="display:flex;gap:5px">'+btns+'</div>';c.appendChild(d);});}
 function renderVirtQ(){var c=document.getElementById('virt-questions');if(!c||c.children.length>0)return;VQ.forEach(function(v,i){window.fVV[i]=7;var d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';d.innerHTML='<span style="font-size:13px;flex:1">'+v+'</span><div style="display:flex;align-items:center;gap:8px"><input type="range" min="0" max="10" value="7" style="width:100px" oninput="setVirt('+i+',this.value);document.getElementById(\'vv'+i+'\').textContent=this.value"><span id="vv'+i+'" style="font-size:14px;font-weight:600;min-width:20px;color:var(--accent2)">7</span></div>';c.appendChild(d);});}
-window.enviarFormulario=async function(){var btn=document.getElementById('btn-enviar');btn.textContent='Enviando...';btn.disabled=true;var body={nome:document.getElementById('f-nome').value.trim(),email:document.getElementById('f-email').value.trim(),whatsapp:document.getElementById('f-whatsapp').value.trim(),data_nasc:document.getElementById('f-nasc').value||null,endereco:document.getElementById('f-cidade').value.trim(),linkedin:document.getElementById('f-linkedin').value.trim()||null,experiencia:document.getElementById('f-exp').value,nivel:document.getElementById('f-nivel').value,resp_empresa:document.getElementById('f-r1').value.trim(),resp_equipe:document.getElementById('f-r2').value.trim(),resp_valores:document.getElementById('f-r3').value.trim(),resp_vaga:document.getElementById('f-r4').value.trim(),resp_feedback:document.getElementById('f-r5').value.trim(),lgpd_aceite:document.getElementById('f-lgpd').checked,pool_global:document.getElementById('f-pool').checked};for(var q=0;q<26;q++)for(var o=0;o<4;o++){var k='disc_q'+String(q+1).padStart(2,'0')+'_'+'abcd'[o];body[k]=(window.fDR[q]&&window.fDR[q][o])||DP[q][o];}for(var i=0;i<50;i++)body['ego_r'+String(i+1).padStart(2,'0')]=window.fEV[i]!==undefined?window.fEV[i]:2;for(var j=1;j<=27;j++)body['quad_r'+String(j).padStart(2,'0')]=2;VQ.forEach(function(v,i){body['virt_'+v.toLowerCase().replace(/[^a-z]/g,'_')]=window.fVV[i]!==undefined?window.fVV[i]:7;});try{var token=window.location.pathname.split('/').pop();var r=await fetch('https://project-dcveo.vercel.app/api/formulario/'+token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var d=await r.json();if(d.sucesso||d.candidato_id){[1,2,3,4].forEach(function(i){var el=document.getElementById('form-etapa-'+i);if(el)el.classList.add('hidden');});document.getElementById('form-sucesso').classList.remove('hidden');}else{showToast(d.erro||'Erro ao enviar','❌');btn.textContent='✓ Enviar análise';btn.disabled=false;}}catch(e){showToast('Erro de conexão','❌');btn.textContent='✓ Enviar análise';btn.disabled=false;}};
+window.enviarFormulario=async function(){var btn=document.getElementById('btn-enviar');btn.textContent='Enviando...';btn.disabled=true;var body={nome:document.getElementById('f-nome').value.trim(),email:document.getElementById('f-email').value.trim(),whatsapp:document.getElementById('f-whatsapp').value.trim(),data_nasc:document.getElementById('f-nasc').value||null,endereco:document.getElementById('f-cidade').value.trim(),linkedin:document.getElementById('f-linkedin').value.trim()||null,experiencia:document.getElementById('f-exp').value,nivel:document.getElementById('f-nivel').value,resp_empresa:document.getElementById('f-r1').value.trim(),resp_equipe:document.getElementById('f-r2').value.trim(),resp_valores:document.getElementById('f-r3').value.trim(),resp_vaga:document.getElementById('f-r4').value.trim(),resp_feedback:document.getElementById('f-r5').value.trim(),lgpd_aceite:document.getElementById('f-lgpd').checked,pool_global:document.getElementById('f-pool').checked};for(var q=0;q<26;q++)for(var o=0;o<4;o++){var k='disc_q'+String(q+1).padStart(2,'0')+'_'+'abcd'[o];body[k]=(window.fDR[q]&&window.fDR[q][o])||DP[q][o];}for(var i=0;i<50;i++)body['ego_r'+String(i+1).padStart(2,'0')]=window.fEV[i]!==undefined?window.fEV[i]:2;for(var j=0;j<28;j++)body['quad_r'+String(j+1).padStart(2,'0')]=window.fQR[j]!==undefined?window.fQR[j]:0;VQ.forEach(function(v,i){body['virt_'+v.toLowerCase().replace(/[^a-z]/g,'_')]=window.fVV[i]!==undefined?window.fVV[i]:7;});try{var token=window.location.pathname.split('/').pop();var r=await fetch('https://project-dcveo.vercel.app/api/formulario/'+token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var d=await r.json();if(d.sucesso||d.candidato_id){[1,2,3,4,5].forEach(function(i){var el=document.getElementById('form-etapa-'+i);if(el)el.classList.add('hidden');});document.getElementById('form-sucesso').classList.remove('hidden');}else{showToast(d.erro||'Erro ao enviar','❌');btn.textContent='✓ Enviar análise';btn.disabled=false;}}catch(e){showToast('Erro de conexão','❌');btn.textContent='✓ Enviar análise';btn.disabled=false;}};
 
 // ── MODAL PSICÓLOGA ──
 var psiTimer = null;
@@ -2062,6 +2065,17 @@ async function verCandidatoReal(candidatoId) {
       else if([2,7,9,16,18,22,24,26,43,45,48].indexOf(qi)>=0) egoCL+=v;
       else egoCA+=v;
     }
+    // Calcular quadrantes: cada pergunta soma na sua coluna pré-definida (A=Pré-ativo, B=Pró-ativo, C=Reativo, D=Relacional)
+    var quadMap = ['A','B','C','D','A','B','A','B','D','D','C','B','B','A','C','A','C','B','D','B','D','A','D','C','D','A','C','B'];
+    var quadPreativo=0, quadProativo=0, quadReativo=0, quadRelacional=0;
+    for(var qj=1;qj<=28;qj++){
+      var vq = a['quad_r'+String(qj).padStart(2,'0')]||0;
+      var cq = quadMap[qj-1];
+      if(cq==='A') quadPreativo+=vq;
+      else if(cq==='B') quadProativo+=vq;
+      else if(cq==='C') quadReativo+=vq;
+      else if(cq==='D') quadRelacional+=vq;
+    }
     state.candidatoAtual = {
       id: c.id,
       nome: c.nome,
@@ -2087,8 +2101,10 @@ async function verCandidatoReal(candidatoId) {
         CA: egoCA||a.ego_crianca_adapt||8
       },
       quad: {
-        A: a.quad_analitico || 12, B: a.quad_ordenado || 12,
-        C: a.quad_relacional || 12, D: a.quad_experimental || 12
+        PRE: quadPreativo||a.quad_preativo||0,
+        PRO: quadProativo||a.quad_proativo||0,
+        REA: quadReativo||a.quad_reativo||0,
+        REL: quadRelacional||a.quad_relacional||0
       },
       virt: {},
       perfilPrimario: a.perfil_primario || '',
@@ -2367,48 +2383,54 @@ window.mostrarSaibaMaisQuad = function() {
   window.scrollTo(0,0);
 };
 
-// Gráfico Quadrantes — barras horizontais estilo da imagem
+// Gráfico Quadrantes — gráfico de linha verde (mesmo estilo do egograma)
 function renderQuadChart(quad) {
   const ctx = document.getElementById('chart-quad');
   if (!ctx) return;
   if (state.charts.quad) { try{state.charts.quad.destroy();}catch(e){} }
 
-  const labels = ['Pré-Ativo','Pró-Ativo','Reativo','Relacional'];
-  const valores = [quad.A||0, quad.B||0, quad.C||0, quad.D||0];
-  const cores = ['#4a90d9','#dc5050','#50b478','#f0b43c'];
+  const labels = ['Pré-ativo','Pró-ativo','Reativo','Relacional'];
+  const valores = [quad.PRE||0, quad.PRO||0, quad.REA||0, quad.REL||0];
 
   state.charts.quad = new Chart(ctx.getContext('2d'), {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: labels,
       datasets: [{
         data: valores,
-        backgroundColor: cores.map(function(c){ return c + '99'; }),
-        borderColor: cores,
-        borderWidth: 2,
-        borderRadius: 0,
-        borderSkipped: false
+        borderColor: '#22c55e',
+        backgroundColor: 'rgba(34,197,94,0.08)',
+        pointBackgroundColor: '#22c55e',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 7,
+        pointHoverRadius: 9,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35
       }]
     },
     options: {
-      indexAxis: 'y',
-      layout: { padding: { right: 40 } },
+      layout: { padding: { top: 20, bottom: 10 } },
       scales: {
         x: {
-          min: 0,
-          ticks: { color: '#7a798a', font: { size: 10 } },
+          ticks: { color: '#e8e6f0', font: { size: 11, weight: '600' } },
           grid: { color: 'rgba(255,255,255,0.05)' },
           border: { color: 'rgba(255,255,255,0.1)' }
         },
         y: {
-          ticks: { color: '#e8e6f0', font: { size: 12, weight: '600' } },
-          grid: { display: false }
+          min: 0,
+          ticks: { color: '#7a798a', font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
         }
       },
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: { label: function(c){ return '  ' + c.parsed.x + ' pts'; } },
+          callbacks: {
+            label: function(ctx) { return '  ' + ctx.parsed.y + ' pts'; }
+          },
           backgroundColor: 'rgba(13,13,20,0.95)',
           borderColor: 'rgba(255,255,255,0.1)',
           borderWidth: 1
@@ -2418,11 +2440,11 @@ function renderQuadChart(quad) {
           color: '#ffffff',
           font: { size: 12, weight: '700' },
           anchor: 'end',
-          align: 'right',
+          align: 'top',
           formatter: function(v) { return v; }
         }
       },
-      animation: { duration: 800, easing: 'easeOutQuart' }
+      animation: { duration: 900, easing: 'easeOutQuart' }
     }
   });
 }
@@ -2764,7 +2786,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Progresso -->
     <div style="margin-bottom:32px">
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted2);margin-bottom:8px">
-        <span id="form-etapa-label">Etapa 1 de 4 — Dados pessoais</span>
+        <span id="form-etapa-label">Etapa 1 de 5 — Dados pessoais</span>
         <span id="form-pct">0%</span>
       </div>
       <div class="progress-bar-wrap"><div class="progress-bar" id="form-progress" style="width:0%"></div></div>
@@ -2822,7 +2844,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
 
-    <!-- ETAPA 3: Egograma + Quadrantes -->
+    <!-- ETAPA 3: Egograma -->
     <div id="form-etapa-3" class="hidden">
       <div class="card" style="margin-bottom:16px">
         <div class="ficha-section-title" style="font-size:15px">Teste Egograma — 50 questões</div>
@@ -2831,19 +2853,32 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div style="display:flex;gap:10px">
         <button class="btn btn-outline" onclick="formVoltar(2)">← Voltar</button>
-        <button class="btn btn-grad" style="flex:1" onclick="formProxima(4)">Continuar → Virtudes</button>
+        <button class="btn btn-grad" style="flex:1" onclick="formProxima(4)">Continuar → Quadrantes</button>
       </div>
     </div>
 
-    <!-- ETAPA 4: Virtudes + Submit -->
+    <!-- ETAPA 4: Teste dos Quadrantes -->
     <div id="form-etapa-4" class="hidden">
+      <div class="card" style="margin-bottom:16px">
+        <div class="ficha-section-title" style="font-size:15px">Teste dos Quadrantes — 28 questões</div>
+        <p style="font-size:13px;color:var(--muted2);margin-bottom:20px">Para cada frase, marque o quanto ela representa você: <strong style="color:var(--text)">3</strong>=Sempre assim, <strong style="color:var(--text)">2</strong>=Muitas vezes assim, <strong style="color:var(--text)">1</strong>=Raramente, <strong style="color:var(--text)">0</strong>=Nunca.</p>
+        <div id="quad-questions"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" onclick="formVoltar(3)">← Voltar</button>
+        <button class="btn btn-grad" style="flex:1" onclick="formProxima(5)">Continuar → Virtudes</button>
+      </div>
+    </div>
+
+    <!-- ETAPA 5: Virtudes + Submit -->
+    <div id="form-etapa-5" class="hidden">
       <div class="card" style="margin-bottom:16px">
         <div class="ficha-section-title" style="font-size:15px">Roda das Virtudes</div>
         <p style="font-size:13px;color:var(--muted2);margin-bottom:20px">Em uma escala de 0 a 10, como você avalia cada virtude?</p>
         <div id="virt-questions"></div>
       </div>
       <div style="display:flex;gap:10px">
-        <button class="btn btn-outline" onclick="formVoltar(3)">← Voltar</button>
+        <button class="btn btn-outline" onclick="formVoltar(4)">← Voltar</button>
         <button class="btn btn-grad" style="flex:1" id="btn-enviar" onclick="enviarFormulario()">✓ Enviar análise</button>
       </div>
     </div>
@@ -3210,32 +3245,5 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
-
-<!-- ═══ Contador de visitas (admin) ═══ -->
-<script>
-(function(){
-  try {
-    var vid = localStorage.getItem('_pfv');
-    if (!vid) {
-      vid = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-      localStorage.setItem('_pfv', vid);
-    }
-    var pathKey = '_pft_' + location.pathname;
-    if (sessionStorage.getItem(pathKey)) return;
-    sessionStorage.setItem(pathKey, '1');
-    fetch('https://www.perfilis.com/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        path: location.pathname,
-        visitor_id: vid,
-        referrer: document.referrer || ''
-      }),
-      keepalive: true
-    }).catch(function(){});
-  } catch(e) {}
-})();
-</script>
-
 </body>
 </html>

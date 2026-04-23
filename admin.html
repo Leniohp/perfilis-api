@@ -1907,6 +1907,88 @@
     });
   }
 
+  // Chart dos Quadrantes no modal admin (linha verde, mesmo estilo da página /r/...)
+  let _adminQuadChart = null;
+  function renderAdminQuadLineChart(quad) {
+    const ctx = document.getElementById('chart-quad-admin');
+    if (!ctx) return;
+    if (_adminQuadChart) { try { _adminQuadChart.destroy(); } catch(e){} }
+
+    const labels  = ['Pré-ativo','Pró-ativo','Reativo','Relacional'];
+    const valores = [quad.PRE||0, quad.PRO||0, quad.REA||0, quad.REL||0];
+    const maxV    = Math.max(...valores, 10);
+
+    // Plugin inline para valor acima de cada ponto
+    const pontosValorPluginQ = {
+      id: 'pontosValorQuad',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta || !meta.data) return;
+        ctx.save();
+        ctx.font = '700 12px Inter, system-ui, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        meta.data.forEach((pt, i) => {
+          const v = chart.data.datasets[0].data[i];
+          if (v === null || v === undefined) return;
+          ctx.fillText(String(v), pt.x, pt.y - 12);
+        });
+        ctx.restore();
+      }
+    };
+
+    _adminQuadChart = new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: valores,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,0.10)',
+          pointBackgroundColor: '#22c55e',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 22, bottom: 6, left: 4, right: 8 } },
+        scales: {
+          x: {
+            ticks: { color: '#cbd5e1', font: { size: 11, weight: '600' }, maxRotation: 0, autoSkip: false },
+            grid:   { color: 'rgba(255,255,255,0.05)' },
+            border: { color: 'rgba(255,255,255,0.1)' }
+          },
+          y: {
+            min: 0,
+            suggestedMax: Math.ceil(maxV * 1.15),
+            ticks: { color: '#7a798a', font: { size: 10 } },
+            grid:   { color: 'rgba(255,255,255,0.05)' },
+            border: { color: 'rgba(255,255,255,0.1)' }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: (ctx) => '  ' + ctx.parsed.y + ' pts' },
+            backgroundColor: 'rgba(13,13,20,0.95)',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1
+          }
+        },
+        animation: { duration: 800, easing: 'easeOutQuart' }
+      },
+      plugins: [pontosValorPluginQ]
+    });
+  }
+
   async function abrirCandidato(id) {
     document.getElementById('modal-overlay').classList.add('open');
     document.getElementById('modal-content').innerHTML =
@@ -1933,6 +2015,24 @@
         A:  egoA  || a.ego_adulto       || 0,
         CL: egoCL || a.ego_crianca_livre|| 0,
         CA: egoCA || a.ego_crianca_adapt|| 0
+      };
+
+      // --- Calcular Quadrantes (mesma lógica da página /r/...) ---
+      var quadMap = ['A','B','C','D','A','B','A','B','D','D','C','B','B','A','C','A','C','B','D','B','D','A','D','C','D','A','C','B'];
+      var quadPre = 0, quadPro = 0, quadRea = 0, quadRel = 0;
+      for (var qj = 1; qj <= 28; qj++) {
+        var vQuad = a['quad_r' + String(qj).padStart(2, '0')] || 0;
+        var col = quadMap[qj - 1];
+        if      (col === 'A') quadPre += vQuad;
+        else if (col === 'B') quadPro += vQuad;
+        else if (col === 'C') quadRea += vQuad;
+        else if (col === 'D') quadRel += vQuad;
+      }
+      const quad = {
+        PRE: quadPre || a.quad_preativo   || 0,
+        PRO: quadPro || a.quad_proativo   || 0,
+        REA: quadRea || a.quad_reativo    || 0,
+        REL: quadRel || a.quad_relacional || 0
       };
 
       const discData = [
@@ -2030,6 +2130,14 @@
                 <canvas id="chart-ego-admin"></canvas>
               </div>
             </div>
+            <div style="background:rgba(255,255,255,0.03);padding:20px 18px 14px;border-radius:16px;border:1px solid var(--border)">
+              <div style="text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:16px">
+                Quadrantes
+              </div>
+              <div style="height:340px;padding:4px 2px">
+                <canvas id="chart-quad-admin"></canvas>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2060,6 +2168,8 @@
       setTimeout(() => renderQuestionario(c), 50);
       // Render egograma (line chart) no modal admin
       setTimeout(() => renderAdminEgoLineChart(ego), 60);
+      // Render quadrantes (line chart verde) no modal admin
+      setTimeout(() => renderAdminQuadLineChart(quad), 70);
     } catch (e) {
       document.getElementById('modal-content').innerHTML =
         `<div style="color:var(--accent2);text-align:center;padding:40px">Erro ao carregar candidato.</div>`;
