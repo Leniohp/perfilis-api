@@ -694,11 +694,6 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* Grid DISC + Egograma no modal do candidato — empilha no mobile */
-    @media (max-width: 900px) {
-      .admin-charts-grid { grid-template-columns: 1fr !important; }
-    }
   </style>
 </head>
 <body>
@@ -2025,7 +2020,7 @@
             ${a.perfil_primario ? badgePerfil(a.perfil_primario, 'font-size:13px;padding:5px 14px') : ''}
             ${a.perfil_secundario ? badgePerfil(a.perfil_secundario, 'font-size:12px;padding:4px 12px;opacity:.75') : ''}
           </div>
-          <div class="admin-charts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="admin-charts-grid" style="display:grid;grid-template-columns:1fr;gap:16px">
             <div>${discBars}</div>
             <div style="background:rgba(255,255,255,0.03);padding:20px 18px 14px;border-radius:16px;border:1px solid var(--border)">
               <div style="text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:16px">
