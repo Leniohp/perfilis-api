@@ -326,6 +326,7 @@ select.input { cursor: pointer; }
   .grid3 { grid-template-columns: 1fr; }
   .dash-grid { grid-template-columns: 1fr; }
   .hero-h1 { font-size: 36px; }
+  #dash-graficos-row { grid-template-columns: 1fr !important; }
 }
 </style>
 </head>
@@ -962,14 +963,33 @@ select.input { cursor: pointer; }
         </div>
       </div>
 
-      <!-- Link de aplicação -->
+      <!-- ═══ GRÁFICO 1: Média por Dimensão (barras verticais) ═══ -->
       <div class="card" style="margin-top:20px">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Seu link de aplicação</div>
-        <div class="link-box">
-          <span class="link-box-text" id="dash-link-form">—</span>
-          <button class="btn btn-ghost btn-sm link-copy-btn no-print" onclick="copiarTexto('dash-link-form')">Copiar</button>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">📊 Média por Dimensão</div>
+        <div style="position:relative;height:420px;width:100%">
+          <canvas id="grafico-dim-media"></canvas>
         </div>
-        <div style="margin-top:8px;font-size:12px;color:var(--muted)">Compartilhe com seus colaboradores. Cada um responderá e o resultado alimentará este painel.</div>
+      </div>
+
+      <!-- ═══ GRÁFICOS 2 e 3 lado a lado ═══ -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px" id="dash-graficos-row">
+
+        <!-- Radar por Categoria -->
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">🎯 Perfil por Categoria (% da Escala)</div>
+          <div style="position:relative;height:380px;width:100%">
+            <canvas id="grafico-categorias"></canvas>
+          </div>
+        </div>
+
+        <!-- Comportamentos Ofensivos -->
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;color:#f25757;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">⚠️ Comportamentos Ofensivos (% Sim)</div>
+          <div style="position:relative;height:380px;width:100%">
+            <canvas id="grafico-ofensivos"></canvas>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1756,13 +1776,12 @@ function classificarClass(classificacao) {
  * Renderiza o dashboard COPSOQ II completo (4 seções)
  */
 function renderCopsoqDashboard(data) {
-  const { pacote, stats, dimensoes, respostas, analise_departamentos, departamentos_fixos } = data;
+  const { pacote, stats, dimensoes, categorias, respostas, analise_departamentos, departamentos_fixos } = data;
 
   // ─── Header ───
   document.getElementById('dash-empresa-label').textContent = pacote.empresa || 'Empresa';
   document.getElementById('dash-plano-badge').textContent = 'Plano ' + (pacote.plano === 'free' ? 'Grátis ✨' : (pacote.plano || 'Starter').charAt(0).toUpperCase() + (pacote.plano || 'starter').slice(1));
   document.getElementById('dash-periodo').textContent = `Avaliação iniciada em ${new Date(pacote.created_at).toLocaleDateString('pt-BR')} · Token: ${pacote.token_ranking}`;
-  document.getElementById('dash-link-form').textContent = `${window.location.origin}/q/${pacote.token}`;
 
   // ═══ ABA 1: DASHBOARD ═══
   document.getElementById('d-total-resp').textContent = stats.respondentes;
@@ -1814,6 +1833,11 @@ function renderCopsoqDashboard(data) {
       </tr>`;
   });
 
+  // ═══ ABA 1 — GRÁFICOS (espelham a planilha) ═══
+  renderGraficoMediaDim(dimensoes);
+  renderGraficoCategorias(categorias || {});
+  renderGraficoOfensivos(dimensoes);
+
   // ═══ ABA 2: RESPOSTAS ═══
   renderTabelaRespostas(respostas, dimensoes);
 
@@ -1822,6 +1846,192 @@ function renderCopsoqDashboard(data) {
 
   // ═══ ABA 4: ANÁLISE POR DEPARTAMENTO ═══
   renderAnaliseDepartamentos(analise_departamentos, departamentos_fixos, dimensoes);
+}
+
+// ═══════════════════════════════════════════════
+// GRÁFICOS DO DASHBOARD (espelho da planilha Excel)
+// ═══════════════════════════════════════════════
+
+// Cor padrão da planilha: teal escuro
+const COR_TEAL = '#2d7a8c';
+const COR_TEAL_BG = 'rgba(45,122,140,0.65)';
+const COR_VERMELHO = '#e74c3c';
+const COR_VERMELHO_BG = 'rgba(231,76,60,0.65)';
+
+// Guarda instâncias pra destruir antes de recriar
+let _graficoDimMedia = null, _graficoCategorias = null, _graficoOfensivos = null;
+
+/**
+ * Gráfico 1: Média por Dimensão (barras verticais — 19 dimensões analisadas)
+ * Espelha o "Média por Dimensão" da aba Dashboard da planilha
+ */
+function renderGraficoMediaDim(dimensoes) {
+  const canvas = document.getElementById('grafico-dim-media');
+  if (!canvas || !window.Chart) return;
+  if (_graficoDimMedia) { try { _graficoDimMedia.destroy(); } catch(e){} }
+
+  const dims = (dimensoes || []).filter(d => d.tipo !== 'ofensivo');
+
+  _graficoDimMedia = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: dims.map(d => d.dim),
+      datasets: [{
+        label: 'Pontuação Média',
+        data: dims.map(d => parseFloat((d.media || 0).toFixed(2))),
+        backgroundColor: COR_TEAL_BG,
+        borderColor: COR_TEAL,
+        borderWidth: 1.5,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(13,13,20,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: { label: (ctx) => ` Pontuação: ${ctx.parsed.y.toFixed(2)}` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#cbd5e1', font: { size: 10 }, maxRotation: 60, minRotation: 45, autoSkip: false },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        },
+        y: {
+          title: { display: true, text: 'Pontuação Média', color: '#9395b0', font: { size: 11 } },
+          min: 0, suggestedMax: 8,
+          ticks: { color: '#7a798a', font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        }
+      },
+      animation: { duration: 800, easing: 'easeOutQuart' }
+    }
+  });
+}
+
+/**
+ * Gráfico 2: Perfil por Categoria (radar/hexágono — 6 categorias em % da escala)
+ * Espelha o "Perfil por Categoria (% da Escala)" da aba Dashboard da planilha
+ */
+function renderGraficoCategorias(categorias) {
+  const canvas = document.getElementById('grafico-categorias');
+  if (!canvas || !window.Chart) return;
+  if (_graficoCategorias) { try { _graficoCategorias.destroy(); } catch(e){} }
+
+  // Ordem fixa (igual planilha)
+  const ordem = [
+    'Exigências no Trabalho',
+    'Organização do Trabalho e Conteúdo',
+    'Relações Interpessoais e Liderança',
+    'Saúde e Bem-Estar',
+    'Interface Trabalho-Indivíduo',
+    'Valores no Local de Trabalho',
+  ];
+  const labels = ordem;
+  const valores = ordem.map(cat => parseFloat((categorias[cat] || 0).toFixed(1)));
+
+  _graficoCategorias = new Chart(canvas.getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Média %',
+        data: valores,
+        backgroundColor: 'rgba(45,122,140,0.45)',
+        borderColor: COR_TEAL,
+        borderWidth: 2,
+        pointBackgroundColor: COR_TEAL,
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 1.5,
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#cbd5e1', font: { size: 11 }, boxWidth: 14, padding: 10 } },
+        tooltip: {
+          backgroundColor: 'rgba(13,13,20,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.r.toFixed(1)}%` }
+        }
+      },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { color: '#7a798a', font: { size: 9 }, backdropColor: 'transparent', stepSize: 20 },
+          grid: { color: 'rgba(255,255,255,0.08)' },
+          angleLines: { color: 'rgba(255,255,255,0.08)' },
+          pointLabels: { color: '#cbd5e1', font: { size: 10 } }
+        }
+      },
+      animation: { duration: 800, easing: 'easeOutQuart' }
+    }
+  });
+}
+
+/**
+ * Gráfico 3: Comportamentos Ofensivos (% Sim — barras vermelhas)
+ * Espelha o "Comportamentos Ofensivos (% Sim)" da aba Dashboard da planilha
+ */
+function renderGraficoOfensivos(dimensoes) {
+  const canvas = document.getElementById('grafico-ofensivos');
+  if (!canvas || !window.Chart) return;
+  if (_graficoOfensivos) { try { _graficoOfensivos.destroy(); } catch(e){} }
+
+  const ofens = (dimensoes || []).filter(d => d.tipo === 'ofensivo');
+
+  _graficoOfensivos = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ofens.map(d => d.dim),
+      datasets: [{
+        label: '% Sim',
+        data: ofens.map(d => parseFloat(((d.pct_sim !== undefined ? d.pct_sim : d.media_pct) || 0).toFixed(1))),
+        backgroundColor: COR_VERMELHO_BG,
+        borderColor: COR_VERMELHO,
+        borderWidth: 1.5,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(13,13,20,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: { label: (ctx) => ` ${ctx.parsed.y.toFixed(1)}% responderam "Sim"` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#cbd5e1', font: { size: 11 }, maxRotation: 0 },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        },
+        y: {
+          title: { display: true, text: '% de respostas "Sim"', color: '#9395b0', font: { size: 11 } },
+          min: 0, max: 100,
+          ticks: { color: '#7a798a', font: { size: 10 }, callback: (v) => v + '%' },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        }
+      },
+      animation: { duration: 800, easing: 'easeOutQuart' }
+    }
+  });
 }
 
 function renderTabelaRespostas(respostas, dimensoes) {
