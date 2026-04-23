@@ -6,10 +6,12 @@
     { "src": "disc.html",       "use": "@vercel/static" },
     { "src": "nr1.html",        "use": "@vercel/static" },
     { "src": "nr1-admin.html",  "use": "@vercel/static" },
+    { "src": "public/**",       "use": "@vercel/static" },
     { "src": "api/index.js",    "use": "@vercel/node" },
     { "src": "api/nr1.js",      "use": "@vercel/node" }
   ],
   "routes": [
+    { "src": "/img/(.*)",            "dest": "/public/img/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
     { "src": "/api/nr1/(.*)",        "dest": "/api/nr1.js" },
     { "src": "/admin/nr1/(.*)",      "dest": "/api/nr1.js" },
     { "src": "/admin/nr1",           "dest": "/nr1-admin.html" },
