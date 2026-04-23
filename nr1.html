@@ -1090,11 +1090,12 @@ function doRoute() {
     console.log('[NR-1 Router] → questionário, token=', token);
     if (token) { initQuestionario(token); return; }
   }
-  // Dashboard (ranking)
-  if (path.startsWith('/r/') || hash.startsWith('#r/') || rParam) {
+  // Dashboard (ranking) — aceita /r/, /nr1-r/, #r/ ou ?r=
+  if (path.startsWith('/nr1-r/') || path.startsWith('/r/') || hash.startsWith('#r/') || rParam) {
     let token = rParam;
-    if (!token && path.startsWith('/r/'))   token = path.split('/r/')[1];
-    if (!token && hash.startsWith('#r/'))   token = hash.split('#r/')[1];
+    if (!token && path.startsWith('/nr1-r/')) token = path.split('/nr1-r/')[1];
+    if (!token && path.startsWith('/r/'))     token = path.split('/r/')[1];
+    if (!token && hash.startsWith('#r/'))     token = hash.split('#r/')[1];
     token = (token || '').split('?')[0].split('#')[0].trim();
     console.log('[NR-1 Router] → dashboard, token=', token);
     if (token) { initDashboard(token); return; }
@@ -1331,7 +1332,7 @@ function confirmarPagamento() {
 
   const base = window.location.origin;
   const linkForm = `${base}/q/${checkoutToken}`;
-  const linkDash = `${base}/r/${checkoutTokenRanking}`;
+  const linkDash = `${base}/nr1-r/${checkoutTokenRanking}`;
   document.getElementById('link-colaboradores').textContent = linkForm;
   document.getElementById('link-dashboard').textContent = linkDash;
   document.getElementById('email-confirmacao').textContent = document.getElementById('co-email').value;

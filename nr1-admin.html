@@ -508,8 +508,8 @@ function renderPacotes() {
       </td>
       <td>
         <div class="link-cell">
-          <span id="lr-${p.id}" title="${base}/r/${p.token_ranking}">/r/${p.token_ranking?.slice(0,8)}…</span>
-          <button class="copy-btn" onclick="copiarTexto('${base}/r/${p.token_ranking}')">copiar</button>
+          <span id="lr-${p.id}" title="${base}/nr1-r/${p.token_ranking}">/nr1-r/${p.token_ranking?.slice(0,8)}…</span>
+          <button class="copy-btn" onclick="copiarTexto('${base}/nr1-r/${p.token_ranking}')">copiar</button>
         </div>
       </td>
       <td>${p.ativo ? '<span class="badge badge-teal">Ativo</span>' : '<span class="badge badge-gray">Inativo</span>'}</td>
@@ -568,7 +568,7 @@ async function criarPacoteManual() {
     await req('POST', `/api/nr1/pacotes/${pr.pacote_id}/ativar`, {}).catch(()=>{});
     const base = window.location.origin;
     document.getElementById('np-link-form').textContent = `${base}/q/${pr.token}`;
-    document.getElementById('np-link-dash').textContent = `${base}/r/${pr.token_ranking}`;
+    document.getElementById('np-link-dash').textContent = `${base}/nr1-r/${pr.token_ranking}`;
     document.getElementById('np-success').classList.remove('hidden');
     loadAll();
   } catch(e) {
@@ -588,7 +588,7 @@ async function excluirPacote(id) {
 
 // ── VER DASHBOARD ──
 function verDashboard(tokenRanking) {
-  if (tokenRanking) window.open(`/r/${tokenRanking}`, '_blank');
+  if (tokenRanking) window.open(`/nr1-r/${tokenRanking}`, '_blank');
 }
 
 // ── UTILS ──

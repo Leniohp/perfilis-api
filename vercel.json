@@ -22,7 +22,10 @@
     { "src": "/nr1",                 "dest": "/nr1.html" },
 
     { "src": "/q/([A-Za-z0-9-]+)",   "dest": "/nr1.html?q=$1" },
-    { "src": "/r/(RU[A-Za-z0-9-]+)", "dest": "/nr1.html?r=$1" },
+    { "src": "/nr1-r/([A-Za-z0-9-]+)", "dest": "/nr1.html?r=$1" },
+
+    { "src": "/disc-f/([A-Za-z0-9-]+)", "dest": "/disc.html?f=$1" },
+    { "src": "/disc-r/([A-Za-z0-9-]+)", "dest": "/disc.html?r=$1" },
 
     { "src": "/f/(.*)",              "dest": "/disc.html" },
     { "src": "/r/(.*)",              "dest": "/disc.html" },
