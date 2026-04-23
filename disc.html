@@ -1809,11 +1809,20 @@ window.formEtapa=function(n){
   // Mostrar psicóloga lateral apenas na etapa 2 (DISC)
   var lateral = document.getElementById('psico-lateral');
   if (lateral) {
+    // Limpa timers antigos (show e hide) antes de decidir o que fazer
+    clearTimeout(window._lateralShowTimer);
+    clearTimeout(window._lateralHideTimer);
     if (n === 2) {
-      lateral.classList.remove('saindo');
-      lateral.style.display = 'flex';
-      clearTimeout(window._lateralTimer);
-      window._lateralTimer = setTimeout(function(){ lateral.classList.add('saindo'); setTimeout(function(){ lateral.style.display = 'none'; lateral.classList.remove('saindo'); }, 400); }, 20000);
+      // Aparece depois de 2,5s para não assustar o usuário
+      window._lateralShowTimer = setTimeout(function(){
+        lateral.classList.remove('saindo');
+        lateral.style.display = 'flex';
+        // Sai após 20s na tela
+        window._lateralHideTimer = setTimeout(function(){
+          lateral.classList.add('saindo');
+          setTimeout(function(){ lateral.style.display = 'none'; lateral.classList.remove('saindo'); }, 400);
+        }, 20000);
+      }, 2500);
     } else {
       if (lateral.style.display !== 'none') {
         lateral.classList.add('saindo');
@@ -2889,11 +2898,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- PSICÓLOGA LATERAL — fixa durante DISC -->
-<div id="psico-lateral" style="position:fixed;right:0;bottom:0;z-index:1;pointer-events:none;display:none;align-items:flex-end;max-width:220px;padding-bottom:0;opacity:0.92">
-  <img loading="lazy" decoding="async" src="perfilis_preview/img_6.webp" alt="Dica" 
-    style="width:280px;height:auto;display:block;
-    filter:drop-shadow(-4px 0 20px rgba(0,0,0,0.5));
-    animation:slideInRight 0.5s ease">
+<div id="psico-lateral" style="position:fixed;right:0;bottom:0;z-index:1;pointer-events:none;display:none;align-items:flex-end;opacity:0.92">
+  <img loading="lazy" decoding="async" src="/img/psico-dica.webp" alt="Dica de preenchimento do questionário DISC"
+    style="display:block;filter:drop-shadow(-4px 0 20px rgba(0,0,0,0.5));animation:slideInRight 0.5s ease"
+    class="psico-img-lateral">
 </div>
 <style>
 @keyframes slideInRight {
@@ -2906,6 +2914,16 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 #psico-lateral.saindo {
   animation: slideOutRight 0.4s ease forwards;
+}
+/* Desktop: tamanho confortável */
+.psico-img-lateral { width: 280px; height: auto; }
+/* Mobile: ~55% do tamanho, discreta, não atrapalha leitura das questões */
+@media (max-width: 768px) {
+  #psico-lateral { opacity: 0.88; }
+  .psico-img-lateral { width: 155px; }
+}
+@media (max-width: 380px) {
+  .psico-img-lateral { width: 130px; }
 }
 </style>
 
