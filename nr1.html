@@ -337,6 +337,7 @@ select.input { cursor: pointer; }
     </a>
     <div class="nav-links" id="nav-links">
       <button class="btn btn-ghost btn-sm" onclick="showPage('landing')">Início</button>
+      <button class="btn btn-sm" style="background:#22c55e;color:#062312;border:none;font-weight:700" onclick="openCheckout('free')">✨ Grátis até 3</button>
       <button class="btn btn-primary btn-sm" onclick="openCheckout('starter')">Contratar</button>
     </div>
   </div>
@@ -356,6 +357,7 @@ select.input { cursor: pointer; }
         <p class="hero-desc">Ferramenta baseada no COPSOQ II — padrão internacional de avaliação psicossocial — adaptada para atender a NR-1 e complementar o seu PGR com dados concretos de bem-estar organizacional.</p>
         <div class="hero-ctas">
           <button class="btn btn-grad btn-lg" onclick="openCheckout('starter')">Contratar agora</button>
+          <button class="btn btn-lg" style="background:#22c55e;color:#062312;border:none;font-weight:700" onclick="openCheckout('free')">✨ Testar grátis</button>
           <button class="btn btn-outline btn-lg" onclick="document.getElementById('como-funciona').scrollIntoView({behavior:'smooth'})">Como funciona</button>
         </div>
       </div>
@@ -517,6 +519,19 @@ select.input { cursor: pointer; }
       <h2 class="section-title">Escolha o tamanho do seu time</h2>
       <p class="section-desc">Pague uma vez, sem mensalidade. Acesso ao painel de resultados por 12 meses.</p>
       <div class="pricing-grid">
+        <div class="pricing-card" id="plan-free" style="border:1px solid rgba(34,197,94,0.35);background:linear-gradient(180deg,rgba(34,197,94,0.06),transparent 60%)">
+          <div class="pricing-badge" style="background:#22c55e;color:#062312">✨ Experimente</div>
+          <div class="pricing-name">Grátis</div>
+          <div class="pricing-price" style="color:#22c55e">R$ 0<span></span></div>
+          <div class="pricing-period">sem pagamento · até 3 colaboradores</div>
+          <ul class="pricing-features">
+            <li>Até 3 respondentes</li>
+            <li>Dashboard completo</li>
+            <li>23 dimensões COPSOQ II</li>
+            <li>1 pacote grátis por empresa</li>
+          </ul>
+          <button class="btn" style="width:100%;background:#22c55e;color:#062312;border:none;font-weight:700" onclick="openCheckout('free')">✨ Grátis até 3</button>
+        </div>
         <div class="pricing-card" id="plan-starter">
           <div class="pricing-name">Starter</div>
           <div class="pricing-price">R$ 297<span></span></div>
@@ -977,6 +992,7 @@ async function api(method, path, body) {
 // CHECKOUT FLOW
 // ═══════════════════════════════
 const PLANOS = {
+  free:       { nome: 'Grátis', valor: 0, quantidade: 3 },
   starter:    { nome: 'Starter', valor: 297, quantidade: 30 },
   pro:        { nome: 'Profissional', valor: 497, quantidade: 100 },
   enterprise: { nome: 'Enterprise', valor: 897, quantidade: 300 },
@@ -993,13 +1009,17 @@ let pixPolling = null;
 
 function openCheckout(plano) {
   checkoutPlano = plano || 'pro';
+  checkoutStep = 1;
   const p = PLANOS[checkoutPlano];
-  document.getElementById('checkout-plan-label').textContent = `${p.nome} — R$ ${p.valor} (até ${p.quantidade} respondentes)`;
+  const isFree = checkoutPlano === 'free';
+  document.getElementById('checkout-plan-label').textContent = isFree
+    ? `${p.nome} — R$ 0 (até ${p.quantidade} respondentes)`
+    : `${p.nome} — R$ ${p.valor} (até ${p.quantidade} respondentes)`;
   document.getElementById('checkout-step-1').classList.remove('hidden');
   document.getElementById('checkout-step-2').classList.add('hidden');
   document.getElementById('checkout-step-3').classList.add('hidden');
   document.getElementById('modal-footer-btns').classList.remove('hidden');
-  document.getElementById('btn-checkout-next').textContent = 'Continuar →';
+  document.getElementById('btn-checkout-next').textContent = isFree ? 'Gerar link grátis →' : 'Continuar →';
   document.getElementById('checkout-error').classList.add('hidden');
   document.getElementById('modal-checkout').classList.remove('hidden');
 }
@@ -1034,6 +1054,15 @@ async function checkoutNext() {
       checkoutPacoteId = pacRes.pacote_id;
       checkoutToken = pacRes.token;
       checkoutTokenRanking = pacRes.token_ranking;
+
+      // Se plano é grátis, pular pagamento e ir direto pro sucesso
+      if (checkoutPlano === 'free') {
+        document.getElementById('checkout-step-1').classList.add('hidden');
+        btn.disabled = false; btn.textContent = 'Continuar →';
+        confirmarPagamento(); // reaproveita sucesso + ativa pacote
+        return;
+      }
+
       document.getElementById('checkout-step-1').classList.add('hidden');
       document.getElementById('checkout-step-2').classList.remove('hidden');
       btn.disabled = false; btn.textContent = 'Confirmar pagamento →';

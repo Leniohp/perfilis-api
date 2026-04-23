@@ -309,6 +309,7 @@
               <div class="field">
                 <label>Plano *</label>
                 <select id="np-plano">
+                  <option value="free">✨ Grátis — 3 respondentes (promocional)</option>
                   <option value="starter">Starter — 30 respondentes</option>
                   <option value="pro" selected>Profissional — 100 respondentes</option>
                   <option value="enterprise">Enterprise — 300 respondentes</option>
@@ -488,10 +489,15 @@ function renderContratantes() {
 function renderPacotes() {
   const base = window.location.origin;
   const tbody = document.getElementById('tbl-pacotes');
-  tbody.innerHTML = allData.pacotes.map(p => `
+  tbody.innerHTML = allData.pacotes.map(p => {
+    const isPromo = p.promocional === true || p.plano === 'free';
+    const planoBadge = isPromo
+      ? `<span class="badge" style="background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3)">✨ Grátis</span>`
+      : `<span class="badge badge-blue">${p.plano || '—'}</span>`;
+    return `
     <tr>
       <td class="td-name">${p.empresa || p.contratante_nome || '—'}</td>
-      <td><span class="badge badge-blue">${p.plano || '—'}</span></td>
+      <td>${planoBadge}</td>
       <td>${p.quantidade}</td>
       <td>${p.usados || 0}</td>
       <td>
@@ -512,7 +518,8 @@ function renderPacotes() {
         <button class="btn-danger-sm" onclick="excluirPacote('${p.id}')">Excluir</button>
       </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // ── RESPONDENTES ──
@@ -535,7 +542,7 @@ function renderRespondentes() {
 }
 
 // ── CRIAR PACOTE MANUAL ──
-const PLANO_QTD = { starter: 30, pro: 100, enterprise: 300, demo: 5 };
+const PLANO_QTD = { free: 3, starter: 30, pro: 100, enterprise: 300, demo: 5 };
 async function criarPacoteManual() {
   const nome = document.getElementById('np-nome').value.trim();
   const email = document.getElementById('np-email').value.trim();
