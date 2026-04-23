@@ -878,6 +878,7 @@
           <span class="search-icon">🔍</span>
           <input type="text" id="search-links" placeholder="Buscar por token, empresa ou nome..." oninput="filtrarLinks()"/>
         </div>
+        <button class="filter-btn" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.3);color:#22c55e" onclick="abrirModalPromo()">✨ Gerar link promocional</button>
         <button class="refresh-btn" onclick="carregarLinks()">↻ Atualizar</button>
       </div>
       <div id="barra-exclusao" style="display:none;align-items:center;gap:12px;padding:10px 16px;
@@ -923,6 +924,103 @@
   <div class="modal" id="modal">
     <button class="modal-close" onclick="fecharModal()">✕</button>
     <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MODAL LINK PROMOCIONAL ═══════════════════ -->
+<div class="modal-overlay" id="modal-promo" onclick="fecharModalPromo(event)">
+  <div class="modal" style="width:520px">
+    <button class="modal-close" onclick="fecharModalPromo()">✕</button>
+    <div id="promo-content">
+      <div class="modal-name" style="color:#22c55e">✨ Gerar Link Promocional</div>
+      <div class="modal-empresa">Crie links gratuitos para promoções, parcerias ou testes — sem custo.</div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Dados do parceiro</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Nome da empresa *</label>
+            <input type="text" id="promo-empresa" placeholder="Ex: Empresa XYZ Ltda"
+              style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">WhatsApp *</label>
+            <input type="tel" id="promo-whatsapp" placeholder="(99) 99999-9999"
+              style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Configuração do link</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Quantidade *</label>
+            <input type="number" id="promo-qtd" value="10" min="1" max="100"
+              style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;font-weight:600;outline:none;text-align:center">
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">Máximo: 100 análises</div>
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Perfil Primário *</label>
+            <select id="promo-perfil1"
+              style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;cursor:pointer">
+              <option value="Executor">Executor (D)</option>
+              <option value="Comunicador">Comunicador (I)</option>
+              <option value="Planejador">Planejador (S)</option>
+              <option value="Analítico">Analítico (C)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Perfil Secundário (opcional)</label>
+          <select id="promo-perfil2"
+            style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;cursor:pointer">
+            <option value="">— Nenhum —</option>
+            <option value="Executor">Executor (D)</option>
+            <option value="Comunicador">Comunicador (I)</option>
+            <option value="Planejador">Planejador (S)</option>
+            <option value="Analítico">Analítico (C)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="promo-erro" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px"></div>
+
+      <button id="promo-btn-gerar" onclick="gerarLinkPromo()"
+        style="width:100%;background:#22c55e;color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">
+        ✨ Gerar Link Promocional
+      </button>
+    </div>
+
+    <div id="promo-sucesso" style="display:none">
+      <div class="modal-name" style="color:#22c55e">✅ Link criado com sucesso!</div>
+      <div class="modal-empresa"><strong id="promo-emp-nome"></strong> · <span id="promo-emp-qtd"></span> análises</div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Links gerados</div>
+        <div class="link-row">
+          <span class="link-row-label candidatos">Candidatos</span>
+          <span class="link-url" id="promo-link-cand"></span>
+          <button class="copy-btn" onclick="copiar(document.getElementById('promo-link-cand').textContent)">Copiar</button>
+        </div>
+        <div class="link-row">
+          <span class="link-row-label ranking">Ranking</span>
+          <span class="link-url" id="promo-link-rank"></span>
+          <button class="copy-btn" onclick="copiar(document.getElementById('promo-link-rank').textContent)">Copiar</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button onclick="resetarModalPromo()"
+          style="flex:1;background:var(--border);color:var(--text);border:none;border-radius:10px;padding:12px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer">
+          Criar outro
+        </button>
+        <button onclick="fecharModalPromo()"
+          style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer">
+          Fechar
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1242,15 +1340,18 @@
     }
 
     tbody.innerHTML = lista.map(l => {
-      const gratis = !l.pago && (l.quantidade <= 10);
+      const promocional = l.promocional || (l.vaga && l.vaga.indexOf('[PROMOCIONAL]') === 0);
+      const gratis = !l.pago && (l.quantidade <= 10) && !promocional;
       const usados = l.usados || 0;
-      const tipoBadge = gratis
+      const tipoBadge = promocional
+        ? `<span style="font-size:11px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:rgba(34,197,94,0.18);color:#4ade80;border:1px solid rgba(34,197,94,0.45)">✨ Promocional</span>`
+        : gratis
         ? `<span style="font-size:11px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3)">Gratuito</span>`
         : `<span style="font-size:11px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:20px;background:rgba(108,99,255,0.12);color:#a89bff;border:1px solid rgba(108,99,255,0.3)">Pago</span>`;
       return `
       <tr id="row-${l.id}">
         <td>
-          ${gratis
+          ${(gratis || promocional)
             ? `<input type="checkbox" class="link-check" data-id="${l.id}" onchange="atualizarSelecao()"
                 style="cursor:pointer;accent-color:#ef4444">`
             : `<span title="Links pagos não podem ser excluídos" style="color:var(--muted);font-size:16px;cursor:not-allowed">🔒</span>`
@@ -1414,6 +1515,75 @@
     if (erros > 0) mostrarToast(`${erros} link(s) não puderam ser excluídos`);
     else mostrarToast(`${ids.length} link(s) excluído(s) com sucesso!`);
     carregarLinks();
+  }
+
+  // ═══ LINK PROMOCIONAL ═══
+  function abrirModalPromo() {
+    resetarModalPromo();
+    document.getElementById('modal-promo').classList.add('open');
+  }
+
+  function fecharModalPromo(e) {
+    if (!e || e.target === document.getElementById('modal-promo')) {
+      document.getElementById('modal-promo').classList.remove('open');
+    }
+  }
+
+  function resetarModalPromo() {
+    document.getElementById('promo-empresa').value = '';
+    document.getElementById('promo-whatsapp').value = '';
+    document.getElementById('promo-qtd').value = '10';
+    document.getElementById('promo-perfil1').value = 'Executor';
+    document.getElementById('promo-perfil2').value = '';
+    document.getElementById('promo-erro').style.display = 'none';
+    document.getElementById('promo-content').style.display = 'block';
+    document.getElementById('promo-sucesso').style.display = 'none';
+  }
+
+  async function gerarLinkPromo() {
+    const empresa  = document.getElementById('promo-empresa').value.trim();
+    const whatsapp = document.getElementById('promo-whatsapp').value.trim();
+    const qtd      = parseInt(document.getElementById('promo-qtd').value);
+    const perfil1  = document.getElementById('promo-perfil1').value;
+    const perfil2  = document.getElementById('promo-perfil2').value || null;
+    const errEl    = document.getElementById('promo-erro');
+    const btn      = document.getElementById('promo-btn-gerar');
+
+    errEl.style.display = 'none';
+    if (!empresa)  { errEl.textContent = 'Informe o nome da empresa.'; errEl.style.display = 'block'; return; }
+    if (!whatsapp) { errEl.textContent = 'Informe o WhatsApp.'; errEl.style.display = 'block'; return; }
+    if (!qtd || qtd < 1 || qtd > 100) { errEl.textContent = 'Quantidade deve ser entre 1 e 100.'; errEl.style.display = 'block'; return; }
+    if (perfil2 && perfil2 === perfil1) { errEl.textContent = 'O perfil secundário deve ser diferente do primário.'; errEl.style.display = 'block'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Gerando...';
+
+    try {
+      const res = await fetch(`${ADMIN_BASE}/links-promocionais`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ empresa, whatsapp, quantidade: qtd, perfil_1: perfil1, perfil_2: perfil2 })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.erro || 'Erro ao gerar link');
+
+      document.getElementById('promo-emp-nome').textContent  = data.empresa;
+      document.getElementById('promo-emp-qtd').textContent   = data.quantidade;
+      document.getElementById('promo-link-cand').textContent = data.link_candidatos;
+      document.getElementById('promo-link-rank').textContent = data.link_ranking;
+      document.getElementById('promo-content').style.display = 'none';
+      document.getElementById('promo-sucesso').style.display = 'block';
+
+      mostrarToast(`Link promocional para ${data.empresa} criado!`);
+      carregarLinks();
+      carregarContratantes();
+    } catch (e) {
+      errEl.textContent = e.message;
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '✨ Gerar Link Promocional';
+    }
   }
 
   function fecharModal(e) {
