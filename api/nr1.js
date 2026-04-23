@@ -307,7 +307,7 @@ app.post('/api/nr1/pacotes', async (req, res) => {
   res.status(201).json({
     pacote_id: data.id, token, token_ranking,
     link:          `${base}/q/${token}`,
-    link_ranking:  `${base}/r/${token_ranking}`,
+    link_ranking:  `${base}/nr1-r/${token_ranking}`,
   });
 });
 
