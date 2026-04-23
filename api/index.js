@@ -568,3 +568,86 @@ app.delete('/admin/link/:id', adminAuth, async (req, res) => {
 });
 
 // Admin: excluir link gratuito (pacote)
+// ══════════════════════════════════════
+// ADMIN — Criar links promocionais (sem custo)
+// ══════════════════════════════════════
+app.post('/admin/links-promocionais', adminAuth, async (req, res) => {
+  try {
+    const { empresa, whatsapp, quantidade, perfil_1, perfil_2 } = req.body;
+
+    if (!empresa || !whatsapp || !quantidade || !perfil_1) {
+      return res.status(400).json({ erro: 'Campos obrigatórios: empresa, whatsapp, quantidade, perfil_1' });
+    }
+    const qtd = parseInt(quantidade);
+    if (isNaN(qtd) || qtd < 1 || qtd > 100) {
+      return res.status(400).json({ erro: 'Quantidade deve ser entre 1 e 100' });
+    }
+    const perfisValidos = ['Executor', 'Comunicador', 'Planejador', 'Analítico'];
+    if (!perfisValidos.includes(perfil_1)) {
+      return res.status(400).json({ erro: 'Perfil primário inválido' });
+    }
+    if (perfil_2 && !perfisValidos.includes(perfil_2)) {
+      return res.status(400).json({ erro: 'Perfil secundário inválido' });
+    }
+
+    const emailPlaceholder = `promo-${Date.now()}-${Math.random().toString(36).slice(2,7)}@perfilis.com`;
+    const { data: contratante, error: e1 } = await supabase.from('contratantes')
+      .insert({
+        nome: empresa,
+        email: emailPlaceholder,
+        whatsapp: whatsapp.replace(/\D/g, ''),
+        empresa: empresa
+      })
+      .select().single();
+    if (e1) return res.status(500).json({ erro: 'Erro ao criar contratante: ' + e1.message });
+
+    const token = gerarToken();
+    const token_ranking = gerarToken('R');
+
+    let pacoteData = null;
+    const { data: pacote, error: e2 } = await supabase.from('pacotes')
+      .insert({
+        contratante_id: contratante.id,
+        token,
+        token_ranking,
+        perfil_1,
+        perfil_2: perfil_2 || null,
+        quantidade: qtd,
+        vaga: 'Link Promocional',
+        promocional: true
+      })
+      .select().single();
+
+    if (e2) {
+      const { data: pacoteFb, error: e2b } = await supabase.from('pacotes')
+        .insert({
+          contratante_id: contratante.id,
+          token,
+          token_ranking,
+          perfil_1,
+          perfil_2: perfil_2 || null,
+          quantidade: qtd,
+          vaga: '[PROMOCIONAL] Link gratuito'
+        })
+        .select().single();
+      if (e2b) return res.status(500).json({ erro: 'Erro ao criar pacote: ' + e2b.message });
+      pacoteData = pacoteFb;
+    } else {
+      pacoteData = pacote;
+    }
+
+    res.status(201).json({
+      ok: true,
+      pacote_id: pacoteData.id,
+      empresa,
+      quantidade: qtd,
+      token,
+      token_ranking,
+      link_candidatos: `https://www.perfilis.com/f/${token}`,
+      link_ranking: `https://www.perfilis.com/r/${token_ranking}`,
+      promocional: true
+    });
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
