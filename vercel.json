@@ -12,20 +12,26 @@
   ],
   "routes": [
     { "src": "/img/(.*)",            "dest": "/public/img/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
+
     { "src": "/api/nr1/(.*)",        "dest": "/api/nr1.js" },
     { "src": "/admin/nr1/(.*)",      "dest": "/api/nr1.js" },
     { "src": "/admin/nr1",           "dest": "/nr1-admin.html" },
     { "src": "/nr1-admin",           "dest": "/nr1-admin.html" },
+
     { "src": "/nr1/(.*)",            "dest": "/nr1.html" },
     { "src": "/nr1",                 "dest": "/nr1.html" },
-    { "src": "/q/(.*)",              "dest": "/nr1.html" },
-    { "src": "/r/RU(.*)",            "dest": "/nr1.html" },
+
+    { "src": "/q/([A-Za-z0-9-]+)",   "dest": "/nr1.html?q=$1" },
+    { "src": "/r/(RU[A-Za-z0-9-]+)", "dest": "/nr1.html?r=$1" },
+
     { "src": "/f/(.*)",              "dest": "/disc.html" },
     { "src": "/r/(.*)",              "dest": "/disc.html" },
     { "src": "/disc",                "dest": "/disc.html" },
+
     { "src": "/api/(.*)",            "dest": "/api/index.js" },
     { "src": "/admin/(.+)",          "dest": "/api/index.js" },
     { "src": "/admin",               "dest": "/admin.html" },
+
     { "src": "/(.*)",                "dest": "/index.html" }
   ],
   "env": {

@@ -1070,21 +1070,46 @@ function showNav(show) {
 }
 
 // Route on load
-(function route() {
+function doRoute() {
   const path = window.location.pathname;
   const hash = window.location.hash;
+  const search = window.location.search;
+  console.log('[NR-1 Router] pathname=', path, 'hash=', hash, 'search=', search);
 
-  if (path.startsWith('/q/') || hash.startsWith('#q/')) {
-    const token = (path.split('/q/')[1] || hash.split('#q/')[1] || '').split('?')[0];
+  // Query string ?q=TOKEN ou ?r=TOKEN (para casos onde o vercel faz rewrite)
+  const params = new URLSearchParams(search);
+  const qParam = params.get('q');
+  const rParam = params.get('r');
+
+  // Questionário
+  if (path.startsWith('/q/') || hash.startsWith('#q/') || qParam) {
+    let token = qParam;
+    if (!token && path.startsWith('/q/'))   token = path.split('/q/')[1];
+    if (!token && hash.startsWith('#q/'))   token = hash.split('#q/')[1];
+    token = (token || '').split('?')[0].split('#')[0].trim();
+    console.log('[NR-1 Router] → questionário, token=', token);
     if (token) { initQuestionario(token); return; }
   }
-  if (path.startsWith('/r/') || hash.startsWith('#r/')) {
-    const token = (path.split('/r/')[1] || hash.split('#r/')[1] || '').split('?')[0];
+  // Dashboard (ranking)
+  if (path.startsWith('/r/') || hash.startsWith('#r/') || rParam) {
+    let token = rParam;
+    if (!token && path.startsWith('/r/'))   token = path.split('/r/')[1];
+    if (!token && hash.startsWith('#r/'))   token = hash.split('#r/')[1];
+    token = (token || '').split('?')[0].split('#')[0].trim();
+    console.log('[NR-1 Router] → dashboard, token=', token);
     if (token) { initDashboard(token); return; }
   }
+  console.log('[NR-1 Router] → landing');
   showPage('landing');
   showNav(true);
-})();
+}
+
+// Executa quando DOM estiver pronto (cobre cenários de JS async/defer também)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', doRoute);
+} else {
+  doRoute();
+}
 
 // ═══════════════════════════════
 // UTILS
