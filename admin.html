@@ -694,6 +694,11 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Grid DISC + Egograma no modal do candidato — empilha no mobile */
+    @media (max-width: 900px) {
+      .admin-charts-grid { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 <body>
@@ -1825,6 +1830,88 @@
   }
 
   // ═══ MODAL CANDIDATO ═══
+  // Chart do egograma no modal admin (mesmo estilo da página pública /r/...)
+  let _adminEgoChart = null;
+  function renderAdminEgoLineChart(ego) {
+    const ctx = document.getElementById('chart-ego-admin');
+    if (!ctx) return;
+    if (_adminEgoChart) { try { _adminEgoChart.destroy(); } catch(e){} }
+
+    const labels  = ['Pai Crítico','Pai Amoroso','Adulto','Criança Livre','Criança Adaptada'];
+    const valores = [ego.PC||0, ego.PA||0, ego.A||0, ego.CL||0, ego.CA||0];
+    const maxV    = Math.max(...valores, 10);
+
+    // Plugin inline para desenhar os valores acima de cada ponto (substitui chartjs-datalabels)
+    const pontosValorPlugin = {
+      id: 'pontosValor',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta || !meta.data) return;
+        ctx.save();
+        ctx.font = '700 12px Inter, system-ui, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        meta.data.forEach((pt, i) => {
+          const v = chart.data.datasets[0].data[i];
+          if (v === null || v === undefined) return;
+          ctx.fillText(String(v), pt.x, pt.y - 12);
+        });
+        ctx.restore();
+      }
+    };
+
+    _adminEgoChart = new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: valores,
+          borderColor: '#4a90d9',
+          backgroundColor: 'rgba(74,144,217,0.10)',
+          pointBackgroundColor: '#4a90d9',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 22, bottom: 6, left: 4, right: 8 } },
+        scales: {
+          x: {
+            ticks: { color: '#cbd5e1', font: { size: 10, weight: '600' }, maxRotation: 0, autoSkip: false },
+            grid:   { color: 'rgba(255,255,255,0.05)' },
+            border: { color: 'rgba(255,255,255,0.1)' }
+          },
+          y: {
+            min: 0,
+            suggestedMax: Math.ceil(maxV * 1.15),
+            ticks: { color: '#7a798a', font: { size: 10 } },
+            grid:   { color: 'rgba(255,255,255,0.05)' },
+            border: { color: 'rgba(255,255,255,0.1)' }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: (ctx) => '  ' + ctx.parsed.y + ' pts' },
+            backgroundColor: 'rgba(13,13,20,0.95)',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1
+          }
+        },
+        animation: { duration: 800, easing: 'easeOutQuart' }
+      },
+      plugins: [pontosValorPlugin]
+    });
+  }
+
   async function abrirCandidato(id) {
     document.getElementById('modal-overlay').classList.add('open');
     document.getElementById('modal-content').innerHTML =
@@ -1834,6 +1921,24 @@
       const res = await fetch(`${API_BASE}/candidato/${id}`, { headers: authHeaders() });
       const c = await res.json();
       const a = c.analises?.[0] || {};
+
+      // --- Calcular Egograma (mesma lógica da página /r/...) ---
+      var egoPC = 0, egoPA = 0, egoA = 0, egoCL = 0, egoCA = 0;
+      for (var qi = 1; qi <= 50; qi++) {
+        var vEgo = a['ego_r' + String(qi).padStart(2, '0')] || 0;
+        if ([1,2,3,6,10,20,23,29,34,37,47].indexOf(qi) >= 0) egoPC += vEgo;
+        else if ([5,12,14,17,25,28,30,31,35,38,42,46,49].indexOf(qi) >= 0) egoPA += vEgo;
+        else if ([8,13,15,19,21,27,32,33,36,39,40,44,50].indexOf(qi) >= 0) egoA += vEgo;
+        else if ([2,7,9,16,18,22,24,26,43,45,48].indexOf(qi) >= 0) egoCL += vEgo;
+        else egoCA += vEgo;
+      }
+      const ego = {
+        PC: egoPC || a.ego_pai_critico  || 0,
+        PA: egoPA || a.ego_pai_amoroso  || 0,
+        A:  egoA  || a.ego_adulto       || 0,
+        CL: egoCL || a.ego_crianca_livre|| 0,
+        CA: egoCA || a.ego_crianca_adapt|| 0
+      };
 
       const discData = [
         { label: 'Executor (D)',    value: a.disc_executor    || 0, color: '#ef4444' },
@@ -1920,7 +2025,17 @@
             ${a.perfil_primario ? badgePerfil(a.perfil_primario, 'font-size:13px;padding:5px 14px') : ''}
             ${a.perfil_secundario ? badgePerfil(a.perfil_secundario, 'font-size:12px;padding:4px 12px;opacity:.75') : ''}
           </div>
-          ${discBars}
+          <div class="admin-charts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>${discBars}</div>
+            <div style="background:rgba(255,255,255,0.03);padding:20px 18px 14px;border-radius:16px;border:1px solid var(--border)">
+              <div style="text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:16px">
+                Egograma
+              </div>
+              <div style="height:340px;padding:4px 2px">
+                <canvas id="chart-ego-admin"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="modal-section" id="sec-respostas" style="display:none">
@@ -1948,6 +2063,8 @@
       `;
       // Render questionário after a tick
       setTimeout(() => renderQuestionario(c), 50);
+      // Render egograma (line chart) no modal admin
+      setTimeout(() => renderAdminEgoLineChart(ego), 60);
     } catch (e) {
       document.getElementById('modal-content').innerHTML =
         `<div style="color:var(--accent2);text-align:center;padding:40px">Erro ao carregar candidato.</div>`;
