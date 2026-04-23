@@ -6,6 +6,9 @@
 <title>Perfilis NR-1 — Avaliação de Riscos Psicossociais</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Bibliotecas para exportar PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
   --bg: #06070d;
@@ -736,12 +739,40 @@ select.input { cursor: pointer; }
         <span class="badge badge-gray">LGPD</span>
       </div>
 
-      <div class="card" style="text-align:left;max-width:500px;margin:0 auto 28px">
+      <div class="card" style="text-align:left;max-width:560px;margin:0 auto 28px">
         <div class="q-section-title">Dados do respondente</div>
         <div class="grid2">
           <div class="form-group">
-            <label>Departamento / Setor *</label>
-            <input class="input" id="r-departamento" placeholder="Ex: Financeiro" type="text">
+            <label>Nome completo *</label>
+            <input class="input" id="r-nome" placeholder="Seu nome" type="text">
+          </div>
+          <div class="form-group">
+            <label>E-mail *</label>
+            <input class="input" id="r-email" placeholder="voce@empresa.com" type="email">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label>WhatsApp *</label>
+            <input class="input" id="r-whatsapp" placeholder="(11) 99999-9999" type="tel">
+          </div>
+          <div class="form-group">
+            <label>Cargo *</label>
+            <input class="input" id="r-cargo" placeholder="Ex: Analista" type="text">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-group">
+            <label>Departamento *</label>
+            <select class="input" id="r-departamento">
+              <option value="">Selecione</option>
+              <option>Administrativo</option>
+              <option>Comercial</option>
+              <option>Financeiro</option>
+              <option>Operacional</option>
+              <option>RH</option>
+              <option>TI</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Gênero *</label>
@@ -754,30 +785,32 @@ select.input { cursor: pointer; }
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label>Faixa etária *</label>
-          <select class="input" id="r-faixa">
-            <option value="">Selecione</option>
-            <option>18-25</option>
-            <option>26-35</option>
-            <option>36-45</option>
-            <option>46-55</option>
-            <option>56+</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Tempo na empresa *</label>
-          <select class="input" id="r-tempo">
-            <option value="">Selecione</option>
-            <option>Menos de 1 ano</option>
-            <option>1 a 3 anos</option>
-            <option>3 a 5 anos</option>
-            <option>Mais de 5 anos</option>
-          </select>
+        <div class="grid2">
+          <div class="form-group">
+            <label>Faixa etária *</label>
+            <select class="input" id="r-faixa">
+              <option value="">Selecione</option>
+              <option>18-25</option>
+              <option>26-35</option>
+              <option>36-45</option>
+              <option>46-55</option>
+              <option>56+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tempo na empresa</label>
+            <select class="input" id="r-tempo">
+              <option value="">Selecione (opcional)</option>
+              <option>Menos de 1 ano</option>
+              <option>1 a 3 anos</option>
+              <option>3 a 5 anos</option>
+              <option>Mais de 5 anos</option>
+            </select>
+          </div>
         </div>
         <div class="lgpd-wrap">
           <input type="checkbox" id="r-lgpd">
-          <span>Declaro que li e aceito que minhas respostas sejam processadas de forma confidencial, conforme a <strong>LGPD (Lei nº 13.709/2018)</strong>. Os resultados serão apresentados de forma agregada, sem identificação individual.</span>
+          <span>Declaro que li e aceito que minhas respostas sejam processadas de forma confidencial, conforme a <strong>LGPD (Lei nº 13.709/2018)</strong>.</span>
         </div>
       </div>
 
@@ -800,133 +833,220 @@ select.input { cursor: pointer; }
      PAGE: OBRIGADO
 ═══════════════════════════════════════════ -->
 <div id="page-obrigado" class="page hidden">
-  <div class="obrigado-card">
+  <div class="obrigado-card" style="max-width:720px">
     <div class="obrigado-icon">✅</div>
     <div class="obrigado-title">Obrigado!</div>
-    <p class="obrigado-desc">Suas respostas foram registradas com sucesso. Os resultados serão analisados pelo responsável de SST da sua empresa para elaboração do relatório de riscos psicossociais.</p>
+    <p class="obrigado-desc">Suas respostas foram registradas com sucesso. Confira abaixo o seu resultado individual — o contratante verá apenas o relatório agregado com todas as respostas da empresa.</p>
+
+    <!-- Resultado individual -->
+    <div id="resultado-individual" style="margin-top:28px;text-align:left"></div>
+
     <div class="alert alert-info" style="margin-top:24px;text-align:left">
-      🔒 Suas respostas são confidenciais e apresentadas apenas de forma agregada, sem identificação individual.
+      🔒 Suas respostas são confidenciais. No painel do contratante, elas são somadas com as dos outros colaboradores para gerar o relatório da empresa.
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     PAGE: DASHBOARD CONTRATANTE
+     PAGE: DASHBOARD CONTRATANTE (COPSOQ II)
 ═══════════════════════════════════════════ -->
 <div id="page-dashboard" class="page hidden">
-  <div class="container">
+  <div class="container" id="dash-container">
     <div class="dash-header">
       <div class="dash-company" id="dash-empresa-label">Empresa</div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div class="dash-title">Painel de Resultados — COPSOQ II</div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span class="badge badge-gray" id="dash-plano-badge">—</span>
-          <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Imprimir</button>
+          <button class="btn btn-ghost btn-sm no-print" onclick="exportarPDF()">📄 Exportar PDF</button>
+          <button class="btn btn-ghost btn-sm no-print" onclick="window.print()">🖨 Imprimir</button>
         </div>
       </div>
       <div style="margin-top:10px;font-size:13px;color:var(--muted2)" id="dash-periodo">—</div>
     </div>
 
-    <div class="dash-grid" id="dash-content">
-      <!-- SIDEBAR -->
-      <div class="dash-sidebar">
-        <div class="dash-stat">
-          <div class="dash-stat-label">Respondentes</div>
-          <div class="dash-stat-value" id="stat-respondentes">—</div>
-          <div class="dash-stat-sub" id="stat-respondentes-sub">de <span id="stat-total">—</span> convidados</div>
-        </div>
-        <div class="dash-stat">
-          <div class="dash-stat-label">Dimensões</div>
-          <div class="dash-stat-value">23</div>
-          <div class="dash-stat-sub">COPSOQ II versão curta</div>
+    <!-- Navegação entre as 4 seções -->
+    <div class="tabs no-print" style="margin-bottom:24px">
+      <div class="tab active" onclick="switchCopsoqTab('dashboard', this)">📊 Dashboard</div>
+      <div class="tab" onclick="switchCopsoqTab('respostas', this)">📋 Respostas</div>
+      <div class="tab" onclick="switchCopsoqTab('dimensao', this)">📈 Análise por Dimensão</div>
+      <div class="tab" onclick="switchCopsoqTab('departamento', this)">🏢 Análise por Departamento</div>
+    </div>
+
+    <!-- ═══════ ABA 1: DASHBOARD ═══════ -->
+    <div id="copsoq-dashboard" class="copsoq-section">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px">
+        <div class="card card-sm">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Total de Respondentes</div>
+          <div style="font-size:32px;font-weight:800;color:var(--text)" id="d-total-resp">0</div>
+          <div style="font-size:12px;color:var(--muted2)">de <span id="d-total-cotas">0</span> cotas</div>
         </div>
         <div class="card card-sm">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">Classificação Geral</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:13px;color:#4ade80">🟢 Favorável</span>
-              <span class="badge badge-green" id="count-favoravel">0</span>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:13px;color:#f7c94f">🟡 Intermediário</span>
-              <span class="badge badge-amber" id="count-intermediario">0</span>
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:13px;color:#f87171">🔴 Risco</span>
-              <span class="badge badge-red" id="count-risco">0</span>
-            </div>
-          </div>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Dimensões Analisadas</div>
+          <div style="font-size:32px;font-weight:800;color:var(--text)">23</div>
+          <div style="font-size:12px;color:var(--muted2)">19 dimensões + 4 ofensivos</div>
         </div>
         <div class="card card-sm">
-          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">Respondentes por gênero</div>
-          <div id="genero-breakdown" style="font-size:13px;color:var(--muted2)">—</div>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Perguntas do COPSOQ II</div>
+          <div style="font-size:32px;font-weight:800;color:var(--text)">40</div>
+          <div style="font-size:12px;color:var(--muted2)">Versão curta validada</div>
         </div>
-        <div class="card card-sm" style="border-color:rgba(242,87,87,0.25)">
-          <div style="font-size:11px;font-weight:700;color:#f87171;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px">⚠️ Comportamentos Ofensivos</div>
-          <div id="ofensivos-breakdown" style="font-size:13px;color:var(--muted2)">—</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Seu link de aplicação</div>
-          <div class="link-box">
-            <span class="link-box-text" id="dash-link-form">—</span>
-            <button class="btn btn-ghost btn-sm link-copy-btn" onclick="copiarTexto('dash-link-form')">Copiar</button>
-          </div>
-          <div style="margin-top:8px;font-size:11px;color:var(--muted)">Compartilhe com os colaboradores</div>
-        </div>
-        <div class="alert alert-info" style="font-size:12px">
-          💡 <strong>Próximo passo:</strong> Leve este relatório ao seu profissional de SST para integração ao PGR conforme NR-1.
+        <div class="card card-sm">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Departamentos</div>
+          <div style="font-size:32px;font-weight:800;color:var(--text)" id="d-departamentos">0</div>
+          <div style="font-size:12px;color:var(--muted2)">com respondentes</div>
         </div>
       </div>
 
-      <!-- MAIN -->
-      <div class="dash-main">
-        <div class="tabs">
-          <div class="tab active" onclick="switchTab('dimensoes', this)">Dimensões</div>
-          <div class="tab" onclick="switchTab('respondentes', this)">Respondentes</div>
-          <div class="tab" onclick="switchTab('departamentos', this)">Por Departamento</div>
-        </div>
-
-        <!-- TAB: DIMENSÕES -->
-        <div id="tab-dimensoes">
-          <div class="card" style="margin-bottom:16px">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:18px">Resultados por Dimensão</div>
-            <div id="dim-bars"></div>
-          </div>
-          <div class="card">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px">Detalhamento completo</div>
-            <table class="risk-table" id="dim-table">
-              <thead>
-                <tr>
-                  <th>Dimensão</th>
-                  <th>Categoria</th>
-                  <th>Média</th>
-                  <th>% Escala</th>
-                  <th>Classificação</th>
-                </tr>
-              </thead>
-              <tbody id="dim-table-body"></tbody>
-            </table>
+      <!-- Classificação geral -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Classificação Geral</div>
+            <div style="font-size:22px;font-weight:800;margin-top:4px" id="d-class-geral">—</div>
           </div>
         </div>
-
-        <!-- TAB: RESPONDENTES -->
-        <div id="tab-respondentes" class="hidden">
-          <div class="card">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Lista de respondentes</div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Identificação preservada internamente. Relatório apresenta dados agregados.</div>
-            <div id="resp-list"></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#22c55e" id="d-count-fav">0</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em">Favorável</div>
+          </div>
+          <div style="background:rgba(247,201,79,0.1);border:1px solid rgba(247,201,79,0.25);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#f7c94f" id="d-count-int">0</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em">Intermediário</div>
+          </div>
+          <div style="background:rgba(242,87,87,0.1);border:1px solid rgba(242,87,87,0.25);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#f25757" id="d-count-risco">0</div>
+            <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em">Risco</div>
           </div>
         </div>
+      </div>
 
-        <!-- TAB: DEPARTAMENTOS -->
-        <div id="tab-departamentos" class="hidden">
-          <div class="card">
-            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:16px">Comparativo por departamento</div>
-            <div id="dept-table"></div>
+      <!-- Tabela principal de dimensões -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">Resultados por Dimensão (19 dimensões analisadas)</div>
+        <div style="overflow-x:auto">
+          <table class="risk-table" id="d-table-dimensoes">
+            <thead>
+              <tr>
+                <th>#</th><th>Dimensão</th><th>Categoria</th>
+                <th>Média</th><th>Mín.</th><th>Máx.</th>
+                <th>Desvio</th><th>% Escala</th><th>Classificação</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Comportamentos ofensivos -->
+      <div class="card" style="border-color:rgba(242,87,87,0.25)">
+        <div style="font-size:11px;font-weight:700;color:#f25757;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px">⚠️ Comportamentos Ofensivos (% de respostas "Sim")</div>
+        <div style="overflow-x:auto">
+          <table class="risk-table" id="d-table-ofensivos">
+            <thead><tr><th>Comportamento</th><th>% Sim</th><th>% Não</th><th>Total Sim</th><th>Total Não</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Link de aplicação -->
+      <div class="card" style="margin-top:20px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Seu link de aplicação</div>
+        <div class="link-box">
+          <span class="link-box-text" id="dash-link-form">—</span>
+          <button class="btn btn-ghost btn-sm link-copy-btn no-print" onclick="copiarTexto('dash-link-form')">Copiar</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)">Compartilhe com seus colaboradores. Cada um responderá e o resultado alimentará este painel.</div>
+      </div>
+    </div>
+
+    <!-- ═══════ ABA 2: RESPOSTAS ═══════ -->
+    <div id="copsoq-respostas" class="copsoq-section hidden">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Respostas dos Participantes</div>
+            <div style="font-size:13px;color:var(--muted2);margin-top:4px">Detalhamento de todas as respostas com totais por dimensão</div>
           </div>
+        </div>
+        <div style="overflow-x:auto;max-height:640px;overflow-y:auto">
+          <table class="risk-table" id="d-table-respostas" style="min-width:1400px;font-size:12px">
+            <thead style="position:sticky;top:0;background:var(--surface);z-index:2">
+              <tr id="d-respostas-thead"></tr>
+            </thead>
+            <tbody id="d-respostas-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
+
+    <!-- ═══════ ABA 3: ANÁLISE POR DIMENSÃO ═══════ -->
+    <div id="copsoq-dimensao" class="copsoq-section hidden">
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">Análise Detalhada por Dimensão</div>
+        <div style="overflow-x:auto">
+          <table class="risk-table" id="d-table-analise-dim">
+            <thead>
+              <tr>
+                <th>Nº</th><th>Dimensão</th><th>Categoria</th>
+                <th>Média</th><th>Mediana</th><th>Mín.</th><th>Máx.</th>
+                <th>Desvio Padrão</th><th>Classificação</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px">Legenda de Classificação</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;font-size:13px">
+          <div style="background:rgba(34,197,94,0.08);border-left:3px solid #22c55e;padding:12px;border-radius:6px">
+            <div style="color:#22c55e;font-weight:700;margin-bottom:4px">🟢 Favorável</div>
+            <div style="color:var(--muted2)">Situação favorável. Dimensões positivas com pontuação alta ou negativas com pontuação baixa.</div>
+          </div>
+          <div style="background:rgba(247,201,79,0.08);border-left:3px solid #f7c94f;padding:12px;border-radius:6px">
+            <div style="color:#f7c94f;font-weight:700;margin-bottom:4px">🟡 Intermediário</div>
+            <div style="color:var(--muted2)">Situação intermediária. Requer atenção e monitoramento contínuo.</div>
+          </div>
+          <div style="background:rgba(242,87,87,0.08);border-left:3px solid #f25757;padding:12px;border-radius:6px">
+            <div style="color:#f25757;font-weight:700;margin-bottom:4px">🔴 Risco</div>
+            <div style="color:var(--muted2)">Situação de risco. Ação imediata recomendada.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px">Sistema de Pontuação</div>
+        <table class="risk-table" style="font-size:12px">
+          <thead><tr><th>Escala</th><th>Valores</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Frequência</strong></td><td>Sempre=4, Frequentemente=3, Às vezes=2, Raramente=1, Nunca=0</td></tr>
+            <tr><td><strong>Grande medida</strong></td><td>Muito grande medida=4, Grande medida=3, Em parte=2, Pequena medida=1, Muito pequena medida=0</td></tr>
+            <tr><td><strong>Tempo</strong></td><td>O tempo todo=4, Grande parte=3, Parte do tempo=2, Pequena parte=1, Nenhum momento=0</td></tr>
+            <tr><td><strong>Satisfação</strong></td><td>Muito satisfeito=3, Satisfeito=2, Insatisfeito=1, Muito insatisfeito=0</td></tr>
+            <tr><td><strong>Saúde</strong></td><td>Excelente=4, Muito boa=3, Boa=2, Razoável=1, Ruim=0</td></tr>
+            <tr><td><strong>Conflito</strong></td><td>Sim, certamente=3, Em certo grau=2, Muito pouco=1, Não=0</td></tr>
+            <tr><td><strong>Sim/Não</strong></td><td>Sim=1, Não=0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════ ABA 4: ANÁLISE POR DEPARTAMENTO ═══════ -->
+    <div id="copsoq-departamento" class="copsoq-section hidden">
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">Análise por Departamento</div>
+        <div style="overflow-x:auto">
+          <table class="risk-table" id="d-table-deptos" style="min-width:900px;font-size:12px">
+            <thead id="d-deptos-thead"></thead>
+            <tbody id="d-deptos-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1289,13 +1409,20 @@ function initQuestionario(token) {
 }
 
 function iniciarQuestionario() {
+  const nome = document.getElementById('r-nome').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const whatsapp = document.getElementById('r-whatsapp').value.trim();
+  const cargo = document.getElementById('r-cargo').value.trim();
   const dept = document.getElementById('r-departamento').value.trim();
   const gen = document.getElementById('r-genero').value;
   const faixa = document.getElementById('r-faixa').value;
-  const tempo = document.getElementById('r-tempo').value;
   const lgpd = document.getElementById('r-lgpd').checked;
   const errEl = document.getElementById('q-intro-error');
-  if (!dept || !gen || !faixa || !tempo) { errEl.textContent = 'Preencha todos os campos.'; errEl.classList.remove('hidden'); return; }
+  if (!nome || !email || !whatsapp || !cargo || !dept || !gen || !faixa) {
+    errEl.textContent = 'Preencha todos os campos obrigatórios.';
+    errEl.classList.remove('hidden');
+    return;
+  }
   if (!lgpd) { errEl.textContent = 'Você precisa aceitar os termos da LGPD para continuar.'; errEl.classList.remove('hidden'); return; }
   errEl.classList.add('hidden');
   document.getElementById('q-intro').classList.add('hidden');
@@ -1392,32 +1519,106 @@ async function enviarRespostas() {
   btn.disabled = true; btn.textContent = 'Enviando...';
 
   const dados = {
+    nome: document.getElementById('r-nome').value.trim(),
+    email: document.getElementById('r-email').value.trim(),
+    whatsapp: document.getElementById('r-whatsapp').value.trim(),
+    cargo: document.getElementById('r-cargo').value.trim(),
     departamento: document.getElementById('r-departamento').value.trim(),
     genero: document.getElementById('r-genero').value,
     faixa_etaria: document.getElementById('r-faixa').value,
-    tempo_empresa: document.getElementById('r-tempo').value,
+    tempo_empresa: document.getElementById('r-tempo').value || null,
     lgpd_aceite: true,
-    respostas: {}
   };
 
-  // Converter para estrutura por bloco
+  // Converter respostas em q01..q40 (valor já pontuado 0-4)
+  let qGlobal = 0;
   BLOCOS.forEach((bloco, bi) => {
     bloco.perguntas.forEach((_, pi) => {
+      qGlobal++;
       const qid = `${bi}-${pi}`;
       const scoreIdx = qRespostas[qid];
       const pontos = SCORE_MAP[bloco.escala][scoreIdx];
-      dados.respostas[qid] = { scoreIdx, pontos };
+      const key = 'q' + String(qGlobal).padStart(2, '0');
+      dados[key] = pontos;
     });
   });
 
   try {
-    await api('POST', `/api/nr1/questionario/${qToken}`, dados);
+    const resposta = await api('POST', `/api/nr1/questionario/${qToken}`, dados);
+    // Salva resultado individual para exibir na tela de obrigado
+    window._meuResultado = resposta.resultado || null;
     showPage('obrigado');
+    renderResultadoIndividual();
   } catch(e) {
     errEl.textContent = e.message;
     errEl.classList.remove('hidden');
     btn.disabled = false; btn.textContent = 'Enviar respostas →';
   }
+}
+
+// Exibir resultado individual para o respondente
+function renderResultadoIndividual() {
+  const r = window._meuResultado;
+  const box = document.getElementById('resultado-individual');
+  if (!r || !box) return;
+
+  const dims = r.dimensoes || [];
+  const dimsAnalisadas = dims.filter(d => d.tipo !== 'ofensivo');
+  const ofensivos = dims.filter(d => d.tipo === 'ofensivo');
+
+  // Contagens
+  let fav = 0, inter = 0, risco = 0;
+  dimsAnalisadas.forEach(d => {
+    if (d.classificacao === 'Favorável') fav++;
+    else if (d.classificacao === 'Intermediário') inter++;
+    else if (d.classificacao === 'Risco') risco++;
+  });
+
+  let html = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px">
+      <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:28px;font-weight:800;color:#22c55e">${fav}</div>
+        <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em">Favoráveis</div>
+      </div>
+      <div style="background:rgba(247,201,79,0.1);border:1px solid rgba(247,201,79,0.25);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:28px;font-weight:800;color:#f7c94f">${inter}</div>
+        <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em">Intermediárias</div>
+      </div>
+      <div style="background:rgba(242,87,87,0.1);border:1px solid rgba(242,87,87,0.25);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:28px;font-weight:800;color:#f25757">${risco}</div>
+        <div style="font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em">Em risco</div>
+      </div>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;color:var(--text);margin:18px 0 10px;text-transform:uppercase;letter-spacing:.08em">Suas respostas por dimensão</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead style="background:var(--surface2)">
+          <tr><th style="padding:10px;text-align:left">Dimensão</th><th style="padding:10px;text-align:center">Pontos</th><th style="padding:10px;text-align:center">Classificação</th></tr>
+        </thead>
+        <tbody>
+  `;
+  dimsAnalisadas.forEach(d => {
+    const cor = d.classificacao === 'Favorável' ? '#22c55e' : (d.classificacao === 'Risco' ? '#f25757' : '#f7c94f');
+    html += `
+      <tr style="border-top:1px solid var(--border)">
+        <td style="padding:10px">${d.dim}</td>
+        <td style="padding:10px;text-align:center;font-family:monospace">${(d.media || 0).toFixed(0)}/${d.faixaMax}</td>
+        <td style="padding:10px;text-align:center"><span style="color:${cor};font-weight:700">${d.classificacao}</span></td>
+      </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  // Ofensivos (só mostra se tiver algum Sim)
+  const temOfensivo = ofensivos.some(o => o.pct_sim > 0);
+  if (temOfensivo) {
+    html += `<div style="background:rgba(242,87,87,0.08);border:1px solid rgba(242,87,87,0.25);border-radius:10px;padding:14px;margin-top:20px">
+      <div style="font-size:13px;font-weight:700;color:#f25757;margin-bottom:8px">⚠️ Comportamentos Ofensivos Reportados</div>
+      <div style="font-size:13px;color:var(--muted2)">Suas respostas indicaram exposição a situações que serão tratadas com prioridade pela gestão.</div>
+    </div>`;
+  }
+
+  box.innerHTML = html;
 }
 
 // ═══════════════════════════════
@@ -1432,151 +1633,331 @@ async function initDashboard(tokenRanking) {
 
   try {
     const data = await api('GET', `/api/nr1/dashboard/${tokenRanking}`);
-    renderDashboard(data);
+    window._copsoqData = data;
+    renderCopsoqDashboard(data);
   } catch(e) {
-    document.getElementById('dash-content').innerHTML = `<div class="alert alert-danger" style="grid-column:1/-1">${e.message}</div>`;
+    const cont = document.getElementById('dash-container');
+    if (cont) cont.innerHTML = `<div class="alert alert-danger" style="margin:40px auto;max-width:720px">${e.message}</div>`;
   }
-}
-
-function renderDashboard(data) {
-  const { pacote, stats, dimensoes, respondentes, departamentos } = data;
-
-  // Header
-  document.getElementById('dash-empresa-label').textContent = pacote.empresa || 'Empresa';
-  document.getElementById('dash-plano-badge').textContent = `Plano ${pacote.plano || 'Starter'}`;
-  document.getElementById('dash-periodo').textContent = `Avaliação iniciada em ${new Date(pacote.created_at).toLocaleDateString('pt-BR')} · Token: ${pacote.token_ranking}`;
-
-  // Stats
-  document.getElementById('stat-respondentes').textContent = stats.respondentes;
-  document.getElementById('stat-total').textContent = pacote.quantidade;
-
-  // Classificação geral
-  let fav = 0, inter = 0, risco = 0;
-  dimensoes.filter(d => d.tipo !== 'ofensivo').forEach(d => {
-    if (d.classificacao === 'Favorável') fav++;
-    else if (d.classificacao === 'Risco') risco++;
-    else inter++;
-  });
-  document.getElementById('count-favoravel').textContent = fav;
-  document.getElementById('count-intermediario').textContent = inter;
-  document.getElementById('count-risco').textContent = risco;
-
-  // Gênero
-  if (stats.genero) {
-    document.getElementById('genero-breakdown').innerHTML = Object.entries(stats.genero)
-      .map(([k,v]) => `<div style="margin-bottom:4px">${k}: <strong style="color:var(--text)">${v}</strong></div>`).join('');
-  }
-
-  // Ofensivos
-  const ofensivosHtml = dimensoes.filter(d => d.tipo === 'ofensivo')
-    .map(d => `<div style="margin-bottom:6px">${d.dim}: <strong style="color:${d.media_pct > 20 ? '#f87171':'#4ade80'}">${d.media_pct.toFixed(0)}%</strong> <span style="font-size:11px;color:var(--muted)">sim</span></div>`).join('');
-  document.getElementById('ofensivos-breakdown').innerHTML = ofensivosHtml || 'Nenhum dado';
-
-  // Link
-  const base = window.location.origin;
-  document.getElementById('dash-link-form').textContent = `${base}/q/${pacote.token}`;
-
-  // Barras por dimensão
-  renderDimBars(dimensoes);
-  renderDimTable(dimensoes);
-  renderRespondentes(respondentes);
-  renderDepartamentos(departamentos, dimensoes);
 }
 
 function classificarCor(classificacao) {
-  if (classificacao === 'Favorável') return '#4ade80';
-  if (classificacao === 'Risco') return '#f87171';
+  if (classificacao === 'Favorável')   return '#22c55e';
+  if (classificacao === 'Risco')       return '#f25757';
   return '#f7c94f';
 }
-
 function classificarClass(classificacao) {
-  if (classificacao === 'Favorável') return 'risk-favoravel';
-  if (classificacao === 'Risco') return 'risk-risco';
+  if (classificacao === 'Favorável')   return 'risk-favoravel';
+  if (classificacao === 'Risco')       return 'risk-risco';
   return 'risk-intermediario';
 }
 
-function renderDimBars(dimensoes) {
-  const container = document.getElementById('dim-bars');
-  container.innerHTML = '';
+/**
+ * Renderiza o dashboard COPSOQ II completo (4 seções)
+ */
+function renderCopsoqDashboard(data) {
+  const { pacote, stats, dimensoes, respostas, analise_departamentos, departamentos_fixos } = data;
+
+  // ─── Header ───
+  document.getElementById('dash-empresa-label').textContent = pacote.empresa || 'Empresa';
+  document.getElementById('dash-plano-badge').textContent = 'Plano ' + (pacote.plano === 'free' ? 'Grátis ✨' : (pacote.plano || 'Starter').charAt(0).toUpperCase() + (pacote.plano || 'starter').slice(1));
+  document.getElementById('dash-periodo').textContent = `Avaliação iniciada em ${new Date(pacote.created_at).toLocaleDateString('pt-BR')} · Token: ${pacote.token_ranking}`;
+  document.getElementById('dash-link-form').textContent = `${window.location.origin}/q/${pacote.token}`;
+
+  // ═══ ABA 1: DASHBOARD ═══
+  document.getElementById('d-total-resp').textContent = stats.respondentes;
+  document.getElementById('d-total-cotas').textContent = pacote.quantidade;
+  document.getElementById('d-departamentos').textContent = stats.departamentos;
+
+  const c = stats.classificacoes || {Favoravel:0, Intermediario:0, Risco:0};
+  document.getElementById('d-count-fav').textContent = c.Favoravel;
+  document.getElementById('d-count-int').textContent = c.Intermediario;
+  document.getElementById('d-count-risco').textContent = c.Risco;
+
+  const classGeral = stats.classificacao_geral || '—';
+  const corGeral = classificarCor(classGeral);
+  document.getElementById('d-class-geral').innerHTML = `<span style="color:${corGeral}">${classGeral}</span>`;
+
+  // Tabela principal (dimensões analisadas)
+  const tbodyDims = document.querySelector('#d-table-dimensoes tbody');
+  tbodyDims.innerHTML = '';
+  let idx = 0;
   dimensoes.filter(d => d.tipo !== 'ofensivo').forEach(d => {
-    const cor = classificarCor(d.classificacao);
-    const row = document.createElement('div');
-    row.className = 'dim-bar-row';
-    row.innerHTML = `
-      <div class="dim-bar-label">${d.dim}</div>
-      <div class="dim-bar-track">
-        <div class="dim-bar-fill" style="width:${Math.min(d.media_pct,100)}%;background:${cor}"></div>
-      </div>
-      <div class="dim-bar-value">${d.media_pct.toFixed(0)}%</div>
-      <div class="dim-bar-badge"><span class="risk-badge ${classificarClass(d.classificacao)}">${d.classificacao}</span></div>
-    `;
-    container.appendChild(row);
+    idx++;
+    tbodyDims.innerHTML += `
+      <tr>
+        <td style="font-family:var(--font-mono);color:var(--muted)">${idx}</td>
+        <td style="color:var(--text);font-weight:500">${d.dim}</td>
+        <td style="font-size:12px;color:var(--muted2)">${d.cat}</td>
+        <td style="font-family:var(--font-mono)">${(d.media || 0).toFixed(2)}</td>
+        <td style="font-family:var(--font-mono)">${(d.min || 0).toFixed(0)}</td>
+        <td style="font-family:var(--font-mono)">${(d.max || 0).toFixed(0)}</td>
+        <td style="font-family:var(--font-mono)">${(d.std || 0).toFixed(2)}</td>
+        <td style="font-family:var(--font-mono)">${(d.media_pct || 0).toFixed(1)}%</td>
+        <td><span class="risk-badge ${classificarClass(d.classificacao)}">${d.classificacao}</span></td>
+      </tr>`;
   });
+
+  // Tabela de ofensivos
+  const tbodyOf = document.querySelector('#d-table-ofensivos tbody');
+  tbodyOf.innerHTML = '';
+  dimensoes.filter(d => d.tipo === 'ofensivo').forEach(d => {
+    const pctSim = d.pct_sim !== undefined ? d.pct_sim : d.media_pct;
+    const corPct = pctSim > 10 ? '#f25757' : (pctSim > 0 ? '#f7c94f' : '#22c55e');
+    tbodyOf.innerHTML += `
+      <tr>
+        <td style="color:var(--text);font-weight:500">${d.dim}</td>
+        <td style="font-family:var(--font-mono);color:${corPct};font-weight:700">${pctSim.toFixed(1)}%</td>
+        <td style="font-family:var(--font-mono)">${(100 - pctSim).toFixed(1)}%</td>
+        <td style="font-family:var(--font-mono)">${d.total_sim || 0}</td>
+        <td style="font-family:var(--font-mono)">${d.total_nao || 0}</td>
+      </tr>`;
+  });
+
+  // ═══ ABA 2: RESPOSTAS ═══
+  renderTabelaRespostas(respostas, dimensoes);
+
+  // ═══ ABA 3: ANÁLISE POR DIMENSÃO ═══
+  renderAnaliseDetalhada(dimensoes);
+
+  // ═══ ABA 4: ANÁLISE POR DEPARTAMENTO ═══
+  renderAnaliseDepartamentos(analise_departamentos, departamentos_fixos, dimensoes);
 }
 
-function renderDimTable(dimensoes) {
-  const tbody = document.getElementById('dim-table-body');
-  tbody.innerHTML = '';
-  dimensoes.forEach(d => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:var(--text);font-weight:500">${d.dim}</td>
-      <td>${d.cat}</td>
-      <td style="font-family:var(--font-mono)">${typeof d.media === 'number' ? d.media.toFixed(2) : d.media}</td>
-      <td style="font-family:var(--font-mono)">${d.media_pct.toFixed(1)}%</td>
-      <td><span class="risk-badge ${classificarClass(d.classificacao)}">${d.classificacao}</span></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+function renderTabelaRespostas(respostas, dimensoes) {
+  const thead = document.getElementById('d-respostas-thead');
+  const tbody = document.getElementById('d-respostas-tbody');
 
-function renderRespondentes(respondentes) {
-  const container = document.getElementById('resp-list');
-  if (!respondentes || respondentes.length === 0) {
-    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Nenhum respondente ainda</div>';
+  if (!respostas || respostas.length === 0) {
+    thead.innerHTML = '<th>Aguardando respondentes</th>';
+    tbody.innerHTML = '<tr><td style="text-align:center;padding:40px;color:var(--muted)">Nenhum respondente ainda</td></tr>';
     return;
   }
-  container.innerHTML = respondentes.map((r, i) => `
-    <div class="resp-row">
-      <div class="resp-avatar">${(i+1)}</div>
-      <div>
-        <div class="resp-name">${r.departamento} · ${r.genero}</div>
-        <div class="resp-meta">${r.faixa_etaria} · ${r.tempo_empresa} · ${new Date(r.created_at).toLocaleDateString('pt-BR')}</div>
-      </div>
-      <div class="resp-status"><span class="badge badge-teal">Completo</span></div>
-    </div>
-  `).join('');
-}
 
-function renderDepartamentos(departamentos, dimensoes) {
-  const container = document.getElementById('dept-table');
-  if (!departamentos || Object.keys(departamentos).length === 0) {
-    container.innerHTML = '<div style="color:var(--muted);font-size:13px">Dados insuficientes para comparativo por departamento.</div>';
-    return;
-  }
-  const depts = Object.keys(departamentos);
-  const dimsPrincipais = dimensoes.filter(d => d.tipo !== 'ofensivo').slice(0, 8);
+  // Cabeçalho: Nº | Nome | Cargo | Depto | Gênero | Faixa | q01..q40 | T1..T23
+  let thHtml = `<th>Nº</th><th>Nome</th><th>Cargo</th><th>Depto</th><th>Gênero</th><th>Faixa</th>`;
+  for (let i = 1; i <= 40; i++) thHtml += `<th>Q${i}</th>`;
+  for (let i = 1; i <= 23; i++) thHtml += `<th style="background:rgba(79,110,247,0.1)">T${i}</th>`;
+  thead.innerHTML = thHtml;
 
-  let html = `<table class="risk-table"><thead><tr><th>Dimensão</th>${depts.map(d => `<th>${d}</th>`).join('')}</tr></thead><tbody>`;
-  dimsPrincipais.forEach(dim => {
-    html += `<tr><td style="color:var(--text);font-weight:500">${dim.dim}</td>`;
-    depts.forEach(dept => {
-      const val = departamentos[dept]?.[dim.dim];
-      html += `<td style="font-family:var(--font-mono)">${val !== undefined ? val.toFixed(1)+'%' : '—'}</td>`;
-    });
+  tbody.innerHTML = respostas.map((r, i) => {
+    let html = `<tr>
+      <td style="font-family:var(--font-mono);color:var(--muted)">${i+1}</td>
+      <td style="color:var(--text);font-weight:500">${r.nome || '—'}</td>
+      <td>${r.cargo || '—'}</td>
+      <td>${r.departamento || '—'}</td>
+      <td>${r.genero || '—'}</td>
+      <td>${r.faixa_etaria || '—'}</td>`;
+    for (let i = 1; i <= 40; i++) {
+      const key = 'q' + String(i).padStart(2, '0');
+      html += `<td style="font-family:var(--font-mono);text-align:center">${r[key] !== undefined ? r[key] : '—'}</td>`;
+    }
+    for (let i = 1; i <= 23; i++) {
+      const key = 'T' + i;
+      html += `<td style="font-family:var(--font-mono);text-align:center;background:rgba(79,110,247,0.05);color:#4f6ef7;font-weight:600">${r[key] !== undefined ? r[key] : '—'}</td>`;
+    }
     html += '</tr>';
-  });
-  html += '</tbody></table>';
-  container.innerHTML = html;
+    return html;
+  }).join('');
 }
 
-function switchTab(name, el) {
-  ['dimensoes','respondentes','departamentos'].forEach(t => {
-    document.getElementById(`tab-${t}`)?.classList.add('hidden');
+function renderAnaliseDetalhada(dimensoes) {
+  const tbody = document.querySelector('#d-table-analise-dim tbody');
+  tbody.innerHTML = '';
+  let idx = 0;
+  dimensoes.filter(d => d.tipo !== 'ofensivo').forEach(d => {
+    idx++;
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-family:var(--font-mono);color:var(--muted)">${idx}</td>
+        <td style="color:var(--text);font-weight:500">${d.dim}</td>
+        <td style="font-size:12px;color:var(--muted2)">${d.cat}</td>
+        <td style="font-family:var(--font-mono)">${(d.media || 0).toFixed(2)}</td>
+        <td style="font-family:var(--font-mono)">${(d.mediana || 0).toFixed(2)}</td>
+        <td style="font-family:var(--font-mono)">${(d.min || 0).toFixed(0)}</td>
+        <td style="font-family:var(--font-mono)">${(d.max || 0).toFixed(0)}</td>
+        <td style="font-family:var(--font-mono)">${(d.std || 0).toFixed(2)}</td>
+        <td><span class="risk-badge ${classificarClass(d.classificacao)}">${d.classificacao}</span></td>
+      </tr>`;
   });
-  document.getElementById(`tab-${name}`)?.classList.remove('hidden');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+}
+
+function renderAnaliseDepartamentos(analiseDeptos, deptosFixos, dimensoes) {
+  const thead = document.getElementById('d-deptos-thead');
+  const tbody = document.getElementById('d-deptos-tbody');
+  const deptos = deptosFixos || ['Administrativo','Comercial','Financeiro','Operacional','RH','TI'];
+
+  // Header
+  let thHtml = `<tr><th>Dimensão</th>`;
+  deptos.forEach(d => {
+    const count = analiseDeptos?.[d]?.total_respondentes || 0;
+    thHtml += `<th>${d}<div style="font-size:10px;color:var(--muted);font-weight:400;margin-top:2px">${count} resp.</div></th>`;
+  });
+  thHtml += `<th style="background:rgba(79,110,247,0.1)">Média Geral</th></tr>`;
+  thead.innerHTML = thHtml;
+
+  // Linhas
+  tbody.innerHTML = '';
+  dimensoes.filter(d => d.tipo !== 'ofensivo').forEach(d => {
+    let trHtml = `<tr><td style="color:var(--text);font-weight:500">${d.dim}</td>`;
+    deptos.forEach(dept => {
+      const valObj = analiseDeptos?.[dept]?.dimensoes?.[d.dim];
+      if (!valObj || analiseDeptos[dept].total_respondentes === 0) {
+        trHtml += `<td style="color:var(--muted);text-align:center">—</td>`;
+      } else {
+        const cor = classificarCor(valObj.classificacao);
+        trHtml += `<td style="font-family:var(--font-mono);text-align:center"><span style="color:${cor};font-weight:600">${valObj.media.toFixed(2)}</span></td>`;
+      }
+    });
+    trHtml += `<td style="font-family:var(--font-mono);text-align:center;background:rgba(79,110,247,0.05);color:#4f6ef7;font-weight:600">${(d.media || 0).toFixed(2)}</td>`;
+    trHtml += '</tr>';
+    tbody.innerHTML += trHtml;
+  });
+
+  // Linha final: nº de respondentes
+  let trFinal = `<tr style="background:var(--surface2)"><td style="font-weight:700">Nº de Respondentes</td>`;
+  deptos.forEach(dept => {
+    trFinal += `<td style="font-family:var(--font-mono);text-align:center;font-weight:700">${analiseDeptos?.[dept]?.total_respondentes || 0}</td>`;
+  });
+  const total = deptos.reduce((s, d) => s + (analiseDeptos?.[d]?.total_respondentes || 0), 0);
+  trFinal += `<td style="font-family:var(--font-mono);text-align:center;font-weight:700;background:rgba(79,110,247,0.1)">${total}</td></tr>`;
+  tbody.innerHTML += trFinal;
+}
+
+/**
+ * Troca entre as 4 abas do dashboard COPSOQ
+ */
+function switchCopsoqTab(name, el) {
+  ['dashboard','respostas','dimensao','departamento'].forEach(t => {
+    document.getElementById('copsoq-' + t)?.classList.add('hidden');
+  });
+  document.getElementById('copsoq-' + name)?.classList.remove('hidden');
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
   el?.classList.add('active');
+}
+
+/**
+ * Exporta o dashboard em PDF (paisagem A4)
+ * Junta as 4 seções em um único PDF
+ */
+async function exportarPDF() {
+  const btn = event?.target;
+  const origText = btn?.textContent;
+  if (btn) { btn.textContent = 'Gerando PDF...'; btn.disabled = true; }
+
+  try {
+    if (!window.jspdf || !window.html2canvas) {
+      alert('Bibliotecas PDF não carregadas. Recarregue a página e tente de novo.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const pageW = pdf.internal.pageSize.getWidth();   // ~297
+    const pageH = pdf.internal.pageSize.getHeight();  // ~210
+
+    const secoes = ['dashboard','respostas','dimensao','departamento'];
+    const titulos = {
+      dashboard: 'Dashboard',
+      respostas: 'Respostas dos Participantes',
+      dimensao: 'Análise por Dimensão',
+      departamento: 'Análise por Departamento'
+    };
+
+    // Salvar estado atual das seções
+    const estadoAtual = {};
+    secoes.forEach(s => {
+      estadoAtual[s] = document.getElementById('copsoq-' + s).classList.contains('hidden');
+    });
+
+    // Pra cada seção: mostrar, capturar, adicionar ao PDF
+    let primeira = true;
+    for (const s of secoes) {
+      // Esconde todas e mostra só a atual
+      secoes.forEach(x => document.getElementById('copsoq-' + x).classList.add('hidden'));
+      document.getElementById('copsoq-' + s).classList.remove('hidden');
+
+      // Aguarda layout render
+      await new Promise(r => setTimeout(r, 300));
+
+      const element = document.getElementById('copsoq-' + s);
+      const canvas = await html2canvas(element, {
+        scale: 1.5,
+        backgroundColor: '#06070d',
+        logging: false,
+        useCORS: true,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      const imgW = pageW - 10;
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      if (!primeira) pdf.addPage();
+      primeira = false;
+
+      // Cabeçalho em cada página
+      pdf.setFillColor(6, 7, 13);
+      pdf.rect(0, 0, pageW, pageH, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(14);
+      pdf.text('Perfilis NR-1 · COPSOQ II — ' + titulos[s], 5, 8);
+      pdf.setFontSize(9);
+      pdf.setTextColor(147, 149, 176);
+      pdf.text(window._copsoqData?.pacote?.empresa || 'Empresa', pageW - 5, 8, { align: 'right' });
+
+      // Se a imagem for maior que a página, fazemos "fatias" para múltiplas páginas
+      if (imgH <= pageH - 15) {
+        pdf.addImage(imgData, 'JPEG', 5, 12, imgW, imgH);
+      } else {
+        // A imagem é longa: usa uma estratégia de fatiamento
+        let posY = 0;
+        const pxPorMm = canvas.width / imgW;
+        const alturaFatiaMM = pageH - 15;
+        const alturaFatiaPX = alturaFatiaMM * pxPorMm;
+
+        while (posY < canvas.height) {
+          const fatiaH = Math.min(alturaFatiaPX, canvas.height - posY);
+          const tmpCanvas = document.createElement('canvas');
+          tmpCanvas.width = canvas.width;
+          tmpCanvas.height = fatiaH;
+          const ctx = tmpCanvas.getContext('2d');
+          ctx.fillStyle = '#06070d';
+          ctx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+          ctx.drawImage(canvas, 0, posY, canvas.width, fatiaH, 0, 0, canvas.width, fatiaH);
+          const fatiaImg = tmpCanvas.toDataURL('image/jpeg', 0.85);
+          const fatiaAltMM = (fatiaH / canvas.width) * imgW;
+
+          if (posY > 0) {
+            pdf.addPage();
+            pdf.setFillColor(6, 7, 13);
+            pdf.rect(0, 0, pageW, pageH, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(14);
+            pdf.text('Perfilis NR-1 · COPSOQ II — ' + titulos[s] + ' (cont.)', 5, 8);
+          }
+          pdf.addImage(fatiaImg, 'JPEG', 5, 12, imgW, fatiaAltMM);
+          posY += fatiaH;
+        }
+      }
+    }
+
+    // Restaura estado original
+    secoes.forEach(s => {
+      if (estadoAtual[s]) document.getElementById('copsoq-' + s).classList.add('hidden');
+      else document.getElementById('copsoq-' + s).classList.remove('hidden');
+    });
+
+    // Nome do arquivo
+    const empresa = (window._copsoqData?.pacote?.empresa || 'empresa').replace(/[^a-zA-Z0-9]/g, '_');
+    const hoje = new Date().toISOString().split('T')[0];
+    pdf.save(`Perfilis_NR1_${empresa}_${hoje}.pdf`);
+  } catch(e) {
+    console.error('Erro PDF:', e);
+    alert('Erro ao gerar PDF: ' + e.message);
+  } finally {
+    if (btn && origText) { btn.textContent = origText; btn.disabled = false; }
+  }
 }
 </script>
 
