@@ -9,6 +9,8 @@
 <!-- Bibliotecas para exportar PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Chart.js para gráfico comparativo por departamento -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
   --bg: #06070d;
@@ -1046,8 +1048,22 @@ select.input { cursor: pointer; }
 
     <!-- ═══════ ABA 4: ANÁLISE POR DEPARTAMENTO ═══════ -->
     <div id="copsoq-departamento" class="copsoq-section hidden">
+      <!-- Card do gráfico comparativo -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Comparação por Departamento</div>
+            <div style="font-size:13px;color:var(--muted2);margin-top:4px">Pontuação média de cada dimensão por departamento (0 a 8 pontos)</div>
+          </div>
+        </div>
+        <div style="position:relative;height:500px;width:100%">
+          <canvas id="grafico-deptos"></canvas>
+        </div>
+      </div>
+
+      <!-- Card da tabela (já existia) -->
       <div class="card">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">Análise por Departamento</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">Tabela detalhada</div>
         <div style="overflow-x:auto">
           <table class="risk-table" id="d-table-deptos" style="min-width:900px;font-size:12px">
             <thead id="d-deptos-thead"></thead>
@@ -1906,6 +1922,108 @@ function renderAnaliseDepartamentos(analiseDeptos, deptosFixos, dimensoes) {
   const total = deptos.reduce((s, d) => s + (analiseDeptos?.[d]?.total_respondentes || 0), 0);
   trFinal += `<td style="font-family:var(--font-mono);text-align:center;font-weight:700;background:rgba(79,110,247,0.1)">${total}</td></tr>`;
   tbody.innerHTML += trFinal;
+
+  // Render gráfico comparativo (estilo planilha)
+  renderGraficoDeptos(analiseDeptos, deptos, dimensoes);
+}
+
+// Gráfico comparativo por departamento — espelho da aba "Análise por Departamento" da planilha
+let _graficoDeptosChart = null;
+function renderGraficoDeptos(analiseDeptos, deptos, dimensoes) {
+  const canvas = document.getElementById('grafico-deptos');
+  if (!canvas || !window.Chart) return;
+  if (_graficoDeptosChart) { try { _graficoDeptosChart.destroy(); } catch(e){} }
+
+  // Labels do eixo X = dimensões analisadas (sem ofensivos)
+  const dims = dimensoes.filter(d => d.tipo !== 'ofensivo');
+  const labels = dims.map(d => d.dim);
+
+  // Paleta para os departamentos (tons de azul/ciano + contrastes)
+  const coresDepto = {
+    'Administrativo': '#1e4d5f',
+    'Comercial':      '#2d7a8c',
+    'Financeiro':     '#3dd6c4',
+    'Operacional':    '#f97316',
+    'RH':             '#ef4444',
+    'TI':             '#22c55e'
+  };
+
+  // 1 dataset por departamento
+  const datasets = deptos.map(dept => ({
+    label: dept,
+    data: dims.map(d => {
+      const v = analiseDeptos?.[dept]?.dimensoes?.[d.dim];
+      return v ? parseFloat(v.media.toFixed(2)) : 0;
+    }),
+    backgroundColor: coresDepto[dept] || '#6c63ff',
+    borderColor: coresDepto[dept] || '#6c63ff',
+    borderWidth: 1,
+    borderRadius: 2,
+  }));
+
+  _graficoDeptosChart = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Comparação por Departamento',
+          color: '#e9eaf5',
+          font: { size: 15, weight: '700' },
+          padding: { top: 4, bottom: 18 }
+        },
+        legend: {
+          display: true,
+          position: 'right',
+          labels: {
+            color: '#cbd5e1',
+            font: { size: 11 },
+            boxWidth: 14,
+            boxHeight: 14,
+            padding: 10
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(13,13,20,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          callbacks: {
+            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#cbd5e1',
+            font: { size: 10 },
+            maxRotation: 60,
+            minRotation: 45,
+            autoSkip: false,
+          },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Pontuação Média',
+            color: '#9395b0',
+            font: { size: 11 }
+          },
+          min: 0,
+          suggestedMax: 8,
+          ticks: { color: '#7a798a', font: { size: 10 } },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          border: { color: 'rgba(255,255,255,0.1)' }
+        }
+      },
+      animation: { duration: 800, easing: 'easeOutQuart' }
+    }
+  });
 }
 
 /**
