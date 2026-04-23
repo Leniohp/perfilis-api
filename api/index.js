@@ -651,6 +651,7 @@ app.post('/admin/links-promocionais', adminAuth, async (req, res) => {
     res.status(500).json({ erro: e.message });
   }
 });
+
 // ══════════════════════════════════════
 // CONTADOR DE VISITAS
 // ══════════════════════════════════════
