@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Perfilis — Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #0a0a0f;
@@ -733,6 +734,9 @@
       <div class="nav-item" onclick="showPage('links')" id="nav-links">
         <span class="nav-icon">🔗</span> Base de Links
       </div>
+      <div class="nav-item" onclick="showPage('visitas')" id="nav-visitas">
+        <span class="nav-icon">📊</span> Visitas
+      </div>
     </div>
 
     <div class="sidebar-footer">
@@ -910,6 +914,84 @@
               <td colspan="5">
                 <div class="spinner"></div><br/>Carregando...
               </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PÁGINA: VISITAS ── -->
+    <div class="page" id="page-visitas">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Visitas <span>·</span></div>
+          <div class="page-desc">Acessos a todas as páginas do site</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total de visualizações</div>
+          <div class="stat-value accent" id="v-total-views">–</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="v-total-unicos">– únicos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Hoje</div>
+          <div class="stat-value green" id="v-hoje-views">–</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="v-hoje-unicos">– únicos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Últimos 7 dias</div>
+          <div class="stat-value yellow" id="v-semana-views">–</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="v-semana-unicos">– únicos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Últimos 30 dias</div>
+          <div class="stat-value" id="v-mes-views">–</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px" id="v-mes-unicos">– únicos</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div style="flex:1;font-size:13px;color:var(--muted2)">Período do gráfico:</div>
+        <button class="filter-btn" id="v-f-7" onclick="setPeriodoVisitas(7)">7 dias</button>
+        <button class="filter-btn active" id="v-f-30" onclick="setPeriodoVisitas(30)">30 dias</button>
+        <button class="filter-btn" id="v-f-90" onclick="setPeriodoVisitas(90)">90 dias</button>
+        <button class="refresh-btn" onclick="carregarVisitas()">↻ Atualizar</button>
+      </div>
+
+      <!-- Gráfico -->
+      <div class="table-wrap" style="padding:24px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div style="font-size:14px;font-weight:700">Visitas ao longo do tempo</div>
+          <div style="display:flex;gap:16px;font-size:12px">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent)"></span> Visualizações</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent2)"></span> Únicos</span>
+          </div>
+        </div>
+        <div style="position:relative;height:280px">
+          <canvas id="visitas-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabela por página -->
+      <div class="table-wrap">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600">
+          Acessos por página
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Página</th>
+              <th style="text-align:right">Visualizações</th>
+              <th style="text-align:right">Únicos</th>
+              <th style="text-align:right">Engajamento</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-visitas">
+            <tr class="loading-row">
+              <td colspan="5"><div class="spinner"></div><br/>Carregando...</td>
             </tr>
           </tbody>
         </table>
@@ -1101,6 +1183,7 @@
     carregarContratantes();
     carregarCandidatos();
     carregarLinks();
+    carregarVisitas();
   }
 
   // ═══ NAVEGAÇÃO ═══
@@ -1109,6 +1192,155 @@
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + nome).classList.add('active');
     document.getElementById('nav-' + nome).classList.add('active');
+    if (nome === 'visitas') carregarVisitas();
+  }
+
+  // ═══ VISITAS ═══
+  let visitasChart = null;
+  let visitasPeriodo = 30;
+
+  function setPeriodoVisitas(dias) {
+    visitasPeriodo = dias;
+    document.querySelectorAll('[id^="v-f-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById('v-f-' + dias).classList.add('active');
+    carregarVisitas();
+  }
+
+  async function carregarVisitas() {
+    document.getElementById('tabela-visitas').innerHTML =
+      `<tr class="loading-row"><td colspan="5"><div class="spinner"></div><br/>Carregando...</td></tr>`;
+    try {
+      const res = await fetch(`${ADMIN_BASE}/visitas?dias=${visitasPeriodo}`, { headers: authHeaders() });
+      if (res.status === 401) { fazerLogout(); return; }
+      const data = await res.json();
+      renderizarStatsVisitas(data.stats);
+      renderizarGraficoVisitas(data.serie);
+      renderizarTabelaVisitas(data.paginas);
+    } catch (e) {
+      document.getElementById('tabela-visitas').innerHTML =
+        `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--accent2)">Erro ao carregar dados.</td></tr>`;
+    }
+  }
+
+  function renderizarStatsVisitas(s) {
+    document.getElementById('v-total-views').textContent    = (s.total.views  || 0).toLocaleString('pt-BR');
+    document.getElementById('v-total-unicos').textContent   = (s.total.unicos || 0).toLocaleString('pt-BR') + ' únicos';
+    document.getElementById('v-hoje-views').textContent     = (s.hoje.views   || 0).toLocaleString('pt-BR');
+    document.getElementById('v-hoje-unicos').textContent    = (s.hoje.unicos  || 0).toLocaleString('pt-BR') + ' únicos';
+    document.getElementById('v-semana-views').textContent   = (s.semana.views || 0).toLocaleString('pt-BR');
+    document.getElementById('v-semana-unicos').textContent  = (s.semana.unicos|| 0).toLocaleString('pt-BR') + ' únicos';
+    document.getElementById('v-mes-views').textContent      = (s.mes.views    || 0).toLocaleString('pt-BR');
+    document.getElementById('v-mes-unicos').textContent     = (s.mes.unicos   || 0).toLocaleString('pt-BR') + ' únicos';
+  }
+
+  function renderizarGraficoVisitas(serie) {
+    const ctx = document.getElementById('visitas-chart');
+    if (!ctx || typeof Chart === 'undefined') return;
+    if (visitasChart) { try { visitasChart.destroy(); } catch(e){} }
+
+    const labels = serie.map(s => {
+      const d = new Date(s.data);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    });
+
+    visitasChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Visualizações',
+            data: serie.map(s => s.views),
+            borderColor: '#6c63ff',
+            backgroundColor: 'rgba(108,99,255,0.12)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            borderWidth: 2
+          },
+          {
+            label: 'Únicos',
+            data: serie.map(s => s.unicos),
+            borderColor: '#4ade80',
+            backgroundColor: 'rgba(74,222,128,0.08)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#13131c',
+            borderColor: '#1e1e2e',
+            borderWidth: 1,
+            titleColor: '#e8e8f0',
+            bodyColor: '#e8e8f0',
+            padding: 10
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#5a5a78', font: { size: 11 }, maxRotation: 0, autoSkipPadding: 20 },
+            grid:  { display: false },
+            border:{ color: 'rgba(255,255,255,0.06)' }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: '#5a5a78', font: { size: 11 }, precision: 0 },
+            grid:  { color: 'rgba(255,255,255,0.04)' },
+            border:{ display: false }
+          }
+        }
+      }
+    });
+  }
+
+  function renderizarTabelaVisitas(paginas) {
+    const tbody = document.getElementById('tabela-visitas');
+    if (!paginas || paginas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <div class="empty-state-title">Nenhuma visita ainda</div>
+        <div class="empty-state-desc">As visitas aparecerão aqui conforme as pessoas acessam o site</div>
+      </div></td></tr>`;
+      return;
+    }
+
+    const nomePath = {
+      '/': 'Início (landing)',
+      '/disc': 'Perfilis DISC',
+      '/nr1': 'Perfilis NR-1',
+      '/f/:token': 'Formulário DISC (candidatos)',
+      '/r/:token': 'Ranking DISC (contratantes)',
+      '/q/:token': 'Questionário NR-1',
+      '/admin': 'Admin',
+      '/nr1-admin': 'Admin NR-1'
+    };
+
+    tbody.innerHTML = paginas.map((p, i) => {
+      const engajamento = p.views > 0 ? (p.views / p.unicos).toFixed(1) : '0.0';
+      const nome = nomePath[p.path] || p.path;
+      return `
+        <tr>
+          <td style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px">${i+1}</td>
+          <td>
+            <div class="td-name">${esc(nome)}</div>
+            <div class="td-email">${esc(p.path)}</div>
+          </td>
+          <td style="text-align:right;font-family:'DM Mono',monospace;font-size:14px;font-weight:600">${p.views.toLocaleString('pt-BR')}</td>
+          <td style="text-align:right;font-family:'DM Mono',monospace;font-size:14px;color:#4ade80">${p.unicos.toLocaleString('pt-BR')}</td>
+          <td style="text-align:right;font-family:'DM Mono',monospace;font-size:13px;color:var(--muted2)">${engajamento} views/único</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   // ═══ HEADERS AUTH ═══
