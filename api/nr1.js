@@ -202,6 +202,47 @@ app.post('/api/nr1/pacotes', async (req, res) => {
   const { contratante_id, quantidade, plano } = req.body;
   if (!contratante_id || !quantidade) return res.status(400).json({ erro: 'contratante_id e quantidade obrigatórios' });
 
+  const planoRecebido = plano || 'starter';
+  const isFree = planoRecebido === 'free';
+
+  // ─── PLANO GRÁTIS: validar duplicata por email/whatsapp ───
+  if (isFree) {
+    const { data: contratante } = await supabase
+      .from('nr1_contratantes')
+      .select('id, email, whatsapp')
+      .eq('id', contratante_id)
+      .single();
+
+    if (!contratante) {
+      return res.status(404).json({ erro: 'Contratante não encontrado' });
+    }
+
+    const wppLimpo = String(contratante.whatsapp || '').replace(/\D/g, '');
+    const emailLower = String(contratante.email || '').toLowerCase();
+
+    // Buscar todos os contratantes que batem no email OU whatsapp
+    const { data: outrosContratantes } = await supabase
+      .from('nr1_contratantes')
+      .select('id')
+      .or(`email.eq.${emailLower},whatsapp.eq.${wppLimpo}`);
+
+    if (outrosContratantes && outrosContratantes.length > 0) {
+      const ids = outrosContratantes.map(c => c.id);
+      // Verificar se algum deles já tem pacote promocional
+      const { data: pacotesPromo } = await supabase
+        .from('nr1_pacotes')
+        .select('id')
+        .eq('promocional', true)
+        .in('contratante_id', ids);
+
+      if (pacotesPromo && pacotesPromo.length > 0) {
+        return res.status(409).json({
+          erro: 'Esta empresa já utilizou o pacote gratuito. Para contratar mais análises, escolha um dos planos pagos.'
+        });
+      }
+    }
+  }
+
   const token         = gerarToken('Q');   // /q/TOKEN — link colaboradores
   const token_ranking = gerarToken('R');   // /r/TOKEN — painel privado
 
@@ -209,11 +250,12 @@ app.post('/api/nr1/pacotes', async (req, res) => {
     contratante_id,
     token,
     token_ranking,
-    quantidade: parseInt(quantidade),
-    plano: plano || 'starter',
+    quantidade: isFree ? 3 : parseInt(quantidade),
+    plano: planoRecebido,
     usados: 0,
-    ativo: false,       // ativo só após pagamento confirmado
-    pago: false,
+    ativo: isFree ? true : false,       // grátis já ativa direto (pula pagamento)
+    pago: isFree ? true : false,        // considerado "pago" pois é cortesia
+    promocional: isFree,                // flag pro admin distinguir
   }).select().single();
 
   if (error) return res.status(500).json({ erro: error.message });
@@ -455,6 +497,7 @@ app.get('/admin/nr1/pacotes', adminAuth, async (req, res) => {
     plano: p.plano,
     ativo: p.ativo,
     pago: p.pago,
+    promocional: p.promocional === true,
     created_at: p.created_at,
   }));
   res.json({ total: resultado.length, pacotes: resultado });
