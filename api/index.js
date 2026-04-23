@@ -142,10 +142,18 @@ app.post('/api/formulario/:token', async (req, res) => {
 
   if (error) return res.status(500).json({ erro: error.message });
 
-  // Calcular e salvar resultados separados: DISC e Egograma
+  // Calcular e salvar resultados separados: DISC, Egograma e Quadrantes
   const scores = calcularDISC(body);
   const ego = calcularEgograma(body);
-  await supabase.from('analises').insert({ candidato_id: cand.id, ...scores, ...ego });
+  const quad = calcularQuadrantes(body);
+  // Respostas individuais dos Quadrantes (r01-r28, valores 0-3)
+  const quadRespostas = Object.fromEntries(
+    Array.from({length:28}, (_,i) => {
+      const k = 'quad_r' + String(i+1).padStart(2,'0');
+      return [k, parseInt(body[k]) || 0];
+    })
+  );
+  await supabase.from('analises').insert({ candidato_id: cand.id, ...scores, ...ego, ...quad, ...quadRespostas });
 
   // Incrementar contador
   const novosUsados = pacote.usados + 1;
@@ -215,6 +223,26 @@ function calcularEgograma(body) {
     ego_adulto: sc.A,
     ego_crianca_livre: sc.CL,
     ego_crianca_adapt: sc.CA
+  };
+}
+
+// Teste dos Quadrantes — mapeamento fixo de cada pergunta para uma coluna (A/B/C/D)
+// A = Pré-ativo · B = Pró-ativo · C = Reativo · D = Relacional
+const QUAD_MAP = ['A','B','C','D','A','B','A','B','D','D','C','B','B','A','C','A','C','B','D','B','D','A','D','C','D','A','C','B'];
+
+function calcularQuadrantes(body) {
+  const sc = { A:0, B:0, C:0, D:0 };
+  for (let i = 0; i < 28; i++) {
+    const key = 'quad_r' + String(i+1).padStart(2,'0');
+    const val = parseInt(body[key]) || 0;
+    const col = QUAD_MAP[i];
+    if (col && sc[col] !== undefined) sc[col] += val;
+  }
+  return {
+    quad_preativo:   sc.A,
+    quad_proativo:   sc.B,
+    quad_reativo:    sc.C,
+    quad_relacional: sc.D
   };
 }
 
