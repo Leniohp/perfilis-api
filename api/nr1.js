@@ -28,87 +28,114 @@ function gerarToken(prefix = '') {
 const PLANO_QTD = { starter: 30, pro: 100, enterprise: 300, demo: 5 };
 
 // ─────────────────────────────────────────
-// ESCALAS E PONTUAÇÃO COPSOQ II
+// ESCALAS E PONTUAÇÃO COPSOQ II (conforme planilha)
 // ─────────────────────────────────────────
 const SCORE_MAP = {
-  freq5:   [4,3,2,1,0],
-  medida5: [4,3,2,1,0],
-  tempo5:  [4,3,2,1,0],
-  satisf:  [3,2,1,0],
-  saude:   [4,3,2,1,0],
-  conflito:[3,2,1,0],
-  simnao:  [1,0],
+  freq5:   [4,3,2,1,0],       // Sempre=4, Frequentemente=3, Às vezes=2, Raramente=1, Nunca=0
+  medida5: [4,3,2,1,0],       // Muito grande medida=4, Grande=3, Em parte=2, Pequena=1, Muito pequena=0
+  tempo5:  [4,3,2,1,0],       // O tempo todo=4, Grande parte=3, Parte do tempo=2, Pequena parte=1, Nenhum momento=0
+  satisf:  [3,2,1,0],         // Muito satisfeito=3, Satisfeito=2, Insatisfeito=1, Muito insatisfeito=0
+  saude:   [4,3,2,1,0],       // Excelente=4, Muito boa=3, Boa=2, Razoável=1, Ruim=0
+  conflito:[3,2,1,0],         // Sim, certamente=3, Em certo grau=2, Muito pouco=1, Não=0
+  simnao:  [1,0],             // Sim=1, Não=0
 };
 
+// Total máximo (soma de 2 perguntas) por escala
 const FAIXA_MAX = { freq5:4, medida5:4, tempo5:4, satisf:3, saude:4, conflito:3, simnao:1 };
 
+// As 19 dimensões analisadas + 4 comportamentos ofensivos = 23 totais
+// qs: array com os números das perguntas (1-40) que compõem cada dimensão
 const BLOCOS = [
-  { id:0,  cat:'Exigências no Trabalho',             dim:'Exigências Quantitativas',           tipo:'demanda',   escala:'freq5',   nPergs:2 },
-  { id:1,  cat:'Exigências no Trabalho',             dim:'Ritmo de Trabalho',                  tipo:'demanda',   escala:'medida5', nPergs:2 },
-  { id:2,  cat:'Exigências no Trabalho',             dim:'Exigências Emocionais',               tipo:'demanda',   escala:'freq5',   nPergs:2 },
-  { id:3,  cat:'Organização do Trabalho e Conteúdo', dim:'Influência no Trabalho',              tipo:'recurso',   escala:'freq5',   nPergs:2 },
-  { id:4,  cat:'Organização do Trabalho e Conteúdo', dim:'Possibilidades de Desenvolvimento',   tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:5,  cat:'Organização do Trabalho e Conteúdo', dim:'Significado do Trabalho',             tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:6,  cat:'Organização do Trabalho e Conteúdo', dim:'Compromisso com o Local de Trabalho', tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:7,  cat:'Relações Interpessoais e Liderança', dim:'Previsibilidade',                     tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:8,  cat:'Relações Interpessoais e Liderança', dim:'Recompensas / Reconhecimento',        tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:9,  cat:'Relações Interpessoais e Liderança', dim:'Clareza de Papel',                    tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:10, cat:'Relações Interpessoais e Liderança', dim:'Qualidade da Liderança',              tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:11, cat:'Relações Interpessoais e Liderança', dim:'Apoio Social dos Superiores',         tipo:'recurso',   escala:'freq5',   nPergs:2 },
-  { id:12, cat:'Saúde e Bem-Estar',                  dim:'Satisfação com o Trabalho',           tipo:'recurso',   escala:'satisf',  nPergs:1 },
-  { id:13, cat:'Interface Trabalho-Indivíduo',        dim:'Conflito Trabalho-Família',           tipo:'demanda',   escala:'conflito',nPergs:2 },
-  { id:14, cat:'Valores no Local de Trabalho',        dim:'Confiança Vertical',                  tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:15, cat:'Valores no Local de Trabalho',        dim:'Justiça e Respeito',                  tipo:'recurso',   escala:'medida5', nPergs:2 },
-  { id:16, cat:'Saúde e Bem-Estar',                  dim:'Saúde Geral Autoavaliada',            tipo:'recurso',   escala:'saude',   nPergs:1 },
-  { id:17, cat:'Saúde e Bem-Estar',                  dim:'Burnout (Esgotamento)',                tipo:'demanda',   escala:'tempo5',  nPergs:2 },
-  { id:18, cat:'Saúde e Bem-Estar',                  dim:'Estresse',                            tipo:'demanda',   escala:'tempo5',  nPergs:2 },
-  { id:19, cat:'Comportamentos Ofensivos',            dim:'Assédio Sexual',                      tipo:'ofensivo',  escala:'simnao',  nPergs:1 },
-  { id:20, cat:'Comportamentos Ofensivos',            dim:'Ameaças de Violência',                tipo:'ofensivo',  escala:'simnao',  nPergs:1 },
-  { id:21, cat:'Comportamentos Ofensivos',            dim:'Violência Física',                    tipo:'ofensivo',  escala:'simnao',  nPergs:1 },
-  { id:22, cat:'Comportamentos Ofensivos',            dim:'Bullying (Assédio Moral)',             tipo:'ofensivo',  escala:'simnao',  nPergs:1 },
+  { id:1,  cat:'Exigências no Trabalho',             dim:'Exigências Quantitativas',           tipo:'demanda',   escala:'freq5',   qs:[1,2] },
+  { id:2,  cat:'Exigências no Trabalho',             dim:'Ritmo de Trabalho',                  tipo:'demanda',   escala:'medida5', qs:[3,4] },
+  { id:3,  cat:'Exigências no Trabalho',             dim:'Exigências Emocionais',              tipo:'demanda',   escala:'freq5',   qs:[5,6] },
+  { id:4,  cat:'Organização do Trabalho e Conteúdo', dim:'Influência no Trabalho',             tipo:'recurso',   escala:'freq5',   qs:[7,8] },
+  { id:5,  cat:'Organização do Trabalho e Conteúdo', dim:'Possibilidades de Desenvolvimento',  tipo:'recurso',   escala:'medida5', qs:[9,10] },
+  { id:6,  cat:'Organização do Trabalho e Conteúdo', dim:'Significado do Trabalho',            tipo:'recurso',   escala:'medida5', qs:[11,12] },
+  { id:7,  cat:'Organização do Trabalho e Conteúdo', dim:'Compromisso com o Local de Trabalho',tipo:'recurso',   escala:'medida5', qs:[13,14] },
+  { id:8,  cat:'Relações Interpessoais e Liderança', dim:'Previsibilidade',                    tipo:'recurso',   escala:'medida5', qs:[15,16] },
+  { id:9,  cat:'Relações Interpessoais e Liderança', dim:'Recompensas / Reconhecimento',       tipo:'recurso',   escala:'medida5', qs:[17,18] },
+  { id:10, cat:'Relações Interpessoais e Liderança', dim:'Clareza de Papel',                   tipo:'recurso',   escala:'medida5', qs:[19,20] },
+  { id:11, cat:'Relações Interpessoais e Liderança', dim:'Qualidade da Liderança',             tipo:'recurso',   escala:'medida5', qs:[21,22] },
+  { id:12, cat:'Relações Interpessoais e Liderança', dim:'Apoio Social dos Superiores',        tipo:'recurso',   escala:'freq5',   qs:[23,24] },
+  { id:13, cat:'Saúde e Bem-Estar',                  dim:'Satisfação com o Trabalho',          tipo:'recurso',   escala:'satisf',  qs:[25] },
+  { id:14, cat:'Interface Trabalho-Indivíduo',       dim:'Conflito Trabalho-Família',          tipo:'demanda',   escala:'conflito',qs:[26,27] },
+  { id:15, cat:'Valores no Local de Trabalho',       dim:'Confiança Vertical',                 tipo:'recurso',   escala:'medida5', qs:[28,29] },
+  { id:16, cat:'Valores no Local de Trabalho',       dim:'Justiça e Respeito',                 tipo:'recurso',   escala:'medida5', qs:[30,31] },
+  { id:17, cat:'Saúde e Bem-Estar',                  dim:'Saúde Geral Autoavaliada',           tipo:'recurso',   escala:'saude',   qs:[32] },
+  { id:18, cat:'Saúde e Bem-Estar',                  dim:'Burnout (Esgotamento)',              tipo:'demanda',   escala:'tempo5',  qs:[33,34] },
+  { id:19, cat:'Saúde e Bem-Estar',                  dim:'Estresse',                           tipo:'demanda',   escala:'tempo5',  qs:[35,36] },
+  { id:20, cat:'Comportamentos Ofensivos',           dim:'Assédio Sexual',                     tipo:'ofensivo',  escala:'simnao',  qs:[37] },
+  { id:21, cat:'Comportamentos Ofensivos',           dim:'Ameaças de Violência',               tipo:'ofensivo',  escala:'simnao',  qs:[38] },
+  { id:22, cat:'Comportamentos Ofensivos',           dim:'Violência Física',                   tipo:'ofensivo',  escala:'simnao',  qs:[39] },
+  { id:23, cat:'Comportamentos Ofensivos',           dim:'Bullying (Assédio Moral)',           tipo:'ofensivo',  escala:'simnao',  qs:[40] },
 ];
 
-// Referências do estudo dinamarquês (N=3.517) — porcentagem da escala máxima
-const REFS_PCT = {
-  'Exigências Quantitativas': { ref_pct: 41.3, tipo:'demanda' },
-  'Ritmo de Trabalho': { ref_pct: 58.8, tipo:'demanda' },
-  'Exigências Emocionais': { ref_pct: 41.3, tipo:'demanda' },
-  'Influência no Trabalho': { ref_pct: 51.3, tipo:'recurso' },
-  'Possibilidades de Desenvolvimento': { ref_pct: 65.0, tipo:'recurso' },
-  'Significado do Trabalho': { ref_pct: 75.0, tipo:'recurso' },
-  'Compromisso com o Local de Trabalho': { ref_pct: 60.0, tipo:'recurso' },
-  'Previsibilidade': { ref_pct: 57.5, tipo:'recurso' },
-  'Recompensas / Reconhecimento': { ref_pct: 65.0, tipo:'recurso' },
-  'Clareza de Papel': { ref_pct: 71.3, tipo:'recurso' },
-  'Qualidade da Liderança': { ref_pct: 56.3, tipo:'recurso' },
-  'Apoio Social dos Superiores': { ref_pct: 70.0, tipo:'recurso' },
-  'Satisfação com o Trabalho': { ref_pct: 70.0, tipo:'recurso' },
-  'Conflito Trabalho-Família': { ref_pct: 35.0, tipo:'demanda' },
-  'Confiança Vertical': { ref_pct: 67.5, tipo:'recurso' },
-  'Justiça e Respeito': { ref_pct: 60.0, tipo:'recurso' },
-  'Saúde Geral Autoavaliada': { ref_pct: 65.0, tipo:'recurso' },
-  'Burnout (Esgotamento)': { ref_pct: 31.3, tipo:'demanda' },
-  'Estresse': { ref_pct: 28.8, tipo:'demanda' },
-};
+/**
+ * Classificação seguindo EXATAMENTE as regras da planilha COPSOQ II:
+ *  - Demandas (exigências, burnout, estresse): média <=2.67 Favorável | <=5.33 Intermediário | >5.33 Risco
+ *  - Recursos (2 perguntas): média >=5.33 Favorável | >=2.67 Intermediário | <2.67 Risco
+ *  - Satisfação (1 pergunta): média >=2 Favorável | >=1 Intermediário | <1 Risco
+ *  - Saúde (1 pergunta): média >=2.67 Favorável | >=1.33 Intermediário | <1.33 Risco
+ *  - Conflito Trabalho-Família (escala 0-3, 2 perguntas = max 6): <=2 Favorável | <=4 Intermediário | >4 Risco
+ *  - Ofensivos: calcula % de Sim separadamente
+ */
+function classificarDimensao(media, dim, tipo) {
+  // Satisfação (1 pergunta, max 3)
+  if (dim === 'Satisfação com o Trabalho') {
+    if (media >= 2)   return 'Favorável';
+    if (media >= 1)   return 'Intermediário';
+    return 'Risco';
+  }
+  // Saúde Geral (1 pergunta, max 4)
+  if (dim === 'Saúde Geral Autoavaliada') {
+    if (media >= 2.67) return 'Favorável';
+    if (media >= 1.33) return 'Intermediário';
+    return 'Risco';
+  }
+  // Conflito Trabalho-Família (escala 0-3, 2 perguntas = max 6)
+  if (dim === 'Conflito Trabalho-Família') {
+    if (media <= 2) return 'Favorável';
+    if (media <= 4) return 'Intermediário';
+    return 'Risco';
+  }
+  // Demandas (Exigências, Burnout, Estresse)
+  if (tipo === 'demanda') {
+    if (media <= 2.67) return 'Favorável';
+    if (media <= 5.33) return 'Intermediário';
+    return 'Risco';
+  }
+  // Recursos (maioria das dimensões com 2 perguntas, max 8)
+  if (media >= 5.33) return 'Favorável';
+  if (media >= 2.67) return 'Intermediário';
+  return 'Risco';
+}
 
 /**
- * Calcula stats de uma lista de respondentes para uma dimensão específica
- * Retorna: { media, mediana, min, max, std, media_pct, classificacao }
+ * Para cada respondente, calcula o total (soma) de pontos de uma dimensão.
+ * As respostas estão nos campos q01, q02 ... q40 (valores 0-4 já pontuados).
+ */
+function totalDimensaoRespondente(respondente, bloco) {
+  let total = 0;
+  for (const qNum of bloco.qs) {
+    const key = 'q' + String(qNum).padStart(2, '0');
+    total += parseInt(respondente[key]) || 0;
+  }
+  return total;
+}
+
+/**
+ * Calcula stats (média, mediana, min, max, desvio, % da escala, classificação)
+ * de uma lista de respondentes para um bloco (dimensão).
+ * Espelha EXATAMENTE as fórmulas das abas Dashboard e "Análise por Dimensão" da planilha.
  */
 function calcularDimensao(respondentes, bloco) {
-  const pontos = respondentes.map(r => {
-    const respostas = r.respostas || {};
-    let total = 0;
-    for (let pi = 0; pi < bloco.nPergs; pi++) {
-      const qid = `${bloco.id}-${pi}`;
-      total += respostas[qid]?.pontos ?? 0;
-    }
-    return total;
-  }).filter(v => v !== null && v !== undefined);
+  const pontos = respondentes.map(r => totalDimensaoRespondente(r, bloco));
+  if (pontos.length === 0) {
+    return { media:0, mediana:0, min:0, max:0, std:0, media_pct:0, classificacao:'Intermediário', faixaMax: FAIXA_MAX[bloco.escala] * bloco.qs.length, tipo: bloco.tipo };
+  }
 
-  if (pontos.length === 0) return null;
-
-  const faixaMax = FAIXA_MAX[bloco.escala] * bloco.nPergs;
+  const faixaMax = FAIXA_MAX[bloco.escala] * bloco.qs.length;
   const media = pontos.reduce((s,v) => s+v, 0) / pontos.length;
   const sorted = [...pontos].sort((a,b) => a-b);
   const mediana = sorted.length % 2 === 0
@@ -116,31 +143,30 @@ function calcularDimensao(respondentes, bloco) {
     : sorted[Math.floor(sorted.length/2)];
   const min = Math.min(...pontos);
   const max = Math.max(...pontos);
-  const std = Math.sqrt(pontos.reduce((s,v) => s + Math.pow(v-media,2), 0) / pontos.length);
-  const media_pct = (media / faixaMax) * 100;
+  // Desvio padrão populacional (igual a STDEV.P do Excel)
+  const std = pontos.length > 1
+    ? Math.sqrt(pontos.reduce((s,v) => s + Math.pow(v-media,2), 0) / pontos.length)
+    : 0;
+  const media_pct = faixaMax > 0 ? (media / faixaMax) * 100 : 0;
 
-  let classificacao;
+  // Comportamentos ofensivos: calcular % de Sim (em vez de classificação por média)
   if (bloco.tipo === 'ofensivo') {
-    // Para ofensivos: % que disse "sim" (scoreIdx=0 = sim = pontos=1)
-    const pctSim = (pontos.filter(v => v === 1).length / pontos.length) * 100;
-    classificacao = pctSim > 10 ? 'Risco' : 'Favorável';
-    return { media: pctSim, mediana, min, max, std, media_pct: pctSim, classificacao, faixaMax, tipo: bloco.tipo };
+    const totalSim = pontos.filter(v => v === 1).length;
+    const totalNao = pontos.length - totalSim;
+    const pctSim = (totalSim / pontos.length) * 100;
+    return {
+      media, mediana, min, max, std, media_pct: pctSim,
+      classificacao: pctSim > 10 ? 'Risco' : (pctSim > 0 ? 'Intermediário' : 'Favorável'),
+      faixaMax, tipo: bloco.tipo,
+      total_sim: totalSim, total_nao: totalNao, pct_sim: pctSim
+    };
   }
 
-  const ref = REFS_PCT[bloco.dim];
-  if (bloco.tipo === 'demanda') {
-    // Demanda: alto = risco
-    if (media_pct <= ref.ref_pct * 0.7) classificacao = 'Favorável';
-    else if (media_pct >= ref.ref_pct * 1.3) classificacao = 'Risco';
-    else classificacao = 'Intermediário';
-  } else {
-    // Recurso: baixo = risco
-    if (media_pct >= ref.ref_pct * 1.1) classificacao = 'Favorável';
-    else if (media_pct <= ref.ref_pct * 0.7) classificacao = 'Risco';
-    else classificacao = 'Intermediário';
-  }
-
-  return { media, mediana, min, max, std, media_pct, classificacao, faixaMax, tipo: bloco.tipo };
+  return {
+    media, mediana, min, max, std, media_pct,
+    classificacao: classificarDimensao(media, bloco.dim, bloco.tipo),
+    faixaMax, tipo: bloco.tipo
+  };
 }
 
 /**
@@ -149,8 +175,25 @@ function calcularDimensao(respondentes, bloco) {
 function calcularTodas(respondentes) {
   return BLOCOS.map(bloco => {
     const stats = calcularDimensao(respondentes, bloco);
-    return { cat: bloco.cat, dim: bloco.dim, tipo: bloco.tipo, ...(stats || { media:0, media_pct:0, classificacao:'Intermediário' }) };
+    return { id: bloco.id, cat: bloco.cat, dim: bloco.dim, tipo: bloco.tipo, ...stats };
   });
+}
+
+/**
+ * Agrupa resultados por categoria e calcula média % de cada categoria
+ * (usado no "gráfico de categorias" do Dashboard)
+ */
+function agruparPorCategoria(dimensoes) {
+  const cats = {};
+  dimensoes.filter(d => d.tipo !== 'ofensivo').forEach(d => {
+    if (!cats[d.cat]) cats[d.cat] = [];
+    cats[d.cat].push(d.media_pct);
+  });
+  const resultado = {};
+  Object.entries(cats).forEach(([cat, arr]) => {
+    resultado[cat] = arr.length ? arr.reduce((s,v) => s+v, 0) / arr.length : 0;
+  });
+  return resultado;
 }
 
 // ─────────────────────────────────────────
@@ -309,21 +352,39 @@ app.post('/api/nr1/questionario/:token', async (req, res) => {
     return res.status(410).json({ erro: 'Cotas esgotadas' });
   }
 
-  const { departamento, genero, faixa_etaria, tempo_empresa, lgpd_aceite, respostas } = req.body;
-  if (!departamento || !genero || !faixa_etaria || !lgpd_aceite) {
-    return res.status(400).json({ erro: 'Dados obrigatórios faltando' });
+  const {
+    nome, email, whatsapp, cargo,
+    departamento, genero, faixa_etaria, tempo_empresa,
+    lgpd_aceite
+  } = req.body;
+  if (!nome || !email || !whatsapp || !departamento || !genero || !faixa_etaria || !cargo || !lgpd_aceite) {
+    return res.status(400).json({ erro: 'Dados obrigatórios faltando (nome, email, whatsapp, cargo, departamento, gênero, faixa etária e aceite LGPD são obrigatórios)' });
   }
 
-  const { data: resp, error } = await supabase.from('nr1_respondentes').insert({
+  // Montar objeto de inserção com as 40 respostas (q01..q40)
+  const dadosInsert = {
     pacote_id: pacote.id,
+    nome: nome.trim(),
+    email: email.toLowerCase().trim(),
+    whatsapp: (whatsapp || '').replace(/\D/g, ''),
+    cargo: cargo.trim(),
     departamento,
     genero,
     faixa_etaria,
     tempo_empresa: tempo_empresa || null,
     lgpd_aceite: true,
     lgpd_aceite_at: new Date().toISOString(),
-    respostas: respostas || {},
-  }).select().single();
+  };
+
+  // Adicionar q01..q40 ao insert (valores já pontuados 0-4)
+  for (let i = 1; i <= 40; i++) {
+    const key = 'q' + String(i).padStart(2, '0');
+    dadosInsert[key] = parseInt(req.body[key]) || 0;
+  }
+
+  const { data: resp, error } = await supabase.from('nr1_respondentes')
+    .insert(dadosInsert)
+    .select().single();
 
   if (error) return res.status(500).json({ erro: error.message });
 
@@ -332,7 +393,17 @@ app.post('/api/nr1/questionario/:token', async (req, res) => {
   const esgotado = novosUsados >= pacote.quantidade;
   await supabase.from('nr1_pacotes').update({ usados: novosUsados, ativo: !esgotado }).eq('id', pacote.id);
 
-  res.status(201).json({ sucesso: true, respondente_id: resp.id });
+  // Calcular resultado individual (do próprio respondente) pra exibir na tela final
+  const minhasDimensoes = calcularTodas([resp]);
+
+  res.status(201).json({
+    sucesso: true,
+    respondente_id: resp.id,
+    resultado: {
+      dimensoes: minhasDimensoes,
+      categorias: agruparPorCategoria(minhasDimensoes),
+    }
+  });
 });
 
 // ─────────────────────────────────────────
@@ -350,36 +421,82 @@ app.get('/api/nr1/dashboard/:token_ranking', async (req, res) => {
 
   const lista = respondentes || [];
 
-  // Calcular dimensões
+  // 1. Dashboard Geral — 19 dimensões analisadas + 4 ofensivos
   const dimensoes = calcularTodas(lista);
 
-  // Stats gerais
+  // 2. Agrupar por categoria (% média) pro gráfico de categorias
+  const categorias = agruparPorCategoria(dimensoes);
+
+  // 3. Contagens de classificação (Favorável/Intermediário/Risco)
+  const dimsAnalisadas = dimensoes.filter(d => d.tipo !== 'ofensivo');
+  const contClasses = { Favoravel: 0, Intermediario: 0, Risco: 0 };
+  dimsAnalisadas.forEach(d => {
+    if (d.classificacao === 'Favorável')      contClasses.Favoravel++;
+    else if (d.classificacao === 'Intermediário') contClasses.Intermediario++;
+    else if (d.classificacao === 'Risco')     contClasses.Risco++;
+  });
+
+  // 4. Stats gerais de participantes
   const generoCount = {};
-  lista.forEach(r => { generoCount[r.genero] = (generoCount[r.genero] || 0) + 1; });
-
-  // Comparativo por departamento
-  const deptos = {};
+  const deptosSet = new Set();
   lista.forEach(r => {
-    if (!deptos[r.departamento]) deptos[r.departamento] = [];
-    deptos[r.departamento].push(r);
-  });
-  const departamentos = {};
-  Object.entries(deptos).forEach(([dept, resps]) => {
-    departamentos[dept] = {};
-    calcularTodas(resps).filter(d => d.tipo !== 'ofensivo').forEach(d => {
-      departamentos[dept][d.dim] = d.media_pct;
-    });
+    generoCount[r.genero] = (generoCount[r.genero] || 0) + 1;
+    if (r.departamento) deptosSet.add(r.departamento);
   });
 
-  // Respondentes (anonimizados — sem nome/email)
-  const respondentesPublicos = lista.map(r => ({
-    id: r.id,
-    departamento: r.departamento,
-    genero: r.genero,
-    faixa_etaria: r.faixa_etaria,
-    tempo_empresa: r.tempo_empresa,
-    created_at: r.created_at,
-  }));
+  // 5. Comparativo POR DEPARTAMENTO (média de cada dimensão por departamento)
+  //    Espelha exatamente a aba "Análise por Departamento" da planilha
+  const DEPARTAMENTOS_FIXOS = ['Administrativo','Comercial','Financeiro','Operacional','RH','TI'];
+  const deptos = {};
+  DEPARTAMENTOS_FIXOS.forEach(dept => {
+    deptos[dept] = lista.filter(r => r.departamento === dept);
+  });
+  const analiseDepartamentos = {};
+  Object.entries(deptos).forEach(([dept, resps]) => {
+    analiseDepartamentos[dept] = {
+      total_respondentes: resps.length,
+      dimensoes: {}
+    };
+    if (resps.length > 0) {
+      const dimsDept = calcularTodas(resps);
+      dimsDept.forEach(d => {
+        analiseDepartamentos[dept].dimensoes[d.dim] = {
+          media: d.media,
+          media_pct: d.media_pct,
+          classificacao: d.classificacao,
+        };
+      });
+    }
+  });
+
+  // 6. Respondentes — versão com nomes (o contratante vê tudo, é o pacote dele)
+  const respostasList = lista.map(r => {
+    const obj = {
+      id: r.id,
+      nome: r.nome,
+      cargo: r.cargo,
+      departamento: r.departamento,
+      genero: r.genero,
+      faixa_etaria: r.faixa_etaria,
+      tempo_empresa: r.tempo_empresa,
+      created_at: r.created_at,
+    };
+    // Adiciona q01..q40
+    for (let i = 1; i <= 40; i++) {
+      const key = 'q' + String(i).padStart(2, '0');
+      obj[key] = r[key] || 0;
+    }
+    // Adiciona totais por dimensão T1..T23 (calculado na hora)
+    BLOCOS.forEach((b, idx) => {
+      obj['T' + (idx+1)] = totalDimensaoRespondente(r, b);
+    });
+    return obj;
+  });
+
+  // 7. Classificação geral (a mais frequente)
+  let classGeral = 'Favorável';
+  if (contClasses.Risco >= contClasses.Intermediario && contClasses.Risco >= contClasses.Favoravel) classGeral = 'Risco';
+  else if (contClasses.Intermediario >= contClasses.Favoravel) classGeral = 'Intermediário';
 
   res.json({
     pacote: {
@@ -394,11 +511,18 @@ app.get('/api/nr1/dashboard/:token_ranking', async (req, res) => {
     },
     stats: {
       respondentes: lista.length,
+      total_perguntas: 40,
+      total_dimensoes: 23,
+      departamentos: deptosSet.size,
       genero: generoCount,
+      classificacoes: contClasses,
+      classificacao_geral: classGeral,
     },
     dimensoes,
-    respondentes: respondentesPublicos,
-    departamentos,
+    categorias,
+    respostas: respostasList,
+    analise_departamentos: analiseDepartamentos,
+    departamentos_fixos: DEPARTAMENTOS_FIXOS,
   });
 });
 
