@@ -103,14 +103,19 @@ label { display: block; font-size: 11px; font-weight: 600; color: var(--muted2);
 .spin { animation: spin 0.8s linear infinite; }
 
 /* ─── NAV ─── */
-.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 0; background: rgba(6,7,13,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 6px 0; background: rgba(6,7,13,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; }
-.nav-logo { font-family: var(--font-serif); font-size: 22px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-img { height: 95px; width: auto; display: block; }
 .nav-logo-badge { font-family: var(--font-mono); font-size: 10px; background: rgba(79,110,247,0.15); color: var(--accent); border: 1px solid rgba(79,110,247,0.25); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.08em; }
 .nav-links { display: flex; align-items: center; gap: 8px; }
+@media (max-width: 768px) {
+  .nav-logo-img { height: 56px; }
+  .nav { padding: 10px 0; }
+}
 
 /* ─── LANDING ─── */
-#page-landing { padding-top: 68px; }
+#page-landing { padding-top: 120px; }
 
 .hero { padding: 80px 0 60px; display: grid; grid-template-columns: 1fr 480px; gap: 60px; align-items: center; }
 .hero-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
@@ -184,7 +189,7 @@ label { display: block; font-size: 11px; font-weight: 600; color: var(--muted2);
 .modal-footer { padding: 0 28px 24px; display: flex; gap: 10px; }
 
 /* ─── CONTRATANTE DASHBOARD ─── */
-#page-dashboard { padding-top: 68px; background: var(--bg); }
+#page-dashboard { padding-top: 120px; background: var(--bg); }
 .dash-header { padding: 40px 0 32px; border-bottom: 1px solid var(--border); }
 .dash-company { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
 .dash-title { font-family: var(--font-serif); font-size: 32px; color: #fff; }
@@ -250,7 +255,7 @@ label { display: block; font-size: 11px; font-weight: 600; color: var(--muted2);
 .q-submit-area { padding: 32px 0; text-align: center; }
 
 /* ─── RESULTADO PAGE ─── */
-#page-resultado { padding-top: 68px; background: var(--bg); }
+#page-resultado { padding-top: 120px; background: var(--bg); }
 .res-header { padding: 40px 0 28px; border-bottom: 1px solid var(--border); }
 .res-hero { max-width: 880px; }
 .res-label { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
@@ -343,7 +348,7 @@ select.input { cursor: pointer; }
 <nav class="nav" id="main-nav">
   <div class="container nav-inner">
     <a href="#" class="nav-logo" onclick="showPage('landing')">
-      Perfilis
+      <img src="/img/perfilis-logo-sm.webp" alt="Perfilis" width="500" height="95" class="nav-logo-img" loading="eager" decoding="async">
       <span class="nav-logo-badge">NR-1</span>
     </a>
     <div class="nav-links" id="nav-links">

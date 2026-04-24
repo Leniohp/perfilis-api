@@ -102,17 +102,21 @@ label { display: block; font-size: 12px; font-weight: 500; color: var(--muted2);
 /* NAV */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 14px 0;
+  padding: 6px 0;
   background: rgba(5,5,10,0.9);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; }
-.logo-img { height: 38px; width: auto; }
+.logo-img { height: 95px; width: auto; }
 .nav-links { display: flex; align-items: center; gap: 8px; }
+@media (max-width: 768px) {
+  .logo-img { height: 56px; }
+  .nav { padding: 10px 0; }
+}
 
 /* ── LANDING ── */
-#page-landing { padding-top: 72px; }
+#page-landing { padding-top: 120px; }
 #page-landing .hero { padding-top: 40px; }
 
 /* HERO */
@@ -519,7 +523,7 @@ footer a { color: var(--accent2); text-decoration: none; }
 <nav class="nav">
   <div class="container nav-inner">
     <a href="#" onclick="showPage('landing')" style="display:flex;align-items:center">
-      <img loading="eager" decoding="async" src="/img/perfilis-logo-sm.webp" alt="Perfilis — Análise de perfil que gera conexões" width="200" height="38" class="logo-img">
+      <img loading="eager" decoding="async" src="/img/perfilis-logo-sm.webp" alt="Perfilis — Análise de perfil que gera conexões" width="500" height="95" class="logo-img">
     </a>
     <div class="nav-links">
       <button class="btn btn-outline btn-sm" onclick="showPage('landing')">Início</button>

@@ -39,15 +39,20 @@ html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
 /* ─── NAV ─── */
-.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 0; background: rgba(6,7,13,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 6px 0; background: rgba(6,7,13,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
 .nav-inner { max-width: 1040px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; }
-.nav-logo { font-family: var(--font-serif); font-size: 22px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; }
-.nav-logo-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--grad-combo); }
+.nav-logo { display: flex; align-items: center; text-decoration: none; }
+.nav-logo-img { height: 95px; width: auto; display: block; }
 .nav-links { display: flex; align-items: center; gap: 6px; }
 .nav-link { font-size: 13px; color: var(--muted2); padding: 7px 12px; border-radius: var(--r); text-decoration: none; cursor: pointer; transition: color 0.15s; }
 .nav-link:hover { color: var(--text); }
 .nav-cta { font-size: 13px; font-weight: 600; color: white; background: var(--disc); padding: 8px 18px; border-radius: var(--r); border: none; cursor: pointer; transition: all 0.2s; }
 .nav-cta:hover { background: #3d5ce8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,110,247,0.4); }
+
+@media (max-width: 768px) {
+  .nav-logo-img { height: 56px; }
+  .nav { padding: 10px 0; }
+}
 
 .container { max-width: 1040px; margin: 0 auto; padding: 0 28px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 22px; border-radius: var(--r); font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; }
@@ -188,8 +193,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-sans);
 <nav class="nav">
   <div class="nav-inner">
     <a class="nav-logo" href="/">
-      <div class="nav-logo-dot"></div>
-      Perfilis
+      <img src="/img/perfilis-logo-sm.webp" alt="Perfilis" width="500" height="95" class="nav-logo-img" loading="eager" decoding="async">
     </a>
     <div class="nav-links">
       <a class="nav-link" href="/nr1">NR-1</a>

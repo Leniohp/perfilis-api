@@ -72,11 +72,11 @@
     }
 
     .login-logo {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -1px;
       margin-bottom: 4px;
+      display: flex;
+      justify-content: center;
     }
+    .login-logo img { height: 80px; width: auto; display: block; }
     .login-logo span { color: var(--accent); }
 
     .login-subtitle {
@@ -165,11 +165,11 @@
     }
 
     .sidebar-logo {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -1px;
       margin-bottom: 6px;
+      display: flex;
+      align-items: center;
     }
+    .sidebar-logo img { height: 48px; width: auto; display: block; }
     .sidebar-logo span { color: var(--accent); }
 
     .sidebar-tag {
@@ -706,7 +706,7 @@
 <!-- ═══════════════════ LOGIN ═══════════════════ -->
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-logo">Perfilis<span>.</span></div>
+    <div class="login-logo"><img src="/img/perfilis-logo-sm.webp" alt="Perfilis" width="500" height="95" loading="eager"></div>
     <div class="login-subtitle">Painel Administrativo</div>
 
     <div class="login-field">
@@ -726,7 +726,7 @@
 <div id="dashboard">
   <!-- Sidebar -->
   <nav class="sidebar">
-    <div class="sidebar-logo">Perfilis<span>.</span></div>
+    <div class="sidebar-logo"><img src="/img/perfilis-logo-sm.webp" alt="Perfilis" width="500" height="95" loading="eager"></div>
     <div class="sidebar-tag">Admin</div>
 
     <div class="sidebar-nav">
